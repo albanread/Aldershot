@@ -9,6 +9,7 @@ to use RISC OS, not build it.
 - [The first run: choosing the disc folder](#the-first-run-choosing-the-disc-folder)
 - [The mouse and the keyboard](#the-mouse-and-the-keyboard)
 - [The window](#the-window)
+- [Networking](#networking)
 - [Screen sizes](#screen-sizes)
 - [Your files: the disc folder](#your-files-the-disc-folder)
 - [Switching off](#switching-off)
@@ -94,12 +95,36 @@ The app's own menu bar, at the top of the Mac screen, has these commands.
 | Quit RISC OS | ⌘Q | Switches RISC OS off and closes the app |
 | Grab Pointer | ⌃⌥G | Gives the pointer to RISC OS; press again to take it back |
 | Save Screenshot | ⌘S or F13 | Saves the RISC OS screen as a PNG |
+| Load Snapshot | | Rewinds the machine to the desktop as it was when the last snapshot was saved |
+| Backdrop | | Chooses what the Mac draws behind the RISC OS desktop: the Acorn scenes and wallpapers, or your own pictures |
+| HostNet | | Networking mode — see [Networking](#networking). Ticked, your Mac serves RISC OS's network; choosing it again switches to RISC OS's own networking and restarts |
 | Toggle Full Screen | ⌃⌘F | Fills the screen with RISC OS, or returns to the window |
 
 Screenshots are saved in `~/Library/Application Support/RISCOSQEMU/`.
 
 You rarely need to grab the pointer: the pointer moves in and out of the
 window freely. A middle click, on a mouse that has one, also grabs it.
+
+## Networking
+
+Networking works from the first boot, with nothing to configure: open
+NetSurf and browse. RISC OS asks your Mac to make its connections for
+it, so the web works the way it does on your Mac — same network, same
+firewall, same permissions. This is **HostNet**, and it is the default
+(the ticked item in **Machine > HostNet**).
+
+**Machine > HostNet** switches to **RISC OS's own networking** instead:
+the stack RISC OS has always used, running inside RISC OS over an
+emulated network card. It asks first, because switching restarts the
+machine — anything not saved is lost, as it is when you switch a real
+machine off. Choose HostNet again to come back the same way.
+
+Which should you use? HostNet, almost always: it is why the web works
+out of the box. RISC OS's own stack is the original arrangement, kept
+for the things that want a real network interface inside RISC OS — but
+under emulation its address negotiation was never dependable ("often
+worked", and often did not), which is why HostNet exists. If the web
+stops working in that mode, that is the one you are in.
 
 ## Screen sizes
 
@@ -197,9 +222,10 @@ and ePic.
 It does not include RISC OS developer tools, the app store, the manuals
 or the games, to keep the download small.
 
-NetSurf reaches the internet through your Mac's connection. Sound comes
-out of your Mac's speakers; use the Mac's volume control, because the
-one in RISC OS does not do anything.
+NetSurf reaches the internet through your Mac's connection — see
+[Networking](#networking). Sound comes out of your Mac's speakers; use
+the Mac's volume control, because the one in RISC OS does not do
+anything.
 
 ## When something goes wrong
 
@@ -209,6 +235,9 @@ one in RISC OS does not do anything.
 - **It asks for the disc folder every time.** The folder it was using has
   been moved, renamed or deleted, or is on a drive that is not connected.
   Choose it again.
+- **The web does not load.** If **Machine > HostNet** has no tick beside
+  it, RISC OS is running its own networking, which is the unreliable
+  one — choose HostNet (it restarts the machine) and try again.
 - **Something else.** The app writes a log of each run to
   `~/Library/Logs/RISCOSQEA72/`. `run.log` is the main one. If you report
   a problem, include it.
