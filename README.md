@@ -1,8 +1,4 @@
-> [!CAUTION]
-> 🛑 **REPOSITORY CLOSED — UNMAINTAINED.**
->
-> Do not assume the reliability of any data in this repository. It will be
-> archived on **15 October 2026**.
+This repository is scheduled to be archived on 15 October 2026. Pull requests and issues are not accepted.
 
 # Aldershot
 
