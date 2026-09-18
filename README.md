@@ -35,6 +35,20 @@ tell the whole story, from the first boot in QEMU to the files on your disc.
 
 ---
 
+## What it looks like
+
+![The RISC OS desktop, running on the Mac](screenshots/final-desktop.png)
+
+The final screenshot: a desktop you can use. The machine is booted off
+**HostFS** — its disc is a folder on the Mac — and running **HostNet**,
+so its networking is the Mac's networking. The background behind the
+RISC OS desktop is composited by the host, showing through the pixels
+RISC OS marks as background, and the desktop's sprite plots are
+executed by the host too. No emulated disc drive, network card or GPU
+is doing any of the work: the machine asks, and the Mac answers.
+
+---
+
 ## RISC OS for the Mac
 
 RISC OS 5.30, running on your Mac in its own window. The desktop, the
