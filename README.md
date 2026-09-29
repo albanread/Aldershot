@@ -1,8 +1,8 @@
-This repository is scheduled to be archived on 15 October 2026. Pull requests and issues are not accepted.
-
 # Aldershot
 
 **RISC OS, on the computer you already own.**
+
+**Coming soon: BOX -- RISC OS translated to C over a Linux kernel.**
 
 > ⚠️ **This is brand-new software.** It's early days: it works and it's
 > usable today, but you may meet the odd rough edge. If something doesn't
