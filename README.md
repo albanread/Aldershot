@@ -314,12 +314,12 @@ hardware's kernel services, and a **RISC OS personality** then runs
 ### One thing to know: memory
 
 Native x64 code uses a lot more memory than the 32-bit RISC OS you may
-be used to — compiled code, its runtime, everything, is twice the size
-per pointer and happier with bigger buffers. The desktop still starts
-with the slots you know, but **adjust your WimpSlots accordingly**: give
-tasks more than their classic values, and expect the next slot's default
-to be larger. An application that ran happily in 640K of emulation wants
-more here.
+be used to — compiled code, its runtime, everything, is bigger and
+happier with bigger buffers (the pointers stay 32-bit, in the BOX way).
+The desktop still starts with the slots you know, but **adjust your
+WimpSlots accordingly**: give tasks more than their classic values, and
+expect the next slot's default to be larger. An application that ran
+happily in 640K of emulation wants more here.
 
 ### Where it fits
 
