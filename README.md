@@ -22,6 +22,7 @@ walkthroughs and case notes, and the downloads on the
 | --- | --- | --- |
 | 🍎 | **[RISC OS for the Mac](#risc-os-for-the-mac)** | Works on **macOS 26**. Download for [Apple silicon](https://github.com/albanread/Aldershot/releases/download/RISCOSQEA72v1/RISCOSQEA72v1.dmg) or [Intel](https://github.com/albanread/Aldershot/releases/download/RISCOSQEA72v1/RISCOSQEA72v1-x86_64.dmg) · [User guide](mac/user-guide.md) |
 | 🪟 | **[RISC OS for Windows](#risc-os-for-windows)** | Works on **64-bit Windows 10 or 11**. [Download the setup program](https://github.com/albanread/Aldershot/releases/download/RISCOSQEA72v7-windows/RISCOSQEA72v7-setup.exe) · [Release notes](https://github.com/albanread/Aldershot/releases/tag/RISCOSQEA72v7-windows) |
+| 🧪 | **[Preview: early days BOX, x64](#preview-early-days-box-x64)** | Boots RISC OS from a **USB stick on a 64-bit PC**. Under the QEMU releases, for the adventurous. |
 
 More will be added as they become worth your time. Something is listed
 here when it actually runs, not when it is started.
@@ -291,6 +292,40 @@ usable, with a few edges still to smooth. A few honest notes:
 
 It's a young project, same as the Mac one. It works, and it's usable,
 but it hasn't had the polish a finished thing deserves.
+
+---
+
+## Preview: early days BOX, x64
+
+A first look at **BOX** — RISC OS, but not pretending to be a Raspberry
+Pi. This is a preview release: early days, for people who like being
+close to the machinery.
+
+*This is high atmospheric testing compared to the moonshot, but we aim
+for low earth orbit.*
+
+It boots RISC OS from a **USB stick on a 64-bit PC**. No emulator, no
+pretending to be a Raspberry Pi: a small Linux kernel provides the
+hardware's kernel services, and a **RISC OS personality** then runs
+**native x64 code** on your machine.
+
+### One thing to know: memory
+
+Native x64 code uses a lot more memory than the 32-bit RISC OS you may
+be used to — compiled code, its runtime, everything, is twice the size
+per pointer and happier with bigger buffers. The desktop still starts
+with the slots you know, but **adjust your WimpSlots accordingly**: give
+tasks more than their classic values, and expect the next slot's default
+to be larger. An application that ran happily in 640K of emulation wants
+more here.
+
+### Where it fits
+
+This is the same RISC OS you see in the Mac and Windows releases — same
+desktop, same applications, same discs — but running on the metal of
+your PC, with Linux underneath doing what a kernel does: memory, tasks,
+and the devices. It is where this project is going, offered early
+because the adventurous make the best testers.
 
 ---
 
