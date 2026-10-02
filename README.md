@@ -396,6 +396,14 @@ HostFS module added, plus a minimal guest file system drawn from their
 disc image. The applications on that disc belong to their authors and
 keep their own licences.
 
+**BOX is a different licence**, because it is different work: the RISC
+OS system is translated to C, not published as the original sources.
+BOX itself is released under the **Apache 2.0 / MIT** licences, and it
+respects the licences of the original authors of the software that was
+translated to C — RISC OS Open's work above all. Where a translated
+component carries an upstream licence that asks for more, that component
+keeps its upstream terms.
+
 ## Standing on
 
 The Mac and Windows applications are built on **[QEMU](https://www.qemu.org)**, the
