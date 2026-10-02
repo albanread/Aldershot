@@ -2,7 +2,9 @@
 
 **RISC OS, on the computer you already own.**
 
-**Coming soon: BOX -- RISC OS translated to C over a Linux kernel.**
+**Coming soon: BOX — RISC OS translated to C over a Linux kernel.**
+A first preview is here now: **[Preview: early days BOX, x64](#preview-early-days-box-x64)**,
+booting from a USB stick on a 64-bit PC.
 
 > ⚠️ **This is brand-new software.** It's early days: it works and it's
 > usable today, but you may meet the odd rough edge. If something doesn't
