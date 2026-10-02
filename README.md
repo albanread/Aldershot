@@ -323,11 +323,12 @@ happily in 640K of emulation wants more here.
 
 ### Where it fits
 
-This is the same RISC OS you see in the Mac and Windows releases — same
-desktop, same applications, same discs — but running on the metal of
-your PC, with Linux underneath doing what a kernel does: memory, tasks,
-and the devices. It is where this project is going, offered early
-because the adventurous make the best testers.
+This is the same RISC OS as the Mac and Windows releases — the same
+BASIC, the same Wimp, the same desktop — with a few applications to
+try, running on the metal of your PC, Linux underneath doing what a
+kernel does: memory, tasks, and the devices. It is where this project
+is going, offered early because the adventurous make the best
+testers.
 
 ---
 
