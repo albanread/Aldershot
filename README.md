@@ -402,7 +402,8 @@ BOX itself is released under the **Apache 2.0 / MIT** licences, and it
 respects the licences of the original authors of the software that was
 translated to C — RISC OS Open's work above all. Where a translated
 component carries an upstream licence that asks for more, that component
-keeps its upstream terms.
+keeps its upstream terms. Source code and documentation will follow
+on; it is still being written right now.
 
 ## Standing on
 
