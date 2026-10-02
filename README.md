@@ -331,7 +331,7 @@ because the adventurous make the best testers.
 
 ---
 
-## Downloads
+## Downloads: emulated RISC OS
 
 - **Mac, macOS 26:** RISCOSQEA72v1 for [Apple silicon](https://github.com/albanread/Aldershot/releases/download/RISCOSQEA72v1/RISCOSQEA72v1.dmg) or for
   [Intel](https://github.com/albanread/Aldershot/releases/download/RISCOSQEA72v1/RISCOSQEA72v1-x86_64.dmg), a disk image. Open it and drag the app to Applications.
@@ -341,7 +341,17 @@ because the adventurous make the best testers.
   [setup program](https://github.com/albanread/Aldershot/releases/download/RISCOSQEA72v7-windows/RISCOSQEA72v7-setup.exe). Run it; it installs for you alone.
   The [release page](https://github.com/albanread/Aldershot/releases/tag/RISCOSQEA72v7-windows) has the release notes.
 
-Every release is on this repository's
+Every emulated release is on this repository's
+[Releases](https://github.com/albanread/Aldershot/releases) page.
+
+---
+
+## Downloads: BOX (RISC OS user land in C) — native
+
+Coming soon. The first preview, **early days BOX x64** — booting from a
+USB stick on a 64-bit PC — is described
+[above](#preview-early-days-box-x64); its downloads will appear here,
+on this repository's
 [Releases](https://github.com/albanread/Aldershot/releases) page.
 
 ---
