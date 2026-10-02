@@ -24,7 +24,7 @@ walkthroughs and case notes, and the downloads on the
 | --- | --- | --- |
 | 🍎 | **[RISC OS for the Mac](#risc-os-for-the-mac)** | Works on **macOS 26**. Download for [Apple silicon](https://github.com/albanread/Aldershot/releases/download/RISCOSQEA72v1/RISCOSQEA72v1.dmg) or [Intel](https://github.com/albanread/Aldershot/releases/download/RISCOSQEA72v1/RISCOSQEA72v1-x86_64.dmg) · [User guide](mac/user-guide.md) |
 | 🪟 | **[RISC OS for Windows](#risc-os-for-windows)** | Works on **64-bit Windows 10 or 11**. [Download the setup program](https://github.com/albanread/Aldershot/releases/download/RISCOSQEA72v7-windows/RISCOSQEA72v7-setup.exe) · [Release notes](https://github.com/albanread/Aldershot/releases/tag/RISCOSQEA72v7-windows) |
-| 🧪 | **[Preview: early days BOX, x64](#preview-early-days-box-x64)** | Boots RISC OS from a **USB stick on a 64-bit PC**. Under the QEMU releases, for the adventurous. |
+| 🧪 | **[Preview: early days BOX, x64](#preview-early-days-box-x64)** | Boots RISC OS from a **USB stick on a 64-bit PC**. Not emulated — native. For the adventurous. |
 
 More will be added as they become worth your time. Something is listed
 here when it actually runs, not when it is started.
