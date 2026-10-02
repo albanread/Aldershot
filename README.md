@@ -327,8 +327,7 @@ This is the same RISC OS as the Mac and Windows releases — the same
 BASIC, the same Wimp, the same desktop — with a few applications to
 try, running on the metal of your PC, Linux underneath doing what a
 kernel does: memory, tasks, and the devices. It is where this project
-is going, offered early because the adventurous make the best
-testers.
+is going, offered early — for the joy of it.
 
 ---
 
