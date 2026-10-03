@@ -7,6 +7,7 @@ its own.
 
 | Written | Article | What it covers | Read |
 | --- | --- | --- | --- |
+| 3 October 2026 | **GraphTask** | The graphical task window, recreated: a BASIC program's screen in a desktop window. How the original worked by interception, and how BOX builds it into the system with per-task VDU contexts and virtual displays held as sprites; using `!GraphTask` and StrongED's Run; its limits and tests. | [GraphTask](graphtask.md) |
 | 3 October 2026 | **BOX on the Mac, in QEMU** | How BOX runs on Apple silicon under QEMU with the Mac's hypervisor: QEMU against Apple's Virtualization framework, the virtual machine QEMU builds, the share over 9P, the screen and the x2 window on HiDPI screens, the mouse buttons, the network, starting and stopping, and how well it runs. | [BOX on the Mac, in QEMU](box-on-the-mac-in-qemu.md) |
 | 3 October 2026 | **UnixBridge** | BOX's own bridge from RISC OS to Linux: POSIX applications, RISC OS tasks whose musl C library makes real Linux system calls through `Unix_Syscall`; how calls are passed, converted, kept per task or refused; NetSurf as the first user; what it does not do; and why it is BOX-specific. | [UnixBridge](unixbridge.md) |
 | 3 October 2026 | **Supported Software Components** | Every operating system component in BOX's ROM, how each is provided (runtime, native rewrite, shim over Linux, new, translated, or C module), and how many SWIs it supports: 94 modules and 670 SWIs, counted from the build. | [Supported Software Components](supported-software-components.md) |
