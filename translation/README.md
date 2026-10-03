@@ -33,9 +33,10 @@ kernel, the personality, the arena, tasks as threads, and the SWI path.
 
 ## What runs today
 
-A first **preview release: early days BOX, x64**. It boots RISC OS from a
-**USB stick on a 64-bit PC**, with a few applications to try — for people
-who like being close to the machinery. Not emulated. Native.
+A first **preview release: early days BOX, x64**, released on 3 October
+2026 (see [Downloads](#downloads)). It boots RISC OS from a **USB stick on
+a 64-bit PC**, with a few applications to try — for people who like being
+close to the machinery. Not emulated. Native.
 
 ### One thing to know: memory
 
@@ -64,10 +65,69 @@ still answering, NetSurf on the web and a PDF open beside it.
 
 ## Downloads
 
-Coming soon. The first preview, **early days BOX x64** — booting from a
-USB stick on a 64-bit PC — is described [above](#what-runs-today); its
-downloads will appear on this repository's
-[Releases](https://github.com/albanread/Aldershot/releases) page.
+The first preview, **BOX x64, 3 October 2026**, is on the
+[Releases page](https://github.com/albanread/Aldershot/releases/tag/BOX-x64-2026-10-03).
+
+| Download | What it is |
+| --- | --- |
+| [BOX-x64-2026-10-03.img.xz](https://github.com/albanread/Aldershot/releases/download/BOX-x64-2026-10-03/BOX-x64-2026-10-03.img.xz) | the USB stick image, compressed (41 MB; 8.7 GB unpacked) |
+| [BOX-x64-2026-10-03-vmware.zip](https://github.com/albanread/Aldershot/releases/download/BOX-x64-2026-10-03/BOX-x64-2026-10-03-vmware.zip) | the same system as a ready-made VMware virtual machine (51 MB) |
+
+Each has a `.sha256` checksum beside it on the Releases page.
+
+### Making the USB stick
+
+You need a **USB stick of 16 GB or more**; everything on it is erased.
+Write the `.img.xz` file to it with
+[balenaEtcher](https://etcher.balena.io) or
+[Raspberry Pi Imager](https://www.raspberrypi.com/software/) (*Use
+custom*), on Windows, macOS or Linux. Neither needs the file unpacked
+first.
+
+### Booting a PC from it
+
+1. Plug the stick in, and turn **Secure Boot off** in the PC's firmware
+   settings.
+2. Choose the stick from the firmware's boot menu (often F12, F11, F8 or
+   Esc as the PC starts). It must be booted by **UEFI**; old BIOS
+   (legacy or CSM) booting is not supported.
+
+The PC starts straight into the RISC OS desktop. Nothing on the PC's own
+discs is touched. The stick's 8 GB RISC OS disc keeps whatever you save
+on it.
+
+### The hardware it supports
+
+BOX uses Linux's drivers, built into its kernel.
+
+| | Supported |
+| --- | --- |
+| **Processor** | any 64-bit x86 PC, Intel or AMD, up to 32 threads |
+| **Firmware** | UEFI, with Secure Boot off |
+| **Graphics** | NVIDIA cards (nouveau), Intel graphics, server boards' remote-console chips (ASPEED, Matrox G200), and any other card through the display the firmware set up, at that one size |
+| **Keyboard and mouse** | USB, PS/2, Logitech wireless receivers |
+| **Storage** | USB sticks and discs, SATA (AHCI), NVMe |
+| **Network** | wired Ethernet: Intel e1000, e1000e, igb, igc; Realtek r8169 |
+| **Sound** | Intel HD Audio with the common codecs, HDMI and DisplayPort sound, USB audio |
+
+Not supported in this release: AMD graphics cards (they fall back to the
+firmware's display, at one fixed size), Wi-Fi and Bluetooth, legacy BIOS
+booting, and Secure Boot.
+
+### In a virtual machine
+
+The same system runs in a virtual machine on a 64-bit Intel or AMD
+computer, with UEFI firmware:
+
+- **VMware Fusion or Workstation:** unzip the VMware download and open
+  `ROSGD.vmwarevm`. It is set up already. On a Mac it needs an Intel Mac.
+- **QEMU:** with its UEFI firmware (OVMF), the image attached as a USB
+  stick. The [release notes](https://github.com/albanread/Aldershot/releases/tag/BOX-x64-2026-10-03)
+  give the command line.
+- **VirtualBox** is untested, and **Hyper-V** is not supported.
+
+On an Apple silicon Mac the image runs only under full x86 emulation,
+which is very slow.
 
 ---
 
