@@ -102,10 +102,9 @@ could on RISC OS, but now with TLS 1.3.
 
 ### Using other machines' shares
 
-LanManFS is RISC OS's client for Windows shares. RISC OS's speaks SMB1,
-which modern servers refuse. BOX's keeps LanManFS's commands and
-errors, but connects with Linux's **SMB2/3** client, with whatever
-signing and encryption the server asks for:
+BOX's LanManFS keeps LanManFS's commands and errors, and connects with
+Linux's **SMB2/3** client, with whatever signing and encryption the
+server asks for:
 
 ```
 *LMLogon WORKGROUP alice secret
