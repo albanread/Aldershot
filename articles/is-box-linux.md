@@ -188,7 +188,7 @@ wrong to pretend otherwise.
 
 But it is worth being honest about how RISC OS is used today. A great
 many people already run it on top of another operating system: RPCEmu
-or Arculator on Windows, Linux or macOS, or an emulator on a Mac. In
+or Arculator on Windows, Linux or macOS. In
 those cases RISC OS sits in a window, with Windows or macOS (and all
 their drivers) underneath it. BOX is no worse than that, and in one way
 better: on a PC, BOX boots straight from a USB stick, with no other
