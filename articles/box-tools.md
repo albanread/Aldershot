@@ -210,10 +210,10 @@ not recommended. There is no ARM processor for ARM code to run on, and
 the ObjAsm tools are not provided in the box. Write new programs in C or
 BBC BASIC, both of which compile to native code.
 
-BBC BASIC's assembler is still there, for programs that use it. With
-`*BasicAsmCPU`, BASICVFP's `[ ... ]` assembles code for the host
-processor instead of ARM (`A64` on Apple silicon, `X64` on Intel), and
-`CALL` and `USR` run it. The `MandelA64` example draws the Mandelbrot set
+BBC BASIC's assembler is still there, for programs that use it.
+BASICVFP's `[ ... ]` assembles code for the host processor instead of
+ARM (A64 on Apple silicon, x86-64 on Intel), and `CALL` and `USR` run
+it. *BBC BASIC in Translation* describes it. The `MandelA64` example draws the Mandelbrot set
 this way. Code assembled like this is tied to one processor, and ARM
 code assembled by BASIC cannot be run at all.
 
