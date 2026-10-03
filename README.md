@@ -24,7 +24,7 @@ its own page:
 | | | |
 | --- | --- | --- |
 | 🥧 | **[RISC OS emulation](emulation/README.md)** | The genuine RISC OS, unmodified, on an emulated Raspberry Pi. **Works today** on the Mac and Windows. |
-| 🚀 | **[RISC OS translation — BOX](translation/README.md)** | RISC OS itself translated to C, running as **native** code. Early-days preview, booting from a USB stick on a 64-bit PC. |
+| 🚀 | **[RISC OS translation — BOX](translation/README.md)** | **RISC OS, on a Linux kernel, translated to C** — native code, no emulator. Early-days preview, booting from a USB stick on a 64-bit PC. |
 
 **Emulation** runs the real thing. A program on your computer pretends to
 be a Raspberry Pi — the machine RISC OS is built for these days — and
@@ -52,13 +52,15 @@ Not sure which you want? Use the emulator today; watch BOX.
 
 ---
 
-## What it looks like
+## What the emulator looks like
 
 ![The RISC OS desktop, running on the Mac](screenshots/final-desktop.png)
 
-The RISC OS desktop — the same desktop in both editions. (This
-screenshot is the Mac edition: booted from **HostFS**, its disc a folder
-on the Mac, with **HostNet** passing its networking to the Mac's.)
+The RISC OS desktop, running in the Mac edition: booted from **HostFS**,
+its disc a folder on the Mac, with **HostNet** passing its networking to
+the Mac's.
+
+A hero shot of BOX will follow soon.
 
 ---
 

@@ -1,6 +1,6 @@
 # RISC OS translation — BOX
 
-**RISC OS, translated to C, running natively on your machine.**
+**RISC OS, on a Linux kernel, translated to C.**
 
 The [emulated editions](../emulation/README.md) run the real RISC OS inside
 a program that pretends to be a Raspberry Pi. BOX is the other way round:
@@ -42,6 +42,10 @@ This is the same RISC OS as the Mac and Windows releases — the same
 BASIC, the same Wimp, the same desktop — running on the metal of your
 PC, Linux underneath doing what a kernel does. It is where this project
 is going, offered early — for the joy of it.
+
+### What it looks like
+
+A hero shot of BOX is coming soon.
 
 ---
 
