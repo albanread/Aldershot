@@ -1,271 +1,285 @@
 # BOX Architecture
 
-*An article in the BOX series. 3 October 2026.*
+*3 October 2026*
 
-BOX is RISC OS, on a Linux kernel, translated to C. This article describes
-the architecture as it is built: the division of work between the kernel
-and the RISC OS personality, the arena in which the two meet, the way a
-RISC OS task is a thread, and the way a SWI is a call. It describes what
-runs; nothing in it is a plan.
+## Introduction
 
-Notation follows RISC OS convention. Numbers prefixed with an ampersand are
-hexadecimal: `&8000`. Registers are R0 - R15; SWIs are written `OS_WriteC`;
-star commands are written `*Run`.
+BOX is RISC OS 5 running on a Linux kernel, with RISC OS itself translated
+to C and compiled as native code. This article describes how the system is
+put together as it stands today:
+
+* what the Linux kernel provides, and what RISC OS provides
+* the arena, which is the memory both of them share
+* how RISC OS tasks are run as threads
+* how a SWI is made.
+
+Notation follows the usual RISC OS conventions. Hexadecimal numbers are
+prefixed with an ampersand, as in `&8000`. Registers are R0 to R15, SWIs
+are written as `OS_WriteC`, and * Commands as `*Run`.
 
 ---
 
-## 1. The system in outline
+## 1. Overview
 
-There are three parts.
+The system has three parts:
+
+* the Linux kernel
+* the RISC OS *personality*, which is RISC OS 5 translated to C
+* the *arena*, the low 4 GB of the address space, in which all RISC OS
+  memory lives.
 
 ```
         0                                   4 GB
         +-------------------------------------+
-        |              the arena              |   a RISC OS address
-        |  the application slot, the RMA, the |   is a host address;
-        |  screen, the ROM areas, zero page   |   nothing is translated
+        |              the arena              |
+        |  application slot, RMA, screen,     |
+        |  ROM areas, zero page               |
         +-------------------------------------+
-       raised by                    served by
-       the personality              the kernel
-       RISC OS 5 translated         pages, memfds, threads,
-       to C; one program;           devices, filing systems
-       tasks as threads; SWIs
-       as calls
+          set up and used by     backed by
+          the personality        the kernel
 ```
 
-*Figure 1. The kernel provides what hardware provides; the personality
-provides RISC OS; the arena is the memory both of them see.*
+*Figure 1. The personality and the kernel both see the arena. A RISC OS
+address is used directly as a host address.*
 
-The kernel provides what a kernel provides: pages of memory, threads,
-device services, filing systems. The personality is RISC OS 5, translated
-from the sources published by RISC OS Open and compiled as native code.
-The personality owns no device and no filing system of its own; when RISC
-OS reads a disc or lights a pixel, the work is done by the kernel, called
-by the personality, at the moment RISC OS asks for it.
+The kernel does the jobs it would do on any Linux system: it manages
+memory and threads, and it drives the devices and filing systems. The
+personality has no device drivers or filing systems of its own. When RISC
+OS needs to read a disc or draw on the screen, the personality calls the
+kernel to do it.
 
-The two never translate data between them. The arena is that agreement,
-and section 4 describes it.
+No data is converted or copied as it passes between the two; see
+section 4.
 
 ---
 
-## 2. The kernel
+## 2. The Linux kernel
 
-The kernel is Linux. It is not modified. The personality is the first
-process, `/init`, and everything the box does is done by `/init` and its
-threads.
+The kernel is an unmodified Linux kernel. The personality runs as the
+first process, `/init`, and everything else in the box is done by `/init`
+and its threads.
 
-`/init` is a static PIE. This is a rule of the design, not a convenience:
-a static binary that is not position-independent is loaded by the kernel
-at 16 MB, which is inside the arena, and the arena's reservation would
-fail. A PIE is loaded far above 4 GB, where no RISC OS address can reach
-it. There are no shared objects anywhere in the box; the personality and
-every module of RISC OS it contains are one program.
+`/init` must be built as a static PIE (position-independent executable).
+A static executable that is not position-independent is loaded at 16 MB,
+which is inside the arena, and the personality would then be unable to
+reserve the arena for itself. A PIE is loaded well above 4 GB, out of
+reach of any RISC OS address. There are no shared libraries in the box:
+the personality and all the RISC OS modules it contains are linked into
+the one executable.
 
-At boot, `/init` mounts `devtmpfs`, `proc` and `sysfs`, and sets
-`vm.mmap_min_addr` to `&4000`. The kernel's configuration permits
-mappings at `&8000`, where the application slot begins; the personality
-lowers the setting once more because ScratchSpace lies at `&4000`, below
-application space.
+At start-up `/init` mounts `devtmpfs`, `proc` and `sysfs`, and sets
+`vm.mmap_min_addr` to `&4000`. The kernel configuration already allows
+mappings at `&8000`, where application space starts, but ScratchSpace is
+at `&4000`, so the limit has to come down further.
 
-The kernel supplies the devices. The screen is a graphics buffer of the
-kernel's making, mapped into the arena at `&A0000000`; storage, input and
-sound likewise arrive as services of the kernel, and the personality calls
-them. A fault in a program is delivered to the personality, which turns it
-into the RISC OS error the program expects; it does not end the box.
+Devices are all handled by the kernel. The screen is a framebuffer
+supplied by the kernel and mapped into the arena at `&A0000000`. Storage,
+input and sound are likewise kernel services which the personality calls.
+If a program faults, the kernel passes the fault to the personality, which
+turns it into the RISC OS error the program would expect. The box carries
+on running.
 
-### The one-processor rule
+### Single processor
 
-Every thread of the personality runs on one CPU, the CPU on which `/init`
-began. Only the task holding the baton runs (section 4), so a second CPU
-would add nothing but the cost of waking a thread upon it. The cost was
-measured under the development virtual machine:
+All threads of the personality are tied to one CPU, the one on which
+`/init` started. Only one task runs at any time (see section 5), so a
+second CPU would gain nothing, and waking a thread on another CPU costs a
+good deal more. Measured on the development virtual machine:
 
-| To wake a thread | Cost |
+| Waking a thread | Time |
 | --- | --- |
-| on the CPU the switcher runs on | about 6 µs |
-| on another virtual CPU | about 58 µs |
-
-RISC OS is one processor; its tasks stay on one.
+| on the same CPU | about 6 µs |
+| on a different virtual CPU | about 58 µs |
 
 ---
 
 ## 3. The personality
 
-The personality is RISC OS 5.31, translated to C from the sources of
-RISC OS Open and compiled as native code for the host processor, with
-32-bit pointers: a pointer of the C language is a RISC OS address, and 32
-bits suffice because no RISC OS address exceeds the arena.
+The personality is RISC OS 5.31, translated to C from the RISC OS Open
+sources and compiled for the host processor. It is compiled with 32-bit
+pointers, so that a C pointer and a RISC OS address are the same thing.
+32 bits is enough, since every RISC OS address lies in the arena.
 
-The modules of RISC OS - the kernel, FileSwitch, the Wimp, the Font
-Manager, BASIC and the rest - are translated with it
-and linked into `/init`. A module's code is not loaded; it is already
-present. What RISC OS calls the ROM is a region of the arena,
-`&FC000000`, in which each module's code and static data are laid out;
-RISC OS programs that read the ROM find what they expect.
+The RISC OS modules (the Kernel, FileSwitch, the Window Manager, the Font
+Manager, BASIC and so on) are translated in the same way and linked into
+`/init`. Module code is therefore never loaded at run time; it is already
+present. The ROM is a region of the arena at `&FC000000`, laid out with
+each module's code and static data. Programs that look at the ROM find
+what they expect there.
 
-Code is entered through one contract. An entry into compiled code is a
-function
+All compiled code is entered in the same way. An entry point is a C
+function of the form:
 
 ```c
 void ros_code(struct ros_cpu *cpu);
 ```
 
-and `struct ros_cpu` is the register state: R0 - R15 (R13 the stack
-pointer, R14 the link register, R15 the program counter, all of them arena
-addresses), the flags N, Z, C, V and Q held as separate integers, the
-modelled mode and I bit, and a pointer to the task's floating-point
-state. A program's registers are one small structure, passed by pointer,
-and they are the same structure at every boundary in the box.
+`struct ros_cpu` holds the register state:
+
+* R0 to R15, all as arena addresses (R13 is the stack pointer, R14 the
+  link register and R15 the program counter)
+* the N, Z, C, V and Q flags, each held as a separate integer
+* the processor mode and I bit, as modelled
+* a pointer to the task's floating point state.
+
+The same structure is used at every boundary in the box.
 
 ---
 
 ## 4. The arena
 
-The arena is the low 4 GB of the address space, and it is the whole of a
-RISC OS program's world. Its rule is stated once and never varies:
+The arena is the bottom 4 GB of the address space. Everything a RISC OS
+program can see is in it. The rule is simple:
 
 > A RISC OS address is a host address.
 
-Nothing is marshalled. A sprite, a font, a file path, a Wimp message
-block: what one side writes at `&1C8C00`, the other reads at `&1C8C00`.
-Since a RISC OS address is 32 bits, no RISC OS address can name the
-memory of the personality above 4 GB; and a pointer of the personality's
-own that is not arena memory is refused - when such a pointer reaches
-compiled code, the box stops with a report, for it is a fault in the box,
-not in the program.
+Nothing is translated or copied. If one side writes a sprite, a file name
+or a Wimp message block at `&1C8C00`, the other side reads it at
+`&1C8C00`. A RISC OS address is 32 bits, so it cannot refer to the
+personality's own memory above 4 GB. If a pointer to non-arena memory
+ever reaches compiled code, the box stops and reports it; that is a bug in
+the box, not in the program.
 
-Before anything else, the personality reserves the span from `&8000` to
-4 GB as a single inaccessible mapping. Nothing of the kernel's can then
-occupy a RISC OS address. The regions are mapped over the reservation at
-their fixed addresses:
+The first thing the personality does is reserve the whole range from
+`&8000` to 4 GB as one inaccessible mapping, so that the kernel cannot
+place anything at a RISC OS address. The individual regions are then
+mapped over the reservation at fixed addresses:
 
-| Address | Region | Extent | Contents |
+| Address | Region | Size | Contents |
 | --- | --- | --- | --- |
-| `&00004000` | ScratchSpace | 16 KB | the kernel's public scratch area |
-| `&00008000` | Application space | the slot | the current task's program and data |
-| `&20000000` | Relocatable module area | to 256 MB | modules' code and workspace |
-| `&30000000` | System heap | to 32 MB | the system's own allocations |
-| `&32000000` | SVC stack | 1 MB | the stack compiled code runs on |
-| `&A0000000` | Screen | the mode | the screen buffer |
-| `&FC000000` | ROM image | 48 MB | the compiled modules' areas |
-| `&FFFF0000` | Zero page | 32 KB | public kernel workspace, at its offsets |
+| `&00004000` | ScratchSpace | 16 KB | Kernel scratch space |
+| `&00008000` | Application space | slot size | Current task's program and data |
+| `&20000000` | RMA | up to 256 MB | Module code and workspace |
+| `&30000000` | System heap | up to 32 MB | System allocations |
+| `&32000000` | SVC stack | 1 MB | Stack used by compiled code |
+| `&A0000000` | Screen | depends on mode | Screen memory |
+| `&FC000000` | ROM | 48 MB | Compiled modules |
+| `&FFFF0000` | Zero page | 32 KB | Kernel workspace |
 
 Dynamic areas are mapped into the reservation as they are created. Zero
-page carries the kernel's public words at the offsets programs know:
-`MetroGnome`, the centisecond counter, at `+&10C`; `ReturnCode` at
-`+&AC4`; the current Wimp task's domain at `+&FF8`; and the rest at
-theirs.
+page holds the kernel's public workspace at the usual offsets: for
+example `MetroGnome` (the centisecond counter) at `+&10C`, `ReturnCode`
+at `+&AC4`, and the current Wimp task's domain at `+&FF8`.
 
-Every region is a memfd - a memory object of the kernel's, with a name
-and a file descriptor - not private memory. This has three consequences.
-A region may be mapped again at the same address, which is how a task's
-slot is taken over by another task when the Wimp switches, and how the
-same regions will be mapped into further processes should the design ever
-ask for them. A slot grows by extending its memfd, as RISC OS's module
-area grows by extension. And the application slot and the RMA are
-executable - application code and module code run from them, as RISC OS's
-do - so their memfds are created for execution and the kernel is asked
-for that permission once, at boot, and not per program.
+Each region is backed by a memfd (a named Linux memory object with a file
+descriptor) rather than by private memory. This matters for three reasons:
 
----
-
-## 5. Tasks as threads
-
-A RISC OS task is a thread of `/init`. A task is created with its slot,
-an entry and an argument; the entry is a function of the personality's
-which runs the task's program until the task ends. There is one thread
-per task, and no more.
-
-Two rules govern them: the personality lock and the baton.
-
-**The personality lock** is a single mutex. A task's thread holds it
-while it runs and releases it to wait. Module code runs holding the lock,
-because module code runs in the context of whoever called it: when a task
-calls a SWI, the handler runs on the task's own thread, holding the lock
-the task already holds. Nothing is forwarded to another thread and no
-other thread may touch the personality's state; there is nothing to race
-with.
-
-**The baton** is the desktop's single right to run. It is a flag per task
-and one mutex. When the Wimp decides to switch tasks - at `Wimp_Poll`,
-as RISC OS always has - the switch runs on the thread of the task giving
-the baton away, holding the personality lock. That thread saves its own
-task's current program and puts the next task's in place: the slot
-mappings, the personality's pointers, zero page. When the next task's
-thread wakes, everything is already as the task left it. Then the giving
-task releases the lock and waits for its own flag.
-
-A task is therefore paged out exactly when RISC OS would page it out, and
-blocked exactly where RISC OS would block: inside the call. A SWI that
-waits - a poll idle, a sleep, a slow transfer - releases the lock around
-its wait; the thread sleeps inside the SWI, background work runs, and the
-call returns to the task that made it, on the thread that made it.
-
-The personality counts SWIs in and out of each other. The way out of the
-outermost SWI of a task is a safe point: transient callbacks owed to the
-task are delivered there, and nowhere else. A program that computes for a
-long time without calling RISC OS sees its callbacks late; this is the
-one departure from interrupt-time delivery, and it is a bounded one.
+1. A region can be mapped again at the same address. This is how one
+   task's application slot replaces another's when the Wimp switches
+   tasks. It would also allow the regions to be shared with other
+   processes, should that ever be needed.
+2. A slot is grown by extending its memfd, in the same way that the RMA
+   grows.
+3. Code runs from the application slot and the RMA, as it does on RISC
+   OS, so their memfds are created executable. Permission for this is
+   obtained from the kernel once at start-up, not for each program.
 
 ---
 
-## 6. The SWI path
+## 5. Tasks
 
-A SWI in BOX is a function call. There is no instruction to trap and no
-trap to take: translated code and C applications call the dispatcher as a
-function of the C language,
+Each RISC OS task is a thread of `/init`. A task is created with its
+slot, an entry point and an argument. The entry point is a function in the
+personality which runs the task's program until it exits. There is
+exactly one thread per task.
+
+Two mechanisms control which thread may run: the personality lock and
+the baton.
+
+### The personality lock
+
+The personality lock is a single mutex. A task's thread holds it while
+running and releases it when it waits.
+
+Module code runs in the context of its caller. When a task calls a SWI,
+the SWI handler runs on the task's own thread and under the lock the task
+already holds. Calls are never passed to another thread, and no other
+thread touches the personality's state, so there are no races to guard
+against.
+
+### The baton
+
+The baton is the right to run in the desktop. It is implemented as a
+flag for each task, protected by one mutex.
+
+The Wimp switches tasks in `Wimp_Poll`, as it always has. The switch is
+done by the thread of the task that is giving up the baton, while it
+still holds the personality lock. That thread saves its own task's state
+and puts the next task's state in place: the slot mappings, the
+personality's internal pointers and zero page. It then releases the lock
+and waits on its own flag. When the next task's thread wakes up,
+everything is as that task left it.
+
+The result is that a task is paged out at the point RISC OS would page it
+out, and blocks where RISC OS would block, inside the SWI. A SWI that
+waits (an idle poll, a sleep, a slow transfer) releases the lock while it
+waits. The thread sleeps inside the SWI, other work carries on, and when
+the wait is over the SWI returns to the caller on the same thread.
+
+### Callbacks
+
+The personality keeps count of SWI nesting for each task. Exit from a
+task's outermost SWI is treated as a safe point, and transient callbacks
+for the task are delivered there and nowhere else. A program that
+computes for a long time without calling RISC OS will therefore see its
+callbacks late. This is the one difference from interrupt-time delivery
+on real hardware, and the delay is bounded by the program's next SWI.
+
+---
+
+## 6. SWIs
+
+In BOX a SWI is an ordinary function call. There is no SWI instruction to
+trap. Translated code and C programs call the dispatcher directly:
 
 ```c
 void ros_swi(struct ros_cpu *s, uint32_t number);
 ```
 
-with the register state in `s` and the SWI's number, X bit included, in
-`number`. The call is made on the task's own thread, under the
-personality lock. The cost is the cost of a function call, about 0.1 µs,
-and there is nothing between the program and its SWI.
+`s` holds the registers and `number` is the SWI number, including the X
+bit. The call is made on the task's own thread, with the personality lock
+held. It costs about the same as any other function call, around 0.1 µs.
 
-The number decides the handler:
+The SWI number selects the handler:
 
-| Numbers | Handler |
+| SWI numbers | Handled by |
 | --- | --- |
-| `&00` - `&FF` | the kernel's own SWIs, dispatched to their translated implementations |
-| `&100` - `&1FF` | `OS_WriteI`: one SWI per character, the character in the number |
-| all others | a module's chunk of 64, dispatched to that module's handler |
+| `&00` to `&FF` | the Kernel's own SWIs, using their translated code |
+| `&100` to `&1FF` | `OS_WriteI`, with the character in the low byte of the number |
+| all others | the module that owns the SWI chunk |
 
-A module's handler is entered as RISC OS's own dispatcher enters it: R11
-holds the offset within the chunk, R12 the module's private word, and
-R10 - R12 are preserved for the caller. `OS_CallASWI` and
-`OS_CallASWIR12` are honoured: the SWI whose number stands in R10 or R12
-is dispatched in the place of the call, and its own X bit decides its
-error behaviour.
+A module's SWI handler is entered just as RISC OS enters it: R11 holds
+the offset within the chunk, R12 points to the module's private word, and
+R10 to R12 are preserved for the caller. `OS_CallASWI` and
+`OS_CallASWIR12` are supported; the SWI given in R10 or R12 is called in
+their place, and its own X bit decides how errors are handled.
 
-The X bit is bit 31 of the number, as in RISC OS. An error in an X-form
-call is returned: V is set in the register state and R0 holds the address
-of the error block, which is arena memory, so the caller reads it as an
-ordinary pointer. An error in a call without the X bit is raised: the
-personality delivers it to the task's error handler, with the registers,
-mode and stack that RISC OS 5.31's kernel enters an error handler with.
-The error handler of a translated task is translated code; the delivery
-is the same nested entry that any handler receives.
+The X bit is bit 31 of the number, as usual:
+
+* If the X bit is set and an error occurs, V is set on return and R0
+  points to the error block. The error block is in the arena, so the
+  caller can read it directly.
+* If the X bit is clear, the error is raised. The personality enters the
+  task's error handler with the registers, mode and stack that the RISC
+  OS 5.31 Kernel would use. For a translated task the error handler is
+  itself translated code, and it is entered in the same way as any other
+  handler.
 
 ---
 
-## 7. The rules of the design
+## 7. Summary of design rules
 
-Stated together, the rules that make the box what it is:
+1. A RISC OS address is a host address. Data is never converted or copied
+   between RISC OS and the host.
+2. The kernel looks after the hardware and the personality looks after
+   RISC OS.
+3. There is one program. There are no shared libraries, no separate OS
+   process, and no forwarding of calls between threads.
+4. One processor and one lock. Only one task runs at a time, on its own
+   thread.
+5. A SWI is a function call, with no trap.
 
-1. A RISC OS address is a host address. Nothing is marshalled, anywhere,
-   ever.
-2. The kernel owns the hardware; the personality owns RISC OS. Neither
-   does the other's work.
-3. One program. No shared objects, no second process for the OS, no
-   forwarding between them.
-4. One processor. One lock. One task runs at a time, and it runs on its
-   own thread, in its own call.
-5. A SWI is a call. There is no trap on the path between a program and
-   the OS it is calling.
-
-Each rule removes work. The first removes a copy and a translation from
-every interface; the third and the fourth remove a boundary from every
-call; the fifth removes a trap from the most frequently taken path in
-RISC OS.
+Most of these rules exist to avoid work. Rule 1 saves a copy at every
+interface, rules 3 and 4 remove a thread or process boundary from every
+call, and rule 5 removes a trap from the most heavily used path in RISC
+OS.

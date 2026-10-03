@@ -1,12 +1,12 @@
 # Articles
 
-Technical articles about BOX — RISC OS, on a Linux kernel, translated to
-C — each written in the manner of the RISC OS Programmer's Reference
-Manuals: formal, precise, and describing the working code. Each article
-stands alone; none is a plan.
+Technical articles about BOX (RISC OS on a Linux kernel, translated to
+C). They follow the style of the RISC OS Programmer's Reference Manuals
+and describe the code as it currently works. Each article can be read on
+its own.
 
 | Written | Article | What it covers | Read |
 | --- | --- | --- | --- |
-| 3 October 2026 | **BOX Architecture** | The system in outline: the Linux kernel and what it provides, the RISC OS personality, the arena in which a RISC OS address is a host address, tasks as threads under the personality lock and the baton, and the SWI path as a function call. | [BOX Architecture](box-architecture.md) |
+| 3 October 2026 | **BOX Architecture** | Overview of the system: what the Linux kernel provides, the RISC OS personality, the arena (where a RISC OS address is a host address), how tasks run as threads, and how SWIs are called. | [BOX Architecture](box-architecture.md) |
 
 The newest article goes at the top.
