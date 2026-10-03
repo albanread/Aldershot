@@ -177,7 +177,27 @@ system.
 
 ---
 
-## 6. The vision
+## 6. Is that a disappointment?
+
+In some ways, yes. Much of the fun of RISC OS has always been that it
+is not a mini-computer operating system. It is small, it is quick, and
+it is close to the machine: one person could understand all of it, and
+a BASIC program could poke the hardware. Putting a Unix kernel
+underneath, however well hidden, gives some of that up, and it would be
+wrong to pretend otherwise.
+
+But it is worth being honest about how RISC OS is used today. A great
+many people already run it on top of another operating system: RPCEmu
+or Arculator on Windows, Linux or macOS, or an emulator on a Mac. In
+those cases RISC OS sits in a window, with Windows or macOS (and all
+their drivers) underneath it. BOX is no worse than that, and in one way
+better: on a PC, BOX boots straight from a USB stick, with no other
+operating system in sight. The machine starts, and RISC OS is what you
+get.
+
+---
+
+## 7. The vision
 
 BOX is not Linux with a RISC OS window on it, and it is not an emulator
 running in a Linux desktop. It is RISC OS, behaving as RISC OS has
