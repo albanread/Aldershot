@@ -120,9 +120,12 @@ column, objects byte for byte, and the real ObjAsm run on an emulator as
 the reference.
 
 As an assembler it writes AOF or ELF objects. With `--emit c` it
-compiles instead: it writes the unit's ROM image, and its code as C. This
-is how the whole of BOX's ROM is made, the Window Manager and BASIC
-among it. The C comes in two forms, described in *Tiers of Translation*:
+compiles instead: it writes the unit's ROM image, and its code as C.
+This is how BOX's ROM was first made. Since then many modules have been
+rewritten from a specification (tier 2), among them the Window Manager,
+FileSwitch, the Buffer Manager and MessageTrans. Others, BASIC among
+them, are still translated. The C comes in two forms, described in
+*Tiers of Translation*:
 
 * **tier 0** (`--no-lift`): one C statement per instruction over a block
   of registers. Exact, slow and hard to read; the reference.
