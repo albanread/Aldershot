@@ -45,7 +45,7 @@ There are two forms, one for each processor:
 | Pointers, `long`, `size_t` | 4 bytes | 4 bytes |
 | How addresses stay below 4 GB | the compiler puts an `addr32` prefix on every memory access not based on the stack | addresses are formed in 32-bit W registers, which wrap at 4 GB; the few 64-bit sums left fault into a guard region from 4 GB to 68 GB |
 | Static base | `%gs` | `x18`, reserved in all arena code |
-| Compilers | clang `-mx32`; tcc with BOX's x32 patch | clang with BOX's ILP32 front-end patch |
+| Compiler | clang `-mx32` | clang with BOX's ILP32 front-end patch |
 
 x32 code never makes a Linux system call. It reaches the operating
 system only through the SWI gate, a fixed page in the arena at
@@ -108,9 +108,6 @@ It is quick. Timed in the box, on two virtual CPUs of an M4 Max, a C
 The objects and images the box makes are byte for byte the same as those
 the Mac's clang and roscc make from the same source.
 
-On the Intel box `*CC` is tcc rather than clang, and makes Linux
-programs only. The x32 form of tcc (`x32-tcc`) is used by `*RosBas`.
-
 ---
 
 ## 3. ROSASM: the assembler that writes C
@@ -167,9 +164,8 @@ In the box, `*RosBas` does the whole job:
 *game
 ```
 
-ROSBAS makes the C, clang (or `x32-tcc` on Intel) compiles it, and roscc
-links it with the ROSBAS runtime against the ROM's SharedCLibrary. The
-result is an ordinary RISC OS application, typed `&FF8`. A five-line
+ROSBAS makes the C, clang compiles it, and roscc links it with the
+ROSBAS runtime against the ROM's SharedCLibrary. The result is an ordinary RISC OS application, typed `&FF8`. A five-line
 program builds in 0.07 seconds, and the `Primes` example in 0.08 to 0.10
 seconds.
 
