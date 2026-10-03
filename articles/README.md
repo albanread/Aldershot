@@ -7,6 +7,7 @@ its own.
 
 | Written | Article | What it covers | Read |
 | --- | --- | --- | --- |
+| 3 October 2026 | **HostFS and the Filing Systems** | Why BOX has no Acorn filing systems; FileSwitch rewritten; HostFS over Linux's filing systems (the Mac's folder, an ext4 disc, SMB shares); ResourceFS for the ROM's files; SparkFS, the compressed filing system; and booting and running RISC OS from a USB disc. | [HostFS and the Filing Systems](hostfs-and-the-filing-systems.md) |
 | 3 October 2026 | **The Native Wimp** | The Window Manager rewritten in C from a specification: why, how it was tested, its speed against the translation; why BOX keeps RISC OS's task memory layout with each slot at `&8000`; and why slots are dynamic, 1.5 GB and lazy, given the memory needs of 64-bit code. | [The Native Wimp](the-native-wimp.md) |
 | 3 October 2026 | **Is BOX an Emulator?** | No: BOX is a port of RISC OS to C, running on Linux, and runs only translated or compiled code. BASIC runs unchanged; C and assembler need converting, and ARM binaries without source cannot run, which is BOX's main drawback against an emulator. | [Is BOX an Emulator?](is-box-an-emulator.md) |
 | 3 October 2026 | **Is BOX Linux?** | Yes and no: BOX boots a Linux kernel, which provides portability, drivers, networking and network services, and saved porting RISC OS's own drivers and stacks; but there is no Linux userland, and what runs is RISC OS as it has always behaved. | [Is BOX Linux?](is-box-linux.md) |
