@@ -17,7 +17,7 @@ article describes them:
 
 * **x32 mode**, the C model that RISC OS programs are compiled for
 * **`*CC`**, the C compiler in the box
-* **ROSASM**, the assembler that turns RISC OS's ObjAsm into C
+* **ROSASM**, the porting tool that turns RISC OS's ObjAsm into C
 * **ROSBAS**, the compiler that turns BBC BASIC V into C
 * **roscc**, the linker behind all of them.
 
@@ -110,7 +110,7 @@ the Mac's clang and roscc make from the same source.
 
 ---
 
-## 3. ROSASM: the assembler that writes C
+## 3. ROSASM: a porting tool
 
 Most of RISC OS is written in ObjAsm, Acorn's ARM assembler. ROSASM is a
 compatible assembler written in Rust. It reads the RISC OS 5 sources as
@@ -136,7 +136,8 @@ The author's comments are carried into the C beside the code they
 describe, and constants and workspace fields keep their names.
 
 ROSASM runs where the toolchain is, on the Mac, because its output is
-built into the ROM. It is a tool for building BOX, not for writing BOX
+built into the ROM. ROSASM is a porting tool only: it exists to bring
+RISC OS's existing assembler sources across to BOX, not for writing new
 programs, and it is not provided in the box. The `*RosAsm` command
 exists in the hosted runtime, where it runs ROSASM on RISC OS file names;
 in the box itself it refuses, with error `&C0125`. See section 6.
