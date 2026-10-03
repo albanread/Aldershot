@@ -1,5 +1,12 @@
 # RISC OS translation — BOX
 
+![RISC OS BOX on my HP i7-12700 with NV T1000 graphics, booted from USB](../screenshots/box-on-a-pc.png)
+
+*RISC OS BOX on my HP i7-12700 with NV T1000 graphics, booted from USB.*
+The Mandelbrot set drawn by nineteen workers on the spare cores while the
+desktop stays live, NetSurf on the web, a PDF open, and nothing under it
+but its own Linux — started from a USB stick on an ordinary PC.
+
 **RISC OS, on a Linux kernel, translated to C.**
 
 The [emulated editions](../emulation/README.md) run the real RISC OS inside
