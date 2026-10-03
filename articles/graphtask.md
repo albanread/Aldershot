@@ -8,7 +8,7 @@ A graphical BBC BASIC program takes the whole screen. It changes the
 mode, draws where it likes, sets the palette, and the desktop is gone
 until it ends.
 
-On RISC OS there was a utility, GraphTask, that got round this. It
+On RISC OS there was a utility, GraphTask, by David J Ruck, that got round this. It
 opened a desktop window showing a graphical screen in one of BASIC's
 modes, and ran a command line in it. What the program drew went into
 the window, and the rest of the desktop carried on around it. The
