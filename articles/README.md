@@ -7,6 +7,7 @@ its own.
 
 | Written | Article | What it covers | Read |
 | --- | --- | --- | --- |
+| 3 October 2026 | **Porting a C Application to BOX** | What converting a RISC OS C program involves: compiling with clang as Norcroft did, linking with roscc, rewriting the assembler in C, the faults ARM and Norcroft hid, the `!Run` file, and testing against RISC OS 5.30, with the ports done so far. | [Porting a C Application to BOX](porting-a-c-application.md) |
 | 3 October 2026 | **Does BOX Support the Raspberry Pi?** | No: RISC OS 5 runs natively and quickly on the Pi 4, where BOX would be slower and run less; the Pi 5 cannot run RISC OS natively, and low-cost mini PCs now give BOX more for the money. | [Does BOX Support the Raspberry Pi?](does-box-support-the-raspberry-pi.md) |
 | 3 October 2026 | **HostFS and the Filing Systems** | Why BOX has no Acorn filing systems; FileSwitch rewritten; HostFS over Linux's filing systems (the Mac's folder, an ext4 disc, SMB shares); ResourceFS for the ROM's files; SparkFS, the compressed filing system; and booting and running RISC OS from a USB disc. | [HostFS and the Filing Systems](hostfs-and-the-filing-systems.md) |
 | 3 October 2026 | **The Native Wimp** | The Window Manager rewritten in C from a specification: why, how it was tested, its speed against the translation; why BOX keeps RISC OS's task memory layout with each slot at `&8000`; and why slots are dynamic, 1.5 GB and lazy, given the memory needs of 64-bit code. | [The Native Wimp](the-native-wimp.md) |
