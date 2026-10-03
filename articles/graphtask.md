@@ -118,8 +118,8 @@ Each window has its own display, and its own program running in it.
   (12, 15, 20, 21, 27, 28 or 31, or one typed in), Freeze, Save screen,
   Reset and Kill.
 * **A mode change** by the program resizes and retitles the window.
-* **The window refreshes** about fifty times a second, redrawing only the
-  part that has changed.
+* **The window keeps up with the program**: each change is shown at the
+  next screen refresh (fifty a second), and only the part that changed.
 
 From the command line, `*GraphTask <command>` runs a command in a new
 window, in the running GraphTask if there is one. **StrongED** uses this:
@@ -143,11 +143,37 @@ GraphTask is built from three pieces, and the app itself is small:
 * **TaskWindow** takes one new option, `-vdisplay`. A task window's
   child with a virtual display sends its output to the VDU, and so into
   the display, instead of to its parent as text. Input is unchanged.
+* **The Window Manager** draws the window itself. GraphTask binds the
+  window to the display's sprite (a *surface window*), and from then on
+  the Wimp redraws it straight from the sprite, scaled, whenever it needs
+  to, without asking GraphTask. The display tells the Wimp what changed,
+  and the Wimp shows it at a safe moment: its next poll, or the next
+  screen refresh. So a running animation costs no task switches to
+  GraphTask at all.
 * **`!GraphTask`** creates a display, starts a task window's child on
-  it, and shows the display's sprite in its window.
+  it, and binds its window to the display.
 
 None of this needed the parent to know anything special: a BASIC Wimp
 task of twenty lines can do what GraphTask does, without the window.
+
+### Surface windows
+
+Before surface windows, GraphTask looked at its display fifty times a
+second, and when something had changed it asked the Wimp to redraw that
+part of its window. The Wimp then asked GraphTask to draw it. Every
+frame cost at least two task switches, and because a task window's
+program runs for a tenth of a second between polls, a 50-frame
+animation was shown at about twelve frames a second.
+
+With the Wimp drawing the window itself, the same animation (Bounce) is
+shown at all fifty frames a second, and GraphTask is not switched to at
+all while it runs. That is four and a half times the frames shown, for
+about a quarter more processor time.
+
+Surface windows are general: any task can bind a window to a sprite of
+its own and tell the Wimp what changed. They are a first, small step
+towards a desktop where tasks own surfaces and the system composites
+them. They are not that yet.
 
 ---
 
@@ -178,3 +204,8 @@ BOX's self-test has 18 checks for virtual displays, among them:
 A program drawing circles, lines and text in mode 28 inside a task
 window's virtual display was saved as a sprite and inspected, and the
 Paint desktop test showed the real display unharmed.
+
+Surface windows were checked by eye: Bounce running with another window
+dragged over it, with the window partly off the screen, after a mode
+change from the menu, and scaled to fit a resized window. The older way
+is kept for the translated Window Manager, and was checked too.
