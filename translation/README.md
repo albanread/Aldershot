@@ -33,10 +33,13 @@ kernel, the personality, the arena, tasks as threads, and the SWI path.
 
 ## What runs today
 
-A first **preview release: early days BOX, x64**, released on 3 October
-2026 (see [Downloads](#downloads)). It boots RISC OS from a **USB stick on
-a 64-bit PC**, with a few applications to try — for people who like being
-close to the machinery. Not emulated. Native.
+The first **preview releases of BOX**, on 3 October 2026 (see
+[Downloads](#downloads)), with a few applications to try — for people who
+like being close to the machinery. Not emulated. Native.
+
+- **BOX x64** boots RISC OS from a **USB stick on a 64-bit PC**.
+- **BOX for Apple silicon Macs** runs RISC OS, compiled for the Mac's own
+  processor, in a window on the Mac.
 
 ### One thing to know: memory
 
@@ -65,8 +68,12 @@ still answering, NetSurf on the web and a PDF open beside it.
 
 ## Downloads
 
-The first preview, **BOX x64, 3 October 2026**, is on the
-[Releases page](https://github.com/albanread/Aldershot/releases/tag/BOX-x64-2026-10-03).
+| Your computer | Download |
+| --- | --- |
+| **A 64-bit PC** (or a virtual machine on one) | [BOX x64, 3 October 2026](https://github.com/albanread/Aldershot/releases/tag/BOX-x64-2026-10-03): below |
+| **An Apple silicon Mac** (M1 or later) | [BOX for Apple silicon Macs, 3 October 2026](https://github.com/albanread/Aldershot/releases/tag/BOX-arm64-mac-2026-10-03): see [BOX on an Apple silicon Mac](#box-on-an-apple-silicon-mac) |
+
+### BOX x64, for PCs
 
 | Download | What it is |
 | --- | --- |
@@ -132,7 +139,58 @@ computer, with UEFI firmware:
 - **VirtualBox** is untested, and **Hyper-V** is not supported.
 
 On an Apple silicon Mac the image runs only under full x86 emulation,
-which is very slow.
+which is very slow: use BOX for Apple silicon Macs instead.
+
+---
+
+## BOX on an Apple silicon Mac
+
+The same RISC OS, compiled for Apple silicon instead of x64, on a small
+Linux kernel for ARM. QEMU runs it with the Mac's own hypervisor, so it
+runs at the speed of the Mac's processor: nothing is emulated.
+
+| Download | What it is |
+| --- | --- |
+| [BOX-arm64-mac-2026-10-03.zip](https://github.com/albanread/Aldershot/releases/download/BOX-arm64-mac-2026-10-03/BOX-arm64-mac-2026-10-03.zip) | BOX for Apple silicon Macs (73 MB), with a `.sha256` checksum beside it on the [Releases page](https://github.com/albanread/Aldershot/releases/tag/BOX-arm64-mac-2026-10-03) |
+
+It needs an **Apple silicon Mac** (M1 or later) and **QEMU**, which is not
+in the download.
+
+### Installing QEMU
+
+1. If you do not have Homebrew, install it from [brew.sh](https://brew.sh):
+   paste the command shown on that page into Terminal and follow what it
+   says.
+2. In Terminal, run:
+
+   ```
+   brew install qemu
+   ```
+
+   To check it worked: `qemu-system-aarch64 --version`
+
+### Starting it
+
+1. Unzip the download, and keep the folder together: `Start BOX.command`,
+   the `system` folder and the `RISCOS` folder stay side by side.
+2. Double-click **Start BOX.command**. The first time, macOS may refuse to
+   open it because it was downloaded: right-click (or Control-click) it,
+   choose **Open**, then **Open** again.
+3. A Terminal window opens, then the RISC OS window, and the desktop is
+   up in a few seconds.
+
+To stop it, use the desktop's Shutdown, or close the RISC OS window.
+
+### What you get
+
+- **The desktop at your screen's scale:** 1280 × 800, doubled on a Retina
+  or HiDPI screen, so the window is sharp and the right size.
+- **Your RISC OS disc is a folder:** the `RISCOS` folder is the *Host*
+  disc on the icon bar. What you save in RISC OS is kept there, and what
+  you put there from the Mac appears in RISC OS.
+- **Network** (NetSurf browses the web), and **sound** through the Mac.
+- **Settings** such as more memory or processors: see the `ReadMe.txt` in
+  the download, or the release notes.
 
 ---
 

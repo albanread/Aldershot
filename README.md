@@ -24,7 +24,7 @@ its own page:
 | | | |
 | --- | --- | --- |
 | 🥧 | **[RISC OS emulation](emulation/README.md)** | The genuine RISC OS, unmodified, on an emulated Raspberry Pi. **Works today** on the Mac and Windows. |
-| 🚀 | **[RISC OS translation — BOX](translation/README.md)** | **RISC OS, on a Linux kernel, translated to C** — native code, no emulator. Early-days preview, booting from a USB stick on a 64-bit PC. |
+| 🚀 | **[RISC OS translation — BOX](translation/README.md)** | **RISC OS, on a Linux kernel, translated to C** — native code, no emulator. Early-days preview: booting from a USB stick on a 64-bit PC, or in a window on an Apple silicon Mac. |
 
 **Emulation** runs the real thing. A program on your computer pretends to
 be a Raspberry Pi — the machine RISC OS is built for these days — and
