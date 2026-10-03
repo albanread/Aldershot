@@ -6,9 +6,6 @@
 
 RISC OS 5 has networking: a TCP/IP stack, a resolver, Acorn Access for
 file sharing, LanManFS for Windows shares, and fetchers for the web.
-Much of it was written a long time ago, and parts of it no longer talk
-to modern machines: LanManFS speaks only SMB1, which current Windows
-and Samba refuse, and AcornSSL stops at TLS 1.2.
 
 In BOX the network belongs to Linux. RISC OS's network modules keep
 their SWIs and commands, so programs see what they always saw, but the
