@@ -165,9 +165,9 @@ In the box, `*RosBas` does the whole job:
 ```
 
 ROSBAS makes the C, clang compiles it, and roscc links it with the
-ROSBAS runtime against the ROM's SharedCLibrary. The result is an ordinary RISC OS application, typed `&FF8`. A five-line
-program builds in 0.07 seconds, and the `Primes` example in 0.08 to 0.10
-seconds.
+ROSBAS runtime against the ROM's SharedCLibrary. The result is an
+ordinary RISC OS application, typed `&FF8`. A five-line program builds
+in 0.07 seconds, and the `Primes` example in 0.08 to 0.10 seconds.
 
 ### How accurate it is
 
