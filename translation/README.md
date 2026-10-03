@@ -18,6 +18,10 @@ the RISC OS you know.
 *This is high atmospheric testing compared to the moonshot, but we aim
 for low earth orbit.*
 
+How it works is described in the [BOX articles](../articles/README.md).
+The first is **[BOX Architecture](../articles/box-architecture.md)**: the
+kernel, the personality, the arena, tasks as threads, and the SWI path.
+
 ---
 
 ## What runs today
