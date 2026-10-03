@@ -136,9 +136,10 @@ The author's comments are carried into the C beside the code they
 describe, and constants and workspace fields keep their names.
 
 ROSASM runs where the toolchain is, on the Mac, because its output is
-built into the ROM. The `*RosAsm` command exists in the hosted runtime,
-where it runs ROSASM on RISC OS file names. In the box itself it refuses,
-with error `&C0125`.
+built into the ROM. It is a tool for building BOX, not for writing BOX
+programs, and it is not provided in the box. The `*RosAsm` command
+exists in the hosted runtime, where it runs ROSASM on RISC OS file names;
+in the box itself it refuses, with error `&C0125`. See section 6.
 
 ---
 
@@ -177,8 +178,7 @@ in 0.07 seconds, and the `Primes` example in 0.08 to 0.10 seconds.
 On the farm's real RISC OS 5.30, the conformance suite passes 640 of 649
 test runs. On the host, 162 of the 163 Rosetta programs give the same
 output as the interpreter. Still to do are `CALL` and `USR`, which call
-machine code and so need thought in a system with none, and one gated
-quirk.
+machine code, and one gated quirk.
 
 ---
 
@@ -202,7 +202,23 @@ same module descriptions can make a Raspberry Pi image.
 
 ---
 
-## 6. Building in the box
+## 6. Assembly language
+
+BOX does not support writing programs in assembly language, and it is
+not recommended. There is no ARM processor for ARM code to run on, and
+the ObjAsm tools are not provided in the box. Write new programs in C or
+BBC BASIC, both of which compile to native code.
+
+BBC BASIC's assembler is still there, for programs that use it. With
+`*BasicAsmCPU`, BASICVFP's `[ ... ]` assembles code for the host
+processor instead of ARM (`A64` on Apple silicon, `X64` on Intel), and
+`CALL` and `USR` run it. The `MandelA64` example draws the Mandelbrot set
+this way. Code assembled like this is tied to one processor, and ARM
+code assembled by BASIC cannot be run at all.
+
+---
+
+## 7. Building in the box
 
 These tools are driven from Obey files, as RISC OS builds always have
 been:
