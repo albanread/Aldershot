@@ -73,7 +73,7 @@ mappings at `&8000`, where application space starts, but ScratchSpace is
 at `&4000`, so the limit has to come down further.
 
 Devices are all handled by the kernel. The screen is a framebuffer
-supplied by the kernel and mapped into the arena at `&A0000000`. Storage,
+supplied by the kernel and mapped into the arena at `&B4000000`. Storage,
 input and sound are likewise kernel services which the personality calls.
 If a program faults, the kernel passes the fault to the personality, which
 turns it into the RISC OS error the program would expect. The box carries
@@ -96,9 +96,18 @@ good deal more. Measured on the development virtual machine:
 ## 3. The personality
 
 The personality is RISC OS 5.31, translated to C from the RISC OS Open
-sources and compiled for the host processor. It is compiled with 32-bit
-pointers, so that a C pointer and a RISC OS address are the same thing.
-32 bits is enough, since every RISC OS address lies in the arena.
+sources and compiled for the host processor. It is ordinary 64-bit code
+(LP64), loaded above 4 GB, and it never holds a RISC OS address as a C
+pointer. It reaches the arena through accessors such as `ros_ld32()`.
+Because the arena is mapped at address 0, each of these compiles to a
+single load or store.
+
+RISC OS's C programs are compiled differently. The ROM's SharedCLibrary,
+C modules, C applications and anything built in the box are compiled
+with 32-bit pointers (x32 on Intel, A64X32 on Apple silicon), so for
+them a C pointer and a RISC OS address are the same thing. They reach
+the system only through the SWI gate, a fixed page in the arena at
+`&FEEFF000`. *BOX Tools* describes this in more detail.
 
 The RISC OS modules (the Kernel, FileSwitch, the Window Manager, the Font
 Manager, BASIC and so on) are translated in the same way and linked into
@@ -148,16 +157,19 @@ mapped over the reservation at fixed addresses:
 | Address | Region | Size | Contents |
 | --- | --- | --- | --- |
 | `&00004000` | ScratchSpace | 16 KB | Kernel scratch space |
-| `&00008000` | Application space | slot size | Current task's program and data |
-| `&20000000` | RMA | up to 256 MB | Module code and workspace |
-| `&30000000` | System heap | up to 32 MB | System allocations |
-| `&32000000` | SVC stack | 1 MB | Stack used by compiled code |
-| `&A0000000` | Screen | depends on mode | Screen memory |
+| `&00008000` | Application space | slot size, up to 1.5 GB | Current task's program and data |
+| `&60000000` | RMA | up to 256 MB | Module code and workspace |
+| `&70000000` | System heap | up to 32 MB | System allocations |
+| `&72000000` | SVC stack | 1 MB | Stack used by compiled code |
+| `&72200000` | C ROM | to `&78000000` | The ROM's C library |
+| `&78000000` | Dynamic areas | up to the screen | Allocated upwards |
+| `&B4000000` | Screen | up to 64 MB | Screen memory |
 | `&FC000000` | ROM | 48 MB | Compiled modules |
+| `&FEEFF000` | SWI gate | one page | Entry to the OS for x32 code |
 | `&FFFF0000` | Zero page | 32 KB | Kernel workspace |
 
-Dynamic areas are mapped into the reservation as they are created. Zero
-page holds the kernel's public workspace at the usual offsets: for
+Dynamic areas are mapped as they are created, from `&78000000` upwards.
+Zero page holds the kernel's public workspace at the usual offsets: for
 example `MetroGnome` (the centisecond counter) at `+&10C`, `ReturnCode`
 at `+&AC4`, and the current Wimp task's domain at `+&FF8`.
 
