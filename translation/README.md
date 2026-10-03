@@ -119,8 +119,13 @@ booting, and Secure Boot.
 The same system runs in a virtual machine on a 64-bit Intel or AMD
 computer, with UEFI firmware:
 
-- **VMware Fusion or Workstation:** unzip the VMware download and open
-  `ROSGD.vmwarevm`. It is set up already. On a Mac it needs an Intel Mac.
+- **VMware:** unzip the VMware download. It is set up already, sound
+  included.
+  - On an **Intel Mac**, open `ROSGD.vmwarevm` in VMware Fusion.
+  - On **Windows**, install VMware Workstation (free for personal use)
+    and open `ROSGD.vmx` from inside the `ROSGD.vmwarevm` folder.
+  - On an **Apple silicon Mac** it cannot run: Fusion there runs only ARM
+    virtual machines.
 - **QEMU:** with its UEFI firmware (OVMF), the image attached as a USB
   stick. The [release notes](https://github.com/albanread/Aldershot/releases/tag/BOX-x64-2026-10-03)
   give the command line.
