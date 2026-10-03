@@ -25,7 +25,7 @@ This article describes:
 
 The first Wimp in BOX was RISC OS 5.88's Window Manager, translated from
 its ObjAsm by ROSASM at tier 1 (see *Tiers of Translation*). It worked,
-and it ran the desktop for several weeks. But the Wimp is where a
+and it ran the desktop until 2 October. But the Wimp is where a
 translation costs the most, and it is the module that every desktop
 program calls most often.
 
@@ -181,7 +181,7 @@ BOX does not make anyone guess. Since 2 October 2026:
   box's real free memory, and the Task Manager shows the memory each
   task is using, not the size of its slot, updated as it changes.
 * **Running out is an error, not a crash.** If the box truly runs out
-  of memory, the program that asked gets a RISC OS error ("Abort on data
+  of memory, the program that asked gets a RISC OS error ("abort on data
   transfer"), and the rest of the desktop carries on.
 
 The RMA and the system heap keep fixed sizes, as on RISC OS, because
