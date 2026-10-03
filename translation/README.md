@@ -56,7 +56,9 @@ is going, offered early — for the joy of it.
 
 ### What it looks like
 
-A hero shot of BOX is coming soon.
+The picture at the top of this page: BOX on an HP i7-12700, booted from a
+USB stick, drawing the Mandelbrot set on nineteen cores with the desktop
+still answering, NetSurf on the web and a PDF open beside it.
 
 ---
 

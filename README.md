@@ -60,7 +60,13 @@ The RISC OS desktop, running in the Mac edition: booted from **HostFS**,
 its disc a folder on the Mac, with **HostNet** passing its networking to
 the Mac's.
 
-A hero shot of BOX will follow soon.
+And BOX, the translated edition, on an ordinary PC:
+
+![RISC OS BOX on my HP i7-12700 with NV T1000 graphics, booted from USB](screenshots/box-on-a-pc.png)
+
+RISC OS BOX on an HP i7-12700 with NVIDIA T1000 graphics, booted from USB —
+the Mandelbrot set drawn by nineteen workers on the spare cores while the
+desktop stays live.
 
 ---
 
