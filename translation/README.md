@@ -141,6 +141,74 @@ computer, with UEFI firmware:
 On an Apple silicon Mac the image runs only under full x86 emulation,
 which is very slow: use BOX for Apple silicon Macs instead.
 
+### QEMU on Windows
+
+Tested on Windows 11 with QEMU 11.1 from the official Windows installer.
+
+1. Download `qemu-w64-setup-*.exe` from
+   [qemu.weilnetz.de/w64](https://qemu.weilnetz.de/w64/), the build linked
+   from [qemu.org](https://www.qemu.org/download/#windows), and run it. The
+   default folder is `C:\Program Files\qemu`; the commands below assume it.
+   The installer includes the OVMF firmware in its `share` folder.
+2. Turn on **Windows Hypervisor Platform** (*Turn Windows features on or
+   off*) and restart. Without it, use `-accel tcg`, which works but is slow.
+3. Unpack the image. Windows has no `xz`, so use 7-Zip, or `xz` from MSYS2:
+
+   ```
+   xz -dk BOX-x64-2026-10-03.img.xz
+   ```
+
+4. In PowerShell, in the folder holding the image:
+
+   ```powershell
+   $q = 'C:\Program Files\qemu'
+   Copy-Item "$q\share\edk2-i386-vars.fd" box-vars.fd
+   & "$q\qemu-system-x86_64.exe" -machine q35 -accel whpx -cpu qemu64 -smp 4 -m 4G `
+     -drive "if=pflash,format=raw,readonly=on,file=$q\share\edk2-x86_64-code.fd" `
+     -drive if=pflash,format=raw,file=box-vars.fd `
+     -drive if=none,id=stick,format=raw,file=BOX-x64-2026-10-03.img `
+     -device qemu-xhci -device usb-storage,drive=stick `
+     -device usb-kbd -device usb-tablet -vga std -nic user,model=e1000e `
+     -display sdl -audiodev sdl,id=snd -device intel-hda -device hda-output,audiodev=snd
+   ```
+
+   The desktop appears in about 30 seconds, at 1280 × 800, with the
+   network (10.0.2.15, by DHCP) and sound up.
+
+What each part of the command does:
+
+| Option | What it does |
+| --- | --- |
+| `-machine q35` | a modern PC with PCIe, which the image's drivers expect |
+| `-accel whpx` | runs the guest on the real processor through Windows Hypervisor Platform; `-accel tcg` works without it, but slowly |
+| `-cpu qemu64` | a plain 64-bit processor model; not `-cpu host` (see below) |
+| `-smp 4 -m 4G` | 4 processors and 4 GB; BOX uses the spare cores for its Worker jobs, so more of each helps |
+| `-drive if=pflash,...edk2-x86_64-code.fd` | the UEFI firmware, read-only |
+| `-drive if=pflash,...box-vars.fd` | the firmware's settings, a private copy of the template so the original stays clean |
+| `-drive if=none,id=stick,...` with `-device qemu-xhci -device usb-storage,drive=stick` | the image, attached as a USB stick, which is how BOX expects to boot |
+| `-device usb-kbd -device usb-tablet` | keyboard and mouse; the tablet gives an absolute pointer, so the mouse moves in and out of the window freely |
+| `-vga std` | the standard virtual display, which BOX drives at 1280 × 800 |
+| `-nic user,model=e1000e` | wired network on QEMU's built-in NAT, using the Intel e1000e driver BOX has; the guest gets 10.0.2.15 by DHCP |
+| `-display sdl` | the window, drawn by SDL |
+| `-audiodev sdl,id=snd` | sends sound to the Windows default output through SDL |
+| `-device intel-hda -device hda-output,audiodev=snd` | an Intel HD Audio card with a speaker output, which BOX has a driver for |
+
+Three things differ from the Linux and Mac command line:
+
+- Use **`-cpu qemu64`**, not `-cpu host`. With `-accel whpx`, OVMF stops
+  with a general protection fault before the image starts when `-cpu host`
+  is given.
+- Use **`-display sdl`**. With the default GTK window on Windows the screen stays
+  black and the system never starts.
+- For sound use **`-audiodev sdl`** and **`hda-output`**. The `dsound` backend
+  failed to start on the test PC (it also opens a microphone), and the
+  `wav` backend froze QEMU. Leave out the three sound options for a silent
+  machine.
+
+Click inside the window to give it the mouse, and press Ctrl+Alt+G to
+release it. The disc image is written to as you work, so keep a copy of
+the unpacked `.img` if you want to start again from a clean disc.
+
 ---
 
 ## BOX on an Apple silicon Mac
