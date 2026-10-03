@@ -163,10 +163,13 @@ A port is tested by using it, and by comparing it with RISC OS 5.30:
 | Application | What it took |
 | --- | --- |
 | Edit, Draw, Paint | recompiled from RISC OS's sources by the common build; now in the ROM |
-| PipeDream 4.63 | the original C recompiled, with reconstructed headers and three source changes |
+| PipeDream 4.63 | the original C recompiled, with reconstructed headers and three source changes; **still being debugged** |
 | SparkFS | all of its C unchanged; four patches; one ObjAsm file per component rewritten in C |
 | ChangeFSI | its BASIC kept, with two patches; its ARM routines and its JPEG and PNG readers rewritten as a C module |
 | StrongED | written in ARM assembler, so reimplemented in C from a specification rather than ported |
 
 In each case most of the work went on the assembler, the `!Run` file
 and testing, not on the C.
+
+PipeDream is still being debugged: it runs, but it is not yet finished,
+and some of its features may not work as they should.
