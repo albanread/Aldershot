@@ -80,8 +80,8 @@ one instruction at a time. Nothing is guessed. An instruction the
 compiler cannot model is reported as an error at that source line.
 
 It follows that tier 0 code is only as good as the translator. **Every
-bug in tier 0 code is a translator bug.** If it goes wrong, either the decoder or the assembler front end has
-got an instruction wrong. Two such bugs were found in rosasm's FPA
+bug in tier 0 code is a translator bug.** If it goes wrong, either the
+decoder or the assembler front end has got an instruction wrong. Two such bugs were found in rosasm's FPA
 handling: every FPA compare was counted as two words, so every label after
 one was four bytes out (SharedCLibrary was among the victims), and
 post-indexed transfers such as `LFM f4, 4, [sp], #48` lost their offset
