@@ -34,4 +34,7 @@ Downloads are on the [Releases page](https://github.com/albanread/Aldershot/rele
 ## Standing on
 
 **[RISC OS Open Ltd](https://www.riscosopen.org)** make RISC OS 5 and
-publish it as open source. The system the BOX translates is theirs.
+publish it as open source. The system the BOX translates is theirs, as
+is everything the BOX translates: no ownership is claimed over any
+work translated to C. Every original author's licence is respected,
+and where one asks for more, the component keeps its upstream terms.
