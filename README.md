@@ -28,6 +28,7 @@ Downloads are on the [Releases page](https://github.com/albanread/Aldershot/rele
 
 - **BOX x64** — boots from a USB stick on a 64-bit PC.
 - **BOX for Apple silicon Macs** — in a window on the Mac.
+- **BOX for Intel Macs** — in a window on an Intel Mac (macOS 14 or later), signed and notarized, with its own QEMU inside.
 
 ---
 
