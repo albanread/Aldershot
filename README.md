@@ -36,8 +36,8 @@ Xcode. Both are early-days previews.
 
 | Release | For | Download |
 | --- | --- | --- |
-| [BOX for Apple silicon Macs](https://github.com/albanread/Aldershot/releases/tag/BOX-arm64-mac-2026.10.05) | macOS 14 or later, M1 or later | `BOX-arm64-mac-2026.10.05.dmg`, 170 MB |
-| [BOX for Intel Macs](https://github.com/albanread/Aldershot/releases/tag/BOX-x64-mac-2026.10.05) | macOS 14 or later, an Intel Mac | `BOX-x64-mac-2026.10.05.dmg`, 174 MB |
+| [BOX for Apple silicon Macs](https://github.com/albanread/Aldershot/releases/tag/BOX-arm64-mac-2026.10.06) | macOS 14 or later, M1 or later | `BOX-arm64-mac-2026.10.06.dmg`, 167 MB |
+| [BOX for Intel Macs](https://github.com/albanread/Aldershot/releases/tag/BOX-x64-mac-2026.10.06) | macOS 14 or later, an Intel Mac | `BOX-x64-mac-2026.10.06.dmg`, 172 MB |
 
 * **Installing.** Open the disk image, drag BOX to Applications, and
   open it.
