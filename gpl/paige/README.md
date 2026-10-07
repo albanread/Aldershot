@@ -1,17 +1,9 @@
-# Paige (and !Write)
+# Paige and !Write
 
-!Write's text engine is Paige (GNU LGPL 2.1), from
-[HERMES-Paige](https://github.com/nmatavka/HERMES-Paige) at commit **cddd954**,
-with the BOX's changes as one patch:
+Paige (GNU LGPL 2.1) is the text engine of !Write. It is [HERMES-Paige](https://github.com/nmatavka/HERMES-Paige) at commit `cddd954`, plus:
 
-* `ports/paige/patches/engine-32bit-and-platform.patch` -- every change the BOX
-  makes to Paige's own files (32-bit and 64-bit fixes, the RTF and HTML codecs,
-  the platform hooks).
-* `ports/paige/rosc/`, `ports/paige/PGPLATFO/` -- the BOX's platform layer for
-  Paige.
-* `ports/paige/build.sh` -- clones Paige at that commit, applies the patch and
-  builds the library.
+- `ports/paige/patches/engine-32bit-and-platform.patch`: all of BOX's changes to Paige.
+- `ports/paige/rosc/`, `ports/paige/PGPLATFO/`: BOX's platform layer.
+- `ports/paige/build.sh`: clones, patches and builds Paige.
 
-!Write is linked with Paige into one program, so its own source is here too, so
-that it can be built again with a changed Paige: `ports/write/` (the BOX's code,
-MIT).
+`ports/write/` is the source of !Write (BOX's code, MIT), which is linked with Paige.
