@@ -28,7 +28,7 @@ Downloads are on the [Releases page](https://github.com/albanread/Aldershot/rele
 
 ### The BOX on a Mac
 
-Two releases of 5 October 2026, one for each kind of Mac. Each is a disk
+Two releases of 7 October 2026, one for each kind of Mac. Each is a disk
 image holding `BOX.app`, signed with a Developer ID and notarized by
 Apple. BOX has its own QEMU inside and uses the Mac's own hypervisor, so
 nothing is emulated and nothing else needs installing: no Homebrew, no
@@ -36,11 +36,16 @@ Xcode. Both are early-days previews.
 
 | Release | For | Download |
 | --- | --- | --- |
-| [BOX for Apple silicon Macs](https://github.com/albanread/Aldershot/releases/tag/BOX-arm64-mac-2026.10.06) | macOS 14 or later, M1 or later | `BOX-arm64-mac-2026.10.06.dmg`, 167 MB |
-| [BOX for Intel Macs](https://github.com/albanread/Aldershot/releases/tag/BOX-x64-mac-2026.10.06) | macOS 14 or later, an Intel Mac | `BOX-x64-mac-2026.10.06.dmg`, 172 MB |
+| [BOX for Apple silicon Macs](https://github.com/albanread/Aldershot/releases/tag/BOX-arm64-mac-2026.10.07) | macOS 14 or later, M1 or later | `BOX-arm64-mac-2026.10.07.dmg`, 399 MB |
+| [BOX for Intel Macs](https://github.com/albanread/Aldershot/releases/tag/BOX-x64-mac-2026.10.07) | macOS 14 or later, an Intel Mac | `BOX-x64-mac-2026.10.07.dmg`, 416 MB |
 
 * **Installing.** Open the disk image, drag BOX to Applications, and
   open it.
+* **The web browser.** !Browser, in Apps, is WebKit -- the engine of
+  Safari -- run as a Linux program inside the box and shown in an
+  ordinary RISC OS window, with a toolbar: Back, Forward, Reload, the
+  address and Downloads. Files it cannot show are saved in the Downloads
+  folder on your disc. The box starts with 4 processors and 4 GB.
 * **Your RISC OS disc.** The first time, BOX makes the folder
   "RISC OS BOX" in your home folder. In RISC OS it is the Host disc on
   the icon bar, and what you save there stays there. Hold Option as BOX
@@ -56,7 +61,7 @@ Xcode. Both are early-days previews.
   `~/Library/Logs/RISC OS BOX/console.log`.
 
 What comes with it: the RISC OS desktop and its applications, BBC BASIC,
-NetSurf, StrongED, PipeDream, OvationPro and the ArtWorks viewer, !PDF,
+the web browser, NetSurf, StrongED, PipeDream, OvationPro and the ArtWorks viewer, !PDF,
 Write, a C compiler (clang) and Mojo. The licence of every component is
 in `Documents.Licences` on the disc.
 
