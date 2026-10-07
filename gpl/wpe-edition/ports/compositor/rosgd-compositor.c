@@ -361,6 +361,9 @@ static void server_new_input(struct wl_listener *listener, void *data) {
 	wlr_seat_set_capabilities(server->seat, caps);
 }
 
+/* ROSGD: started by the box (-b): the pointer is RISC OS's */
+static bool ros_box;
+
 static void seat_request_cursor(struct wl_listener *listener, void *data) {
 	struct tinywl_server *server = wl_container_of(
 			listener, server, request_cursor);
@@ -381,7 +384,7 @@ static void seat_pointer_focus_change(struct wl_listener *listener, void *data) 
 	 * client is closed. We set the cursor image to its default if target surface
 	 * is NULL */
 	struct wlr_seat_pointer_focus_change_event *event = data;
-	if (event->new_surface == NULL) {
+	if (event->new_surface == NULL && !ros_box) {
 		wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "default");
 	}
 }
@@ -506,7 +509,7 @@ static void process_cursor_motion(struct tinywl_server *server, uint32_t time) {
 	struct wlr_surface *surface = NULL;
 	struct tinywl_toplevel *toplevel = desktop_toplevel_at(server,
 			server->cursor->x, server->cursor->y, &surface, &sx, &sy);
-	if (!toplevel) {
+	if (!toplevel && !ros_box) {
 		/* If there's no toplevel under the cursor, set the cursor image to a
 		 * default. This is what makes the cursor image appear when you move it
 		 * around the screen, not over any toplevels. */
@@ -981,13 +984,13 @@ static void server_new_xdg_popup(struct wl_listener *listener, void *data) {
  * there, and the Wayland windows are under it.  The output is given the
  * largest whole-number scale at which the screen fits, so that a layout
  * pixel is a RISC OS pixel, and the screen is centred.  RISC OS's pointer
- * is the top node.  No link (an ordinary box), and this does nothing. */
+ * is the output's cursor.  No link (an ordinary box), and this does nothing. */
 
 struct ros_block {
 	uint32_t magic, version, generation, xres, yres, pitch, bpp, pixo;
 	uint32_t xoffset, yoffset;
 	int32_t ptr_x, ptr_y;
-	uint32_t ptr_shown, ptr_shape, ptr_image, reserved;
+	uint32_t ptr_shown, ptr_shape, ptr_image, ptr_hot;
 	uint32_t palette[256];
 };
 
@@ -1062,11 +1065,18 @@ static struct {
 	int width, height;
 	struct pixbuf *buf[2];
 	int shown;
-	struct wlr_scene_buffer *desktop, *pointer;
+	struct wlr_scene_buffer *desktop;
 	uint32_t ptr_shape;
+	int ptr_set;                    /* the cursor has RISC OS's image */
+	int ptr_lx, ptr_ly;             /* and is there, layout */
 	struct wl_event_source *timer;
 	struct ros_ext ext;             /* the last whole table read */
+	struct ros_ext ext_drawn;       /* the table the buffer was made with */
 	int ox, oy;                     /* the desktop's top left, layout */
+	uint8_t *raw;                   /* the RISC OS rows as last converted */
+	size_t raw_size;
+	uint32_t raw_pal[256];
+	unsigned still, tick;           /* power: frames looked at with no change */
 } screen = { .fd = -1 };
 
 static void screen_close(void) {
@@ -1224,7 +1234,10 @@ static int screen_tick(void *data) {
 	wl_event_source_timer_update(screen.timer, 20);
 	if (!screen_open()) {
 		wlr_scene_node_set_enabled(&screen.desktop->node, false);
-		wlr_scene_node_set_enabled(&screen.pointer->node, false);
+		if (screen.ptr_set) {
+			wlr_cursor_unset_image(screen.server->cursor);
+			screen.ptr_set = 0;
+		}
 		return 0;
 	}
 	const struct ros_block *b = (const void *)(screen.map + screen.size - ROS_SCREEN_BLOCK);
@@ -1252,23 +1265,60 @@ static int screen_tick(void *data) {
 	}
 	screen_ext();
 
-	/* the screen into the buffer not on show, opaque but where external
-	 * windows are seen; the rows that changed */
+	/* Only the rows RISC OS changed are converted: each is compared, as
+	 * RISC OS left it, with what it was when last converted.  A new
+	 * window table, a new palette or a new mode is all of it.  Power: a
+	 * screen that has been still for a tenth of a second is compared only
+	 * every fifth tick (ten a second); a change puts it back at fifty for
+	 * as long as changes come.  (The pointer is a node of its own, moved
+	 * every tick whatever this does.) */
+	size_t need = (size_t)b->pitch * h;
+	if (need != screen.raw_size) {
+		free(screen.raw);
+		screen.raw = malloc(need);
+		screen.raw_size = screen.raw ? need : 0;
+		full = true;
+	}
+	if (!screen.raw) {
+		return 0;
+	}
+	if (b->bpp <= 8 && memcmp(screen.raw_pal, b->palette, sizeof(screen.raw_pal)) != 0) {
+		memcpy(screen.raw_pal, b->palette, sizeof(screen.raw_pal));
+		full = true;
+	}
+	if (memcmp(&screen.ext_drawn, &screen.ext, sizeof(screen.ext)) != 0) {
+		screen.ext_drawn = screen.ext;
+		full = true;
+	}
+	screen.tick++;
+	bool look = full || screen.still < 5 || screen.tick % 5 == 0;
+
+	/* the changed rows into the buffer not on show (the rest are the same
+	 * in both), opaque but where external windows are seen */
 	struct pixbuf *next = screen.buf[screen.shown ^ 1], *prev = screen.buf[screen.shown];
 	int first = -1, last = -1;
-	for (int y = 0; y < h; y++) {
+	for (int y = 0; look && y < h; y++) {
+		const uint8_t *src = screen.map + (size_t)(b->yoffset + y) * b->pitch;
+		uint8_t *was = screen.raw + (size_t)y * b->pitch;
+		if (!full && memcmp(was, src, b->pitch) == 0) {
+			continue;
+		}
+		memcpy(was, src, b->pitch);
 		uint32_t *out = next->data + (size_t)y * w;
 		screen_row(b, y, out);
 		for (int x = 0; x < w; x++) {
 			out[x] |= 0xff000000u;
 		}
 		screen_holes(y, out, w);
-		if (full || memcmp(out, prev->data + (size_t)y * w, (size_t)w * 4) != 0) {
-			if (first < 0) {
-				first = y;
-			}
-			last = y;
+		if (first < 0) {
+			first = y;
 		}
+		last = y;
+	}
+	if (first >= 0) {
+		screen.still = 0;
+	} else if (look) {
+		screen.still++;
 	}
 
 	/* where it goes: centred, the output scaled to fit it */
@@ -1286,30 +1336,40 @@ static int screen_tick(void *data) {
 		wlr_scene_buffer_set_buffer_with_damage(screen.desktop, &next->base, &damage);
 		pixman_region32_fini(&damage);
 		screen.shown ^= 1;
-		/* the other buffer now holds the last frame but one: bring it up
-		 * to date, so the next comparison is against what is shown */
-		memcpy(prev->data, next->data, (size_t)w * h * 4);
+		/* the other buffer now holds the last frame but one: its changed
+		 * rows brought up to date, so both are the screen */
+		memcpy(prev->data + (size_t)first * w, next->data + (size_t)first * w,
+			(size_t)(last - first + 1) * w * 4);
 	}
 	wm_place();
 
-	/* the pointer, on top */
+	/* the pointer: the output's cursor, with RISC OS's image and hot
+	 * spot, where RISC OS puts it.  wlroots gives it the card's cursor
+	 * plane if there is one -- virtio-gpu's, which QEMU's window draws
+	 * at the Mac's own mouse -- so a move redraws nothing; else it is
+	 * drawn over the frame, as the desktop's node was */
+	struct wlr_cursor *cursor = screen.server->cursor;
 	if (b->ptr_shown && b->ptr_image &&
 			b->ptr_image + ROS_POINTER * ROS_POINTER * 4 <= screen.size - ROS_SCREEN_BLOCK) {
-		if (b->ptr_shape != screen.ptr_shape || !screen.pointer->buffer) {
+		int hx = (int)(b->ptr_hot & 0xFFFF), hy = (int)(b->ptr_hot >> 16);
+		if (b->ptr_shape != screen.ptr_shape || !screen.ptr_set) {
 			struct pixbuf *p = pixbuf_new(ROS_POINTER, ROS_POINTER, DRM_FORMAT_ARGB8888);
 			if (p) {
 				memcpy(p->data, screen.map + b->ptr_image, ROS_POINTER * ROS_POINTER * 4);
-				wlr_scene_buffer_set_buffer(screen.pointer, &p->base);
+				wlr_cursor_set_buffer(cursor, &p->base, hx, hy, 1.0f);
 				wlr_buffer_drop(&p->base);
 				screen.ptr_shape = b->ptr_shape;
+				screen.ptr_set = 1;
 			}
 		}
-		wlr_scene_node_set_enabled(&screen.pointer->node, true);
-		wlr_scene_node_set_position(&screen.pointer->node, ox + b->ptr_x, oy + b->ptr_y);
-		wlr_scene_buffer_set_dest_size(screen.pointer, ROS_POINTER, ROS_POINTER);
-		wlr_scene_node_raise_to_top(&screen.pointer->node);
-	} else {
-		wlr_scene_node_set_enabled(&screen.pointer->node, false);
+		int lx = ox + b->ptr_x + hx, ly = oy + b->ptr_y + hy;
+		if (lx != screen.ptr_lx || ly != screen.ptr_ly) {
+			wlr_cursor_warp(cursor, NULL, lx, ly);
+			screen.ptr_lx = lx, screen.ptr_ly = ly;
+		}
+	} else if (screen.ptr_set) {
+		wlr_cursor_unset_image(cursor);
+		screen.ptr_set = 0;
 	}
 	return 0;
 }
@@ -1750,8 +1810,6 @@ static void screen_start(struct tinywl_server *server) {
 	screen.desktop = wlr_scene_buffer_create(&server->scene->tree, NULL);
 	wlr_scene_buffer_set_filter_mode(screen.desktop, WLR_SCALE_FILTER_NEAREST);
 	wm_popups = wlr_scene_tree_create(&server->scene->tree);
-	screen.pointer = wlr_scene_buffer_create(&server->scene->tree, NULL);
-	wlr_scene_buffer_set_filter_mode(screen.pointer, WLR_SCALE_FILTER_NEAREST);
 	screen.timer = wl_event_loop_add_timer(wl_display_get_event_loop(server->wl_display),
 		screen_tick, NULL);
 	wl_event_source_timer_update(screen.timer, 20);
@@ -1762,16 +1820,21 @@ int main(int argc, char *argv[]) {
 	bool box = false;
 
 	int c;
-	while ((c = getopt(argc, argv, "bs:h")) != -1) {
+	while ((c = getopt(argc, argv, "bps:h")) != -1) {
 		switch (c) {
 		case 'b':
 			box = true;
+			break;
+		case 'p':
+			/* ROSGD: the pointer drawn into the frame -- for a card
+			 * whose host shows no cursor plane (VZ's) */
+			setenv("WLR_NO_HARDWARE_CURSORS", "1", 1);
 			break;
 		case 's':
 			startup_cmd = optarg;
 			break;
 		default:
-			printf("Usage: %s [-b] [-s startup command]\n", argv[0]);
+			printf("Usage: %s [-b] [-p] [-s startup command]\n", argv[0]);
 			return 0;
 		}
 	}
@@ -1782,6 +1845,7 @@ int main(int argc, char *argv[]) {
 	/* ROSGD: -b, as the box starts it (WaylandWindows, through wperun -d):
 	 * the display device its own, no seat manager, no libinput (input is
 	 * RISC OS's), the CPU renderer until G5's GL ES; its log in /run */
+	ros_box = box;
 	if (box) {
 		setenv("WLR_BACKENDS", "drm", 0);
 		setenv("WLR_RENDERER", "pixman", 0);

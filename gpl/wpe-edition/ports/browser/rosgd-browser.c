@@ -14,11 +14,22 @@
  * The compositor tells WaylandWindows each window's client's process id,
  * and a socket under that pid says the window is a browser's.
  *
- * Lines from RISC OS:  go URL, back, forward, reload, stop, scrollto Y
+ * Lines from RISC OS:  go URL, back, forward, reload, stop, scrollto Y,
+ *                      state, newwindow [URL], find TEXT, findnext,
+ *                      findprev, findstop, zoom PERCENT, save [URI]
  * Lines to RISC OS:    url URL, title TEXT, nav CANBACK CANFORWARD,
  *                      load started|finished, progress PERCENT,
  *                      download started|done|failed NAME,
- *                      scroll Y HEIGHT VIEWHEIGHT
+ *                      scroll Y HEIGHT VIEWHEIGHT, zoom PERCENT, error TEXT,
+ *                      hit CONTEXT, hitlink URI, hitimage URI,
+ *                      find found|notfound
+ *
+ * A window of its own is a program of its own: the socket is named after
+ * the pid and RISC OS gives each socket its own toolbar, so newwindow --
+ * and a page's own window.open or target="_blank" -- runs this program
+ * again.  What is under the pointer (hit, hitlink, hitimage) is sent as it
+ * changes, so that RISC OS can build a menu from it when the Menu button
+ * goes down without asking anything of the page (design 23 section 5).
  *
  * The page's own scroll bars are hidden (a user style sheet): the window's
  * scroll bar is RISC OS's, the Wimp's, which WaylandWindows keeps in step
@@ -62,6 +73,17 @@ static size_t inlen;
  * after it (the page loads before the window is made, so its first
  * reports go to nobody) */
 static char last_scroll[64];
+/* the address last asked for, or the page's own once it has one: WebKit
+ * forgets a page's address when its web process dies (and one that dies
+ * before its load commits never had one), so this is what the window shows
+ * then, and what Reload loads */
+static char *wanted;
+
+static void want(const char *u)
+{
+    g_free(wanted);
+    wanted = g_strdup(u);
+}
 
 /* ---- to RISC OS ----------------------------------------------------------- */
 
@@ -95,9 +117,15 @@ static void say_state(void)
 {
     const char *uri = webkit_web_view_get_uri(view);
     const char *title = webkit_web_view_get_title(view);
+    if (!uri || !*uri)
+        uri = wanted;
     say("url %s", uri ? uri : "");
     say("title %s", title && *title ? title : (uri ? uri : "Browser"));
     say("nav %d %d", webkit_web_view_can_go_back(view), webkit_web_view_can_go_forward(view));
+    say("zoom %d", (int)(webkit_web_view_get_zoom_level(view) * 100 + 0.5));
+    /* RISC OS connects after the first load has begun, and again after a
+     * *Desktop: without this the Stop button never comes out of its shade */
+    say("load %s", webkit_web_view_is_loading(view) ? "started" : "finished");
     if (last_scroll[0])
         say("scroll %s", last_scroll);
 }
@@ -109,6 +137,8 @@ static void title_changed(GObject *o, GParamSpec *p, gpointer d)
     (void)o, (void)p, (void)d;
     const char *title = webkit_web_view_get_title(view);
     const char *uri = webkit_web_view_get_uri(view);
+    if (!uri || !*uri)
+        uri = wanted;
     const char *t = title && *title ? title : (uri ? uri : "Browser");
     WPEToplevel *top = wpe_view_get_toplevel(webkit_web_view_get_wpe_view(view));
     if (top)
@@ -120,6 +150,10 @@ static void uri_changed(GObject *o, GParamSpec *p, gpointer d)
 {
     (void)o, (void)p, (void)d;
     const char *uri = webkit_web_view_get_uri(view);
+    if (uri && *uri)
+        want(uri);
+    else
+        uri = wanted;
     say("url %s", uri ? uri : "");
     say("nav %d %d", webkit_web_view_can_go_back(view), webkit_web_view_can_go_forward(view));
 }
@@ -238,6 +272,173 @@ static void download_started(WebKitNetworkSession *s, WebKitDownload *dl, gpoint
     g_signal_connect(dl, "failed", G_CALLBACK(download_failed), NULL);
 }
 
+/* ---- why a page did not come ------------------------------------------------- */
+
+/* GLib quotes a name with U+201C and U+201D, which RISC OS's desktop font
+ * (Latin-1) shows as three odd characters each.  Those four quotes become
+ * the plain ones; the rest is left as it is. */
+static const char *plain(const char *m)
+{
+    static char out[256];
+    size_t n = 0;
+    for (const unsigned char *p = (const unsigned char *)m; *p && n < sizeof out - 1; p++) {
+        if (p[0] == 0xE2 && p[1] == 0x80 && (p[2] == 0x9C || p[2] == 0x9D)) {
+            out[n++] = '"', p += 2;
+        } else if (p[0] == 0xE2 && p[1] == 0x80 && (p[2] == 0x98 || p[2] == 0x99)) {
+            out[n++] = '\'', p += 2;
+        } else {
+            out[n++] = (char)*p;
+        }
+    }
+    out[n] = 0;
+    return out;
+}
+
+/* WEBKIT_LOAD_FINISHED is sent even when a load failed, so without this a
+ * mistyped address simply blanks the status line and leaves the window as
+ * it was -- and a window of its own has nothing to go back to, which is
+ * the ordinary case, not a corner.
+ *
+ * Three failures are the browser working, not failing: Stop cancels a
+ * load, a download interrupts one every time a zip is fetched, and media
+ * content starts a second load of its own.
+ *
+ * TRUE, so WebKit shows no page of its own: its error page is a load like
+ * any other, and that load's "load started" would wipe the very message
+ * this sends.  The window stays as it was and the status line carries the
+ * reason, which is why that message is a sticky one. */
+static gboolean load_failed(WebKitWebView *v, WebKitLoadEvent e, const char *uri,
+                            GError *err, gpointer d)
+{
+    (void)v, (void)e, (void)d;
+    if (!err)
+        return FALSE;
+    if (g_error_matches(err, WEBKIT_NETWORK_ERROR, WEBKIT_NETWORK_ERROR_CANCELLED) ||
+        g_error_matches(err, WEBKIT_POLICY_ERROR,
+                        WEBKIT_POLICY_ERROR_FRAME_LOAD_INTERRUPTED_BY_POLICY_CHANGE) ||
+        g_error_matches(err, WEBKIT_MEDIA_ERROR, WEBKIT_MEDIA_ERROR_WILL_HANDLE_LOAD))
+        return FALSE;
+    say("error %s", plain(err->message));
+    return TRUE;
+}
+
+/* A certificate that cannot be trusted does not reach load-failed at all,
+ * so it is answered here.  Carrying on anyway is not offered: that wants
+ * a dialogue, and a reader who means it can say so to the site's owner. */
+static gboolean load_failed_tls(WebKitWebView *v, const char *uri, GTlsCertificate *cert,
+                                GTlsCertificateFlags errors, gpointer d)
+{
+    (void)v, (void)uri, (void)cert, (void)d;
+    const char *why = "its certificate cannot be trusted";
+    if (errors & G_TLS_CERTIFICATE_EXPIRED)
+        why = "its certificate has expired";
+    else if (errors & G_TLS_CERTIFICATE_BAD_IDENTITY)
+        why = "its certificate is for another site";
+    else if (errors & G_TLS_CERTIFICATE_NOT_ACTIVATED)
+        why = "its certificate is not valid yet";
+    else if (errors & G_TLS_CERTIFICATE_REVOKED)
+        why = "its certificate has been revoked";
+    else if (errors & G_TLS_CERTIFICATE_UNKNOWN_CA)
+        why = "its certificate is from an authority this box does not know";
+    say("error This site was not shown: %s", why);
+    return TRUE;
+}
+
+/* The page's web process has gone -- crashed, or stopped for its memory.
+ * WebKit says so here and nowhere else: no load-failed, no load finished,
+ * so without this the window waits on "Loading 0%" for ever.  The load is
+ * ended, the address the reader asked for is shown, and the reason goes on
+ * the status line; Reload starts a new web process (command's "reload"). */
+static void process_gone(WebKitWebView *v, WebKitWebProcessTerminationReason r, gpointer d)
+{
+    (void)v, (void)d;
+    const char *why = r == WEBKIT_WEB_PROCESS_EXCEEDED_MEMORY_LIMIT
+                          ? "it wanted more memory than a page is given"
+                      : r == WEBKIT_WEB_PROCESS_TERMINATED_BY_API ? "it was stopped"
+                                                                  : "the program running it failed";
+    fprintf(stderr, "rosgd-browser: the web process has gone (%d): %s\n", (int)r,
+            wanted ? wanted : "");
+    const char *u = webkit_web_view_get_uri(view);
+    if ((!u || !*u) && wanted)
+        say("url %s", wanted);
+    say("load finished");
+    say("error This page stopped: %s. Reload tries it again", why);
+}
+
+/* ---- a window of its own ---------------------------------------------------- */
+
+static void reap(GPid pid, gint status, gpointer d)
+{
+    (void)status, (void)d;
+    g_spawn_close_pid(pid);
+}
+
+/* another browser window: this program again, with the URL if there is
+ * one.  Its own pid gives it its own control socket, which is how RISC OS
+ * knows to give it a toolbar of its own. */
+static void new_window(const char *uri)
+{
+    char *argv[3] = { (char *)"/proc/self/exe", NULL, NULL };
+    if (uri && *uri)
+        argv[1] = (char *)uri;
+    GPid pid;
+    GError *err = NULL;
+    if (g_spawn_async(NULL, argv, NULL, G_SPAWN_DO_NOT_REAP_CHILD, NULL, NULL, &pid, &err))
+        g_child_watch_add(pid, reap, NULL);
+    else {
+        fprintf(stderr, "rosgd-browser: no new window: %s\n", err ? err->message : "?");
+        g_clear_error(&err);
+    }
+}
+
+/* window.open, or a link with target="_blank": a window of its own, which
+ * is a browser of its own.  WebKit is told the view was not made (NULL),
+ * because a handle on another process's view is not one the page could
+ * use; a page that scripts its popup loses that, and gets its window. */
+static WebKitWebView *create_view(WebKitWebView *v, WebKitNavigationAction *act, gpointer d)
+{
+    (void)v, (void)d;
+    WebKitURIRequest *req = act ? webkit_navigation_action_get_request(act) : NULL;
+    const char *uri = req ? webkit_uri_request_get_uri(req) : NULL;
+    new_window(uri && strcmp(uri, "about:blank") ? uri : NULL);
+    return NULL;
+}
+
+/* ---- what is under the pointer ---------------------------------------------- */
+
+/* Sent as it changes, not asked for: a hit test is answered on this side
+ * with no script and no round trip, so RISC OS always has the link and the
+ * image under the pointer ready for a menu (design 23 section 5). */
+static void target_changed(WebKitWebView *v, WebKitHitTestResult *hit, guint mods, gpointer d)
+{
+    (void)v, (void)mods, (void)d;
+    if (!hit) {
+        say("hit 0");
+        return;
+    }
+    say("hit %u", webkit_hit_test_result_get_context(hit));
+    if (webkit_hit_test_result_context_is_link(hit))
+        say("hitlink %s", webkit_hit_test_result_get_link_uri(hit));
+    if (webkit_hit_test_result_context_is_image(hit))
+        say("hitimage %s", webkit_hit_test_result_get_image_uri(hit));
+}
+
+/* ---- finding ---------------------------------------------------------------- */
+
+#define FIND_OPTIONS (WEBKIT_FIND_OPTIONS_CASE_INSENSITIVE | WEBKIT_FIND_OPTIONS_WRAP_AROUND)
+
+static void found_text(WebKitFindController *f, guint n, gpointer d)
+{
+    (void)f, (void)n, (void)d;
+    say("find found");
+}
+
+static void found_nothing(WebKitFindController *f, gpointer d)
+{
+    (void)f, (void)d;
+    say("find notfound");
+}
+
 /* a response the view cannot show (a zip, a disc image) is downloaded */
 static gboolean decide_policy(WebKitWebView *v, WebKitPolicyDecision *dec, WebKitPolicyDecisionType type,
                               gpointer d)
@@ -275,6 +476,7 @@ static void command(char *l)
 {
     if (!strncmp(l, "go ", 3)) {
         char *u = as_uri(l + 3);
+        want(u);
         webkit_web_view_load_uri(view, u);
         g_free(u);
     } else if (!strcmp(l, "back")) {
@@ -282,7 +484,13 @@ static void command(char *l)
     } else if (!strcmp(l, "forward")) {
         webkit_web_view_go_forward(view);
     } else if (!strcmp(l, "reload")) {
-        webkit_web_view_reload(view);
+        /* after a web process died before its page committed there is
+         * nothing to reload: the address asked for is loaded again */
+        const char *u = webkit_web_view_get_uri(view);
+        if ((!u || !*u) && wanted)
+            webkit_web_view_load_uri(view, wanted);
+        else
+            webkit_web_view_reload(view);
     } else if (!strcmp(l, "stop")) {
         webkit_web_view_stop_loading(view);
     } else if (!strcmp(l, "state")) {
@@ -291,6 +499,37 @@ static void command(char *l)
         char js[64];
         snprintf(js, sizeof js, "window.scrollTo(window.scrollX,%d)", atoi(l + 9));
         webkit_web_view_evaluate_javascript(view, js, -1, NULL, NULL, NULL, NULL, NULL);
+    } else if (!strcmp(l, "newwindow")) {
+        new_window(NULL);
+    } else if (!strncmp(l, "newwindow ", 10)) {
+        char *u = as_uri(l + 10);
+        new_window(u);
+        g_free(u);
+    } else if (!strncmp(l, "find ", 5)) {
+        webkit_find_controller_search(webkit_web_view_get_find_controller(view),
+                                      l + 5, FIND_OPTIONS, G_MAXUINT);
+    } else if (!strcmp(l, "findnext")) {
+        webkit_find_controller_search_next(webkit_web_view_get_find_controller(view));
+    } else if (!strcmp(l, "findprev")) {
+        webkit_find_controller_search_previous(webkit_web_view_get_find_controller(view));
+    } else if (!strcmp(l, "findstop")) {
+        webkit_find_controller_search_finish(webkit_web_view_get_find_controller(view));
+    } else if (!strncmp(l, "zoom ", 5)) {
+        int p = atoi(l + 5);
+        if (p < 25)
+            p = 25;
+        if (p > 400)
+            p = 400;
+        webkit_web_view_set_zoom_level(view, p / 100.0);
+        say("zoom %d", p);
+    } else if (!strncmp(l, "save ", 5)) {
+        /* a link or an image RISC OS asked for: through the download
+         * machinery above, so it lands in Downloads and is reported */
+        webkit_web_view_download_uri(view, l + 5);
+    } else if (!strcmp(l, "save")) {
+        const char *u = webkit_web_view_get_uri(view);
+        if (u && *u)
+            webkit_web_view_download_uri(view, u);
     }
 }
 
@@ -389,8 +628,20 @@ int main(int argc, char **argv)
     g_signal_connect(view, "notify::uri", G_CALLBACK(uri_changed), NULL);
     g_signal_connect(view, "notify::estimated-load-progress", G_CALLBACK(progress_changed), NULL);
     g_signal_connect(view, "load-changed", G_CALLBACK(load_changed), NULL);
+    g_signal_connect(view, "load-failed", G_CALLBACK(load_failed), NULL);
+    g_signal_connect(view, "load-failed-with-tls-errors", G_CALLBACK(load_failed_tls), NULL);
     g_signal_connect(view, "decide-policy", G_CALLBACK(decide_policy), NULL);
     g_signal_connect(view, "close", G_CALLBACK(closed), NULL);
+    g_signal_connect(view, "web-process-terminated", G_CALLBACK(process_gone), NULL);
+    g_signal_connect(view, "create", G_CALLBACK(create_view), NULL);
+    g_signal_connect(view, "mouse-target-changed", G_CALLBACK(target_changed), NULL);
+    {   /* the find controller's two answers, if this WebKit has them */
+        WebKitFindController *f = webkit_web_view_get_find_controller(view);
+        if (g_signal_lookup("found-text", G_OBJECT_TYPE(f)))
+            g_signal_connect(f, "found-text", G_CALLBACK(found_text), NULL);
+        if (g_signal_lookup("failed-to-find-text", G_OBJECT_TYPE(f)))
+            g_signal_connect(f, "failed-to-find-text", G_CALLBACK(found_nothing), NULL);
+    }
     scroll_setup();
 
     WPEView *wv = webkit_web_view_get_wpe_view(view);
@@ -399,6 +650,7 @@ int main(int argc, char **argv)
         wpe_toplevel_set_title(top, "Browser");
 
     char *u = as_uri(argc > 1 ? argv[1] : START_PAGE);
+    want(u);
     webkit_web_view_load_uri(view, u);
     g_free(u);
 

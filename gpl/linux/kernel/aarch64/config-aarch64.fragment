@@ -86,6 +86,16 @@ CONFIG_POSIX_TIMERS=y
 CONFIG_SECCOMP=y
 CONFIG_SECCOMP_FILTER=y
 
+
+# ---- Linux programs: the system calls WebKit's allocator and JIT need -------
+# madvise: bmalloc/libpas give memory back with it and trap if it fails, so a
+# heavy page (YouTube) killed its web process the first time the scavenger ran
+# (signal 5, the last call madvise).  membarrier: JavaScriptCore's JIT; rseq:
+# glibc's per-CPU data.  All three are on by default; a tiny config drops them.
+CONFIG_ADVISE_SYSCALLS=y
+CONFIG_MEMBARRIER=y
+CONFIG_RSEQ=y
+
 # ---- Linux programs: sandboxes (design 23 R10) -------------------------------
 # Namespaces, for bubblewrap: WebKit's web and network processes run in its
 # sandbox, and GTK's image loaders (glycin) in theirs.  Each process gets its
@@ -199,3 +209,12 @@ CONFIG_SND_TIMER=y
 CONFIG_SND_PCM=y
 CONFIG_SND_HRTIMER=y
 CONFIG_SND_VIRTIO=y
+
+# ---- power: an idle processor sleeps -----------------------------------------
+# Tickless idle: a processor with nothing to run takes no timer interrupt
+# until it next has work.  The periodic tick woke every processor 250 times a
+# second, each a wake of the host -- the heat and battery of a box doing
+# nothing on a laptop.  High-resolution timers give the timed sleeps their
+# own interrupts.
+CONFIG_NO_HZ_IDLE=y
+CONFIG_HIGH_RES_TIMERS=y

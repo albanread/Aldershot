@@ -145,7 +145,7 @@ libtext-iconv-perl                       1.7-9+b1                         libtex
 libtinfo6                                6.6+20260608-2                   ncurses 6.6+20260608-2
 libudev1                                 262-1                            systemd 262-1
 libunistring5                            1.4.2-1                          libunistring 1.4.2-1
-libvulkan1                               1.4.357.0-1                      vulkan-loader 1.4.357.0-1
+libvulkan1                               1.4.363.0-1                      vulkan-loader 1.4.363.0-1
 libwacom-common                          2.20.0-1                         libwacom 2.20.0-1
 libwacom9                                2.20.0-1                         libwacom 2.20.0-1
 libwayland-client0                       1.26.0-1                         wayland 1.26.0-1
