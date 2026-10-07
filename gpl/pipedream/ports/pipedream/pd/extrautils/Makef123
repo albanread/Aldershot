@@ -1,0 +1,80 @@
+# PipeDream <> Lotus 1-2-3 converters (32-bit)
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# Copyright © 2013-2025 Stuart Swales
+
+URD=$.pipedream4.trunk
+
+#PD=$(URD).pd
+PD=^.pd
+
+CMODULES=$(PD).cmodules
+
+# Toolflags:
+
+# Use current set of 32-bit tools on Run$Path and libraries on C$Path
+
+CC=cc
+# -arch 2 -cpu 3 gives code I prefer to look at e.g. STMs, multiple exit LDMs
+CCflags_BASE=-c -I$(PD) -DRISCOS -DNDEBUG -fa -arch 2 -cpu 3 -throwback
+CCflags=$(CCflags_BASE) -Otime
+#CCflags=$(CCflags_BASE) -g
+
+LD=link
+AOFLinkflags=-aof -o $@ -map
+Linkflags=-aif -o $@ -map
+
+# Final targets:
+lotus-converters:   \
+    @.123PD.Apps.Utilities.!123PD.u_ltp \
+    @.PD123.Apps.Utilities.!PD123.u_ptl
+
+#
+# C modules static dependencies
+#
+@.o.123pd_ltp:      $(CMODULES).c.123pd
+       @%CDir @.o
+        $(CC) -o $@ $(CCflags) -DUTIL_LTP $(CMODULES).c.123pd
+@.o.pd123_ltp:      $(CMODULES).c.pd123
+       @%CDir @.o
+        $(CC) -o $@ $(CCflags) -DUTIL_LTP $(CMODULES).c.pd123
+#
+@.o.123pd_ptl:      $(CMODULES).c.123pd
+       @%CDir @.o
+        $(CC) -o $@ $(CCflags) -DUTIL_PTL $(CMODULES).c.123pd
+@.o.pd123_ptl:      $(CMODULES).c.pd123
+       @%CDir @.o
+        $(CC) -o $@ $(CCflags) -DUTIL_PTL $(CMODULES).c.pd123
+#
+# C modules extra dependencies
+#
+@.o.123pd_ltp:      $(CMODULES).h.pd123    $(CMODULES).pd123.h
+@.o.pd123_ltp:      $(CMODULES).h.pd123    $(CMODULES).pd123.h
+#
+@.o.123pd_ptl:      $(CMODULES).h.pd123    $(CMODULES).pd123.h
+@.o.pd123_ptl:      $(CMODULES).h.pd123    $(CMODULES).pd123.h
+
+@.123PD.Apps.Utilities.!123PD.u_ltp: \
+    @.o.123pd_ltp \
+    @.o.pd123_ltp \
+    C:o.Stubs
+    $(LD) $(Linkflags) \
+    @.o.123pd_ltp \
+    @.o.pd123_ltp \
+    C:o.Stubs
+    Squeeze -v $@
+    Info $@
+
+@.PD123.Apps.Utilities.!PD123.u_ptl: \
+    @.o.123pd_ptl \
+    @.o.pd123_ptl \
+    C:o.Stubs
+    $(LD) $(Linkflags) \
+    @.o.123pd_ptl \
+    @.o.pd123_ptl \
+    C:o.Stubs
+    Squeeze -v $@
+    Info $@

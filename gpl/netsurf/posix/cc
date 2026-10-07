@@ -1,0 +1,3 @@
+#!/bin/sh
+# posix/cc: the C compiler for POSIX applications (posix/cc.py)
+exec python3 "$(dirname "$0")/cc.py" "$@"

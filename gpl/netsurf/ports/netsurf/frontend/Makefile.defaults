@@ -1,0 +1,12 @@
+# NetSurf's native RISC OS front end on ROSGD: its build options (design
+# 22, section 11).  No curl or OpenSSL: http: and https: are URL_Fetcher's.
+
+NETSURF_USE_CURL := NO
+NETSURF_USE_OPENSSL := NO
+NETSURF_USE_RSVG := NO
+NETSURF_USE_NSSVG := NO
+NETSURF_USE_ROSPRITE := NO
+NETSURF_USE_HARU_PDF := NO
+NETSURF_FS_BACKING_STORE := NO
+
+CFLAGS += -O2

@@ -1,0 +1,25 @@
+savestr: each save box entry's name its own buffer (SparkFSApp's c/file).
+
+saveblock[] gives each entry's name as a string literal -- ten of them
+"            " (twelve spaces), the archive types' entries -- and
+setuparctypes() strcpy()s each archive type's name into its entry's.
+Norcroft's code keeps each of those literals apart, and RISC OS lets an
+application write to them, so that works there; clang merges identical literals into one (and puts
+it in read-only data), so every entry's name was the same twelve bytes,
+the last archive type's: the New archive save box offered "Zip" five
+times where RISC OS 5.30 offers Spark file, Spark dir, PK arc, Tar, Zip.
+names is now a 13-byte array in each entry, initialised from the same
+literal: what Norcroft's layout gave each one.
+
+diff -ru a/SparkFSApp/file.c b/SparkFSApp/file.c
+--- a/SparkFSApp/file.c	2026-10-02 09:26:54.815749588 +0100
++++ b/SparkFSApp/file.c	2026-10-02 09:26:54.819417397 +0100
+@@ -118,7 +118,7 @@
+ 
+ typedef struct savestr
+ {
+- char * names;
++ char   names[13];   /* ROSGD: each entry its own (the patch says why) */
+  int    type;
+  extfn  fn;
+ } savestr;

@@ -1,0 +1,67 @@
+| CopyToTemp for PipeDream-Manuals
+|
+| This Source Code Form is subject to the terms of the Mozilla Public
+| License, v. 2.0. If a copy of the MPL was not distributed with this
+| file, You can obtain one at https://mozilla.org/MPL/2.0/.
+|
+| Copyright © 1991-1998 Colton Software Limited
+| Copyright © 1998-2015 R W Colton
+
+| !!! ENSURE EVERYTHING IS CHECKED IN FIRST !!!
+
+| Caller must Set pd$Disc
+If "<pd$Disc>"="" Then Error pd$Disc must be specified
+
+Time
+Echo Starting svn export (local) for docs - please be patient
+svn export <Obey$Dir> <pd$Disc>
+Time
+
+| Repository is all UK at the moment
+%CDir <pd$Disc>.Manuals.PipeDream.UK
+
+| Move the StartGuide docs
+| to where they are expected in this package
+Set pd$StartGuide                               <pd$Disc>.Manuals.PipeDream.UK.StartGuide
+%Rename <pd$Disc>.Manuals.PipeDream.StartGuide  <pd$StartGuide>
+
+| Move the Reference Guide docs
+| to where they are expected in this package
+Set pd$RefGuide                                 <pd$Disc>.Manuals.PipeDream.UK.RefGuide
+%Rename <pd$Disc>.Manuals.PipeDream.RefGuide    <pd$RefGuide>
+
+| HTML files
+SetMacro Alias$coltsoft_SetType_HTM SetType %%0 &FAF
+Repeat         coltsoft_SetType_HTM <pd$RefGuide> -files
+Repeat         coltsoft_SetType_HTM <pd$RefGuide>.content -files
+Repeat         coltsoft_SetType_HTM <pd$RefGuide>.content.functions -files
+Repeat         coltsoft_SetType_HTM <pd$StartGuide> -files
+Repeat         coltsoft_SetType_HTM <pd$StartGuide>.content -files
+Unset    Alias$coltsoft_SetType_HTM
+
+| CSS files
+SetMacro Alias$coltsoft_SetType_CSS SetType %%0 &F79
+               coltsoft_SetType_CSS <pd$RefGuide>.content.guide/css
+               coltsoft_SetType_CSS <pd$StartGuide>.content.tutor/css
+Unset    Alias$coltsoft_SetType_CSS
+
+| PNG files
+SetMacro Alias$coltsoft_SetType_PNG SetType %%0 &B60
+Repeat         coltsoft_SetType_PNG <pd$RefGuide>.content.images -files
+Repeat         coltsoft_SetType_PNG <pd$RefGuide>.content.images.toolbar -files
+Repeat         coltsoft_SetType_PNG <pd$StartGuide>.content.images -files
+Repeat         coltsoft_SetType_PNG <pd$StartGuide>.content.images.toolbar -files
+Unset    Alias$coltsoft_SetType_PNG
+
+| TEXT files
+SetMacro Alias$coltsoft_SetType_TXT SetType %%0 &FFF
+               coltsoft_SetType_TXT <pd$RefGuide>.content.images.LICENCE
+               coltsoft_SetType_TXT <pd$StartGuide>.content.images.LICENCE
+Unset    Alias$coltsoft_SetType_TXT
+
+%Remove <pd$Disc>.Manuals.PipeDream./editorconfig
+| The one in RiscPkg.Copyright is the useful one for the packaged docs
+%Remove <pd$Disc>.RiscPkg.LICENCE
+%Remove <pd$Disc>.LICENCE
+%Remove <pd$Disc>.CopyToTemp
+%Remove <pd$Disc>.MakeRiscPkg

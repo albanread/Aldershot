@@ -1,0 +1,8 @@
+<!doctype html><html><head><meta charset="utf-8"><title>BOX Wayland</title>
+<style>body{font-family:sans-serif;background:linear-gradient(135deg,#1d3557,#457b9d);color:#fff;margin:40px}
+h1{font-size:48px} .box{display:inline-block;padding:20px;margin:10px;border-radius:12px;background:rgba(255,255,255,.15)}</style></head>
+<body><h1>WPE WebKit, over Wayland, in the BOX</h1>
+<p>Drawn by WPE as a Wayland program; composited by wlroots (cage, headless, pixman); captured by grim.</p>
+<div class="box">CSS gradients</div><div class="box">rounded corners</div><div class="box" id="js">JavaScript: no</div>
+<script>document.getElementById('js').textContent='JavaScript: yes, '+navigator.userAgent.split(' ').slice(-2).join(' ');</script>
+</body></html>

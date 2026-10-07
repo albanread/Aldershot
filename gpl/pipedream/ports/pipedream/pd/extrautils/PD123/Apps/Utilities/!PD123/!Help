@@ -1,0 +1,15 @@
+   PD123
+   ~~~~~
+   Purpose: Conversion program for PipeDream files to Lotus 1-2-3 .WK1
+
+   Setup:
+      Icon                    Action/Meaning                       Default
+      ----                    --------------                       -------
+      File                    Name of file to be processed           nil
+                              (typed or dragged).
+
+   This application may also be used from the command line.
+
+   Syntax:
+
+      *u_ptl <infile> <outfile>

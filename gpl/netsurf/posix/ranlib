@@ -1,0 +1,3 @@
+#!/bin/sh
+# posix/ranlib: zig's llvm-ranlib
+exec zig ranlib "$@"

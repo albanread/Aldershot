@@ -1,0 +1,3 @@
+#!/bin/sh
+# posix/ar: the archiver for POSIX applications (zig's llvm-ar)
+exec zig ar "$@"

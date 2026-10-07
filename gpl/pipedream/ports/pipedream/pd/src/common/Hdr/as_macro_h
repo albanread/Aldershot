@@ -1,0 +1,33 @@
+; > common/Hdr/as_macro_h
+
+; This Source Code Form is subject to the terms of the Mozilla Public
+; License, v. 2.0. If a copy of the MPL was not distributed with this
+; file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+; Copyright (C) 1989-1998 Colton Software Limited
+; Copyright (C) 1998-2015 R W Colton
+
+        MACRO
+        NameProc    $name
+        ALIGN
+ [ NAMES
+        DCB         "$name", 0
+        ALIGN
+        DCD         &FF000000 :OR: (((:LEN: "$name") + 1 + 3) :AND: :NOT: 3)
+ ]
+        MEND
+
+        MACRO
+        BeginExternal $name
+        EXPORT        $name
+        NameProc      $name
+$name ; NOROUT
+        MEND
+
+        MACRO
+        BeginInternal $name
+        NameProc      $name
+$name ; NOROUT
+        MEND
+
+        END ; of Hdr:as_macro_h

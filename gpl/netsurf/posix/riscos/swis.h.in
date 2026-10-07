@@ -1,0 +1,61 @@
+/* swis.h -- calling SWIs from C, for POSIX applications (design 22, U-g).
+ *
+ * The generalised SWI call of RISC OS's C library: _swi and _swix take the
+ * SWI's number, a mask saying which registers go in and come out, then the
+ * input registers' values and the output registers' addresses, in register
+ * order.  ROSGD's own (posix/riscos/kernel.c), with the mask as RISC OS's
+ * <swis.h> lays it out, so sources written for it compile unchanged:
+ *
+ *   bits 0-9     R0-R9 are inputs, taken from the arguments in order
+ *   bits 22-31   R9-R0 are outputs (bit 31 is R0), written through the
+ *                arguments that follow the inputs, in register order
+ *   bit 21       the flags are an output, after the registers: N Z C V in
+ *                bits 31-28 of the word written
+ *   bits 16-19   _swi's result: that register, or the flags if 15
+ *   bit 11       a block: the arguments left over go in a block of words,
+ *                and the register in bits 12-15 points to it
+ *
+ *   e = _swix(OS_ReadMonotonicTime, _OUT(0), &t);
+ *   h = _swi(Wimp_Initialise, _INR(0,3) | _RETURN(1), 380, 0x4B534154, "App", 0);
+ *
+ * The SWI names below are RISC OS's, as its build's makehswis generates them
+ * from the OS's headers, then ROSGD's own SWIs from api/defs; this file is
+ * generated from posix/riscos/swis.h.in by posix/riscos/swis.py.
+ */
+#ifndef __swis_h
+#define __swis_h
+
+#include <kernel.h>
+#include <stdarg.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* _swi calls the SWI without the X bit: an error goes to the program's
+ * error handler.  _swix sets it, and returns NULL or the error. */
+extern int _swi(int swi_no, unsigned int mask, ...);
+extern _kernel_oserror *_swix(int swi_no, unsigned int mask, ...);
+extern int _vswi(int swi_no, unsigned int mask, va_list ap);
+extern _kernel_oserror *_vswix(int swi_no, unsigned int mask, va_list ap);
+
+#ifdef __cplusplus
+}
+#endif
+
+#define _FLAGS     0x10         /* for _OUT() and _RETURN(): the flags */
+#define _IN(i)     (1U << (i))
+#define _INR(i, j) (~0U << (i) ^ ~0U << ((j) + 1))
+#define _OUT(i)    ((i) != _FLAGS ? 1U << (31 - (i)) : 1U << 21)
+#define _OUTR(i, j) (~0U >> (i) ^ ~0U >> ((j) + 1))
+#define _BLOCK(i)  (1U << 11 | (unsigned)(i) << 12)
+#define _RETURN(i) ((i) != _FLAGS ? (unsigned)(i) << 16 : 0xFU << 16)
+#define _C         (1U << 29)
+#define _Z         (1U << 30)
+#define _N         (1U << 31)
+
+#define XOS_Bit    (1U << 17)
+
+/* @SWI_NAMES@ */
+
+#endif

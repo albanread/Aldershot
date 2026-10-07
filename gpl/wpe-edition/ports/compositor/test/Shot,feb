@@ -1,0 +1,1 @@
+RunBox HostFS::Host.$.wperun /usr/bin/busybox sh /host/shot.sh

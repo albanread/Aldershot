@@ -84,6 +84,11 @@ The licence of every component of the BOX releases is in
 each of the fifty-odd packages built into it, QEMU in the Mac releases, and the
 web browser's Linux userland, package by package with Debian's copyright files.
 
+The source of the copyleft components -- the GNU GPL and LGPL ones (Linux,
+NetSurf, ksmbd-tools, Paige), and PipeDream (MPL 2.0) and SparkFS (CDDL) -- is in
+[gpl](gpl/README.md): the BOX's ports, patches, build scripts and kernel
+configurations, one folder each, with the upstream versions they start from.
+
 ---
 
 ## Standing on

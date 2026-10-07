@@ -1,0 +1,22 @@
+/* A64X32: AArch64 with ILP32 (design 26); aarch64's types, x32's widths.
+ * ROSGD overlay.  long double is double (-mlong-double-64), as in all of
+ * A64X32's C. */
+#define _Addr int
+#define _Int64 long long
+#define _Reg long long
+
+#define __BYTE_ORDER 1234
+#define __LONG_MAX 0x7fffffffL
+
+#ifndef __cplusplus
+TYPEDEF unsigned wchar_t;
+#endif
+TYPEDEF unsigned wint_t;
+
+TYPEDEF int blksize_t;
+TYPEDEF unsigned int nlink_t;
+
+TYPEDEF float float_t;
+TYPEDEF double double_t;
+
+TYPEDEF struct { long long __ll; long double __ld; } max_align_t;

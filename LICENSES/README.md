@@ -115,3 +115,5 @@ the PC image.
 * **RISC OS**: RISC OS Open's sources,
   [riscosopen.org](https://www.riscosopen.org/content/downloads).
 * The other components: where each file in [box/](box/) says it comes from.
+* **The copyleft components as the BOX builds them** -- its ports, patches,
+  build scripts and kernel configurations: [../gpl](../gpl/README.md).

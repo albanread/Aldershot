@@ -1,0 +1,10 @@
+| Boot file for PD123
+
+If "<PD123$Dir>"="" Then Set PD123$Dir <Obey$Dir>
+
+If "<File$Type_DB0>"="" Then Set File$Type_DB0 LotusWK1
+
+IconSprites <PD123$Dir>.!Sprites
+
+| Syntax: PD123 <infile> <outfile>
+Set Alias$PD123 WimpSlot -min 128k|MRun <PD123$Dir>.u_ptl %%*0

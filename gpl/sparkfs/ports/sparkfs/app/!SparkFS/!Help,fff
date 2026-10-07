@@ -1,0 +1,51 @@
+SparkFS
+=======
+
+David Pilling's SparkFS, from RISC OS Open's sources
+(FileSys/ImageFS/SparkFS), built for this box: archives open as
+directories.  SparkFS, its codecs and this application are in the ROM:
+!SparkFS is in the Apps icon's directory, and archives are typed and
+open with a double-click from the desktop's start.
+
+Double-click !SparkFS, or an archive: SparkFS's icon appears on the
+icon bar, and from then on the Filer shows archives as directories --
+open them, copy files out of them, and for the archives SparkFS writes,
+copy files and directories into them, make directories in them, open and
+save the files in them.
+
+The icon bar icon's menu:
+
+  Info         the program's name, author and version
+  New archive  a save box for a new, empty archive: Spark file, Spark
+               dir, PK arc, Tar or Zip -- drag its icon to a directory
+               viewer (or type a full path and press Return); it opens
+  Archive      the archives open now
+  Choices...   memory, UUcode, the codecs loaded, the archive type and
+               compression method new archives get, the scrap directory
+  Quit         Filer (the application) or FS too (SparkFS as well)
+
+Drop a file on the icon to encode it: a save box offers Compress, GZip,
+UUcode, BtoA, Mime, Boo and DeBoo.  Drop a compressed or encoded file
+(compress, gzip, uuencode, BtoA, BinHex) on it to decode it, where it is.
+
+The archives, by file type:
+
+  Archive  &DDC  Spark, PK arc (written too); ArcFS, LHA (.lzh, .lha),
+                 ARJ, Zoo, StuffIt, PackIt, Compact Pro (read only)
+  Zip      &A91  written too
+  Tar      &C46  written too
+  PackdDir &68E  read only
+  Cabinet  &ABF  read only
+  CPIO     &ABA  read only
+
+*SparkFSCreate <type> <name> makes a new archive: 1 Spark, 3 PK arc,
+4 Zip, 7 Tar.  *SparkFSMethod <type> <method> sets how files copied into
+it are compressed.  *McStuffitMode <mode> chooses what a Mac archive's
+files give: 1 the resource fork, 2 the data fork, 3 both (MacBinary, the
+default), 4 the longer.
+
+Licences: CDDL 1.0 and Apache 2.0, file by file, and the Info-ZIP
+licence for the Zip codec's compression code: the Licences directory
+holds each component's LICENCE.  The sources are RISC OS Open's
+(gitlab.riscosopen.org, RiscOS/Sources/FileSys/ImageFS/SparkFS,
+RiscOS/Sources/Lib/SparkLib and RiscOS/Sources/Apps/SparkFSApp).

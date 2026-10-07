@@ -1,0 +1,32 @@
+| MakeRiscPkg for PipeDream-Examples
+|
+| PipeDream 4 Examples by Colton Software is licensed under a
+| Creative Commons Attribution-ShareAlike 4.0 International License.
+| To view a copy of this license, visit:
+| https://creativecommons.org/licenses/by-sa/4.0/deed.en_GB
+
+| !!! ENSURE EVERYTHING IS CHECKED IN FIRST !!!
+
+Set pd$Release 2023xxyy
+| Remember to update RiscPkg.Control too
+
+Set pd$Disc                                $.Temp.PD4.RiscPkg.PDExamples_<pd$Release>
+IfThere $.Temp             Then Else %CDir $.Temp
+IfThere $.Temp.PD4         Then Else %CDir $.Temp.PD4
+IfThere $.Temp.PD4.RiscPkg Then Else %CDir $.Temp.PD4.RiscPkg
+X %Wipe <pd$Disc> ~cfr~v
+
+Set pd$Zip <pd$Disc>/zip
+%Remove <pd$Zip>
+
+Obey <Obey$Dir>.CopyToTemp
+
+%Dir <pd$Disc>
+zip -9 -q -r <pd$Zip> RiscPkg Apps
+SetType <pd$Zip> &A91
+Info <pd$Zip>
+Unset <pd$Zip>
+%Back
+
+Filer_OpenDir <pd$Disc>
+Unset <pd$Disc>

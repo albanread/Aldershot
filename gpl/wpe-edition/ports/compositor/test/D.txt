@@ -1,0 +1,3 @@
+GCOL 0,0,0,0 : CLG
+FOR i% = 0 TO 40 : GCOL RND(255), RND(255), RND(255) : CIRCLE FILL RND(2560), RND(1600), 40 + RND(160) : NEXT
+COLOUR 255, 255, 255 : PRINT TAB(2, 2); "The RISC OS screen, drawn by BBC BASIC -- the compositor's bottom layer"

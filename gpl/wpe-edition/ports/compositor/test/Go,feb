@@ -1,0 +1,2 @@
+RunBox HostFS::Host.$.wperun /usr/bin/busybox sh /host/build.sh
+RunBox HostFS::Host.$.wperun -d /usr/bin/busybox sh /host/start-all.sh

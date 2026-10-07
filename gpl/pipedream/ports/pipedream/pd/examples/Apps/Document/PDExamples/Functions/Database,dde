@@ -1,0 +1,137 @@
+%OP%VS4.54 (04-Oct-2015), Colton Software, R9200 7500 3900 8299
+%OP%LP*
+%OP%TM4
+%OP%BM4
+%OP%LM5
+%OP%FGHomerton.Medium
+%OP%FX160
+%OP%FY160
+%OP%FS0
+%OP%WC2,1750,360,1252,0,1,0,0
+%CO:A,10,88%%C%%H2%Database Functions Examples
+
+
+
+
+
+
+
+
+
+%C%Function
+DAVG
+DCOUNT
+DCOUNTA
+DMAX
+DMIN
+DSTD
+DSTDP
+DSUM
+DVAR
+DVARP
+%CO:B,9,16%
+
+
+%V%%R%8
+%V%%R%7
+%V%%R%2
+%V%%R%11
+%V%%R%6
+
+
+%C%Input 1
+%C%b4e8
+%C%b4e8
+%C%b4e8
+%C%b4e8
+%C%b4e8
+%C%b4e8
+%C%b4e8
+%C%b4e8
+%C%b4e8
+%C%b4e8
+%CO:C,9,0%
+
+
+%V%%R%5
+%V%%R%12
+%V%%R%7
+%V%%R%9
+%V%%R%17
+
+
+%C%Input 2
+%C%b4e8<11
+%C%b4e8<11
+%C%b4e8<11
+%C%b4e8<16
+%C%b4e8>5
+%C%b4e8<5
+%C%b4e8<5
+%C%b4e8<7
+%C%b4e8>13
+%C%b4e8>13
+%CO:D,9,0%
+
+
+%V%%R%10
+%V%%R%14
+%V%%R%7
+%V%%R%5
+%V%%R%17
+
+
+%C%Input 3
+%C%-
+%C%-
+%C%-
+%C%-
+%C%-
+%C%-
+%C%-
+%C%-
+%C%-
+%C% -
+%CO:E,8,90%
+
+
+%V%%R%13
+%V%%R%19
+%V%%R%1
+%V%%R%7
+%V%%R%1
+
+
+%C%Result
+%V%%R%davg(B4E8,B4E8<11)
+%V%%R%dcount(B4E8,B4E8<11)
+%V%%R%dcounta(B4E8,B4E8<11)
+%V%%R%dmax(B4E8,B4E8<16)
+%V%%R%dmin(B4E8,B4E8>5)
+%V%%R%dstd(B4E8,B4E8<5)
+%V%%R%dstdp(B4E8,B4E8<5)
+%V%%R%dsum(B4E8,B4E8<7)
+%V%%R%dvar(B4E8,B4E8>13)
+%V%%R%dvarp(B4E8,B4E8>13)
+%CO:F,4,0%%CO:G,65,68%
+
+
+
+
+
+
+
+
+
+%L%Summary
+Returns the average of a list of numbers.
+Counts the number of entries in a list satisfying the condition. (Numeric Slots only).
+Counts the number of entries in a list satisfying the condition. (All Slots).
+Returns the maximum value in a list satisfying a condition.
+Returns the minimum value in a list satisfying the condition.
+Returns the population standard deviation of a list satisfying the condition.
+Returns the modified population standard deviation of a list satisfying the condition.
+Sums the values in a list satisfying the condition.
+Returns the population variance of a list satisfying the condition.
+Returns the modified population variance of a list satisfying the condition.
+%CO:H,12,0%

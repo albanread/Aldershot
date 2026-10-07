@@ -1,0 +1,152 @@
+# The ROSGD guest kernel, x86-64: merged over `make tinyconfig`.
+#
+# Everything built in, no modules: the kernel is ROSGD's micro kernel, and
+# it carries exactly what the personality asks of it (RISCOSGrandDesign,
+# design 10) -- a console, a framebuffer, input, a clock, memfd and futexes,
+# files, sockets.  build-kernel.sh names the options that must survive
+# olddefconfig, and fails if one does not.
+
+# ---- the machine ---------------------------------------------------------
+CONFIG_64BIT=y
+CONFIG_SMP=y
+CONFIG_NR_CPUS=8
+CONFIG_ACPI=y
+CONFIG_PCI=y
+CONFIG_PCI_MSI=y
+CONFIG_RTC_CLASS=y
+CONFIG_RTC_DRV_CMOS=y
+
+# ---- what /init needs from the kernel ------------------------------------
+CONFIG_PRINTK=y
+CONFIG_PRINTK_TIME=y
+CONFIG_EARLY_PRINTK=y
+CONFIG_BUG=y
+CONFIG_MULTIUSER=y
+# static musl binary as /init, from an initramfs
+CONFIG_BINFMT_ELF=y
+CONFIG_BLK_DEV_INITRD=y
+CONFIG_RD_GZIP=y
+# /dev, /proc, /sys
+CONFIG_DEVTMPFS=y
+CONFIG_PROC_FS=y
+CONFIG_SYSFS=y
+# the arena: memfd regions and slots mapped at fixed low addresses
+CONFIG_SHMEM=y
+CONFIG_TMPFS=y
+CONFIG_MEMFD_CREATE=y
+# Nothing may be mapped below &4000, where RISC OS's ScratchSpace begins
+# (application space follows at &8000); above it, the arena is the
+# runtime's (design 11).  Pages 0-3 stay unmapped, for null pointers.
+CONFIG_DEFAULT_MMAP_MIN_ADDR=16384
+# the personality lock, I/O pumps and timers
+CONFIG_FUTEX=y
+CONFIG_EPOLL=y
+CONFIG_SIGNALFD=y
+CONFIG_TIMERFD=y
+CONFIG_EVENTFD=y
+
+# ---- Linux programs: OpenSSH's sshd ------------------------------------------
+# setitimer, for its login grace time; seccomp filters, the sandbox of its
+# pre-authentication process (modules/sshd)
+CONFIG_POSIX_TIMERS=y
+CONFIG_SECCOMP=y
+CONFIG_SECCOMP_FILTER=y
+
+# ---- Linux programs: sandboxes (design 23 R10) -------------------------------
+# Namespaces, for bubblewrap: WebKit's web and network processes run in its
+# sandbox, and GTK's image loaders (glycin) in theirs.  Each process gets its
+# own view of the mounts, process ids, IPC, host name and, where asked, the
+# network; with seccomp above, that is the sandbox WebKit expects.  SysV IPC
+# is what an IPC namespace has to separate.
+CONFIG_NAMESPACES=y
+CONFIG_USER_NS=y
+CONFIG_PID_NS=y
+CONFIG_NET_NS=y
+CONFIG_UTS_NS=y
+CONFIG_SYSVIPC=y
+CONFIG_IPC_NS=y
+
+# ---- SMB: LanManFS's shares (cifs, SMB2/3) and the server (ksmbd) -----------
+CONFIG_NETWORK_FILESYSTEMS=y
+CONFIG_CIFS=y
+CONFIG_FILE_LOCKING=y
+CONFIG_SMB_SERVER=y
+CONFIG_NLS=y
+CONFIG_NLS_UTF8=y
+CONFIG_NLS_DEFAULT="utf8"
+
+# ---- console ---------------------------------------------------------------
+CONFIG_TTY=y
+CONFIG_VT=y
+CONFIG_VT_CONSOLE=y
+CONFIG_UNIX98_PTYS=y
+# the serial console: where the runtime reports, and CI reads
+CONFIG_SERIAL_8250=y
+CONFIG_SERIAL_8250_CONSOLE=y
+
+# ---- virtio ----------------------------------------------------------------
+CONFIG_VIRTIO_MENU=y
+CONFIG_VIRTIO=y
+CONFIG_VIRTIO_PCI=y
+CONFIG_HW_RANDOM=y
+CONFIG_HW_RANDOM_VIRTIO=y
+
+# ---- display: screen memory is a DRM dumb buffer ---------------------------
+CONFIG_DRM=y
+CONFIG_DRM_VIRTIO_GPU=y
+# the kernel's own console on the screen until the runtime takes it over
+CONFIG_DRM_FBDEV_EMULATION=y
+CONFIG_FRAMEBUFFER_CONSOLE=y
+
+# ---- input: KeyV and PointerV come from evdev ------------------------------
+CONFIG_INPUT=y
+CONFIG_INPUT_EVDEV=y
+CONFIG_VIRTIO_INPUT=y
+# /init watches /dev/input with inotify for devices that come after it
+# starts (the Input module, platform/input_evdev.c): the PC's USB keyboard
+# is enumerated late on most machines (config-pc.fragment adds USB to
+# this).  tinyconfig leaves inotify out (#41).
+CONFIG_INOTIFY_USER=y
+
+# ---- network: the Internet module's API is Linux's sockets -----------------
+CONFIG_NET=y
+CONFIG_INET=y
+CONFIG_IPV6=y
+CONFIG_UNIX=y
+CONFIG_PACKET=y
+CONFIG_NETDEVICES=y
+CONFIG_NET_CORE=y
+CONFIG_VIRTIO_NET=y
+# The kernel configures the network itself, with ip=dhcp on the command
+# line: no DHCP client in userland, which ROSGD does not have.  The name
+# servers it learns are in /proc/net/pnp, in resolv.conf's format.  It
+# does not renew the lease -- fine for QEMU's user networking, whose
+# addresses never change.
+CONFIG_IP_PNP=y
+CONFIG_IP_PNP_DHCP=y
+
+# ---- files: the boot share, and a disc -------------------------------------
+CONFIG_NET_9P=y
+CONFIG_NET_9P_VIRTIO=y
+CONFIG_9P_FS=y
+CONFIG_BLOCK=y
+CONFIG_VIRTIO_BLK=y
+CONFIG_EXT4_FS=y
+
+# ---- sound: SharedSound's driver, ALSA over QEMU's intel-hda ----------------
+# (the host plays it: -audiodev coreaudio on the Mac, with -device intel-hda
+# and -device hda-output on the machine's line; see run/run-x86_64.sh)
+CONFIG_SOUND=y
+CONFIG_SND=y
+CONFIG_SND_TIMER=y
+CONFIG_SND_PCM=y
+CONFIG_SND_HRTIMER=y
+CONFIG_SND_PCI=y
+CONFIG_SND_HDA_INTEL=y
+CONFIG_SND_HDA_CODEC_REALTEK=y
+# the generic codec parser, which drives QEMU's hda-output codec (Linux has
+# no SND_HDA_CODEC_GENERIC: that line was dropped, as SND_VIRTIOSND was)
+CONFIG_SND_HDA_GENERIC=y
+# virtio-snd (SND_VIRTIO, as the arm64 box's), for a QEMU given
+# -device virtio-sound; the box plays through intel-hda today (#35)
+CONFIG_SND_VIRTIO=y

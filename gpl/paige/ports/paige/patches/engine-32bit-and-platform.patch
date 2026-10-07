@@ -1,0 +1,997 @@
+diff --git a/.gitignore b/.gitignore
+index d5ac763..6d1cc11 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,2 +1,2 @@
+-.aider*
+-.env
++build/
++build-mac/
+diff --git a/PGHEADER/CPUDEFS.H b/PGHEADER/CPUDEFS.H
+index b9f6863..f109628 100644
+--- a/PGHEADER/CPUDEFS.H
++++ b/PGHEADER/CPUDEFS.H
+@@ -326,6 +326,8 @@ some each compiler seems to interpret differently.  */
+ 
+ #define HAIKU_1				0x03000001	/* Haiku OS */
+ #define MAX_HAIKU_OS		HAIKU_1
++#define RISCOS_5			0x04000001	/* RISC OS 5 (the ROSGD Box) */
++#define MAX_RISCOS_OS		RISCOS_5
+ 
+ /* Graphic Configurations */
+ 
+@@ -353,6 +355,7 @@ some each compiler seems to interpret differently.  */
+ 
+ #define COREGRAPHICS_QUARTZ	0x02000001	/* macOS Core Graphics/Core Text */
+ #define HAIKU_INTERFACE_KIT	0x03000001	/* Haiku Interface Kit */
++#define RISCOS_WIMP			0x04000001	/* RISC OS: the Wimp and OS_Plot */
+ 
+ #define MACINTOSH_OS		1
+ #define WINDOWS_OS			2
+@@ -360,6 +363,7 @@ some each compiler seems to interpret differently.  */
+ #define OS2_OS				4
+ #define MACOS_OS			5
+ #define HAIKU_OS			6
++#define RISCOS_OS			7
+ 
+ /* Paige configuration constants */
+ 
+@@ -420,6 +424,16 @@ some each compiler seems to interpret differently.  */
+ #define CURRENT_OS			HAIKU_OS
+ #endif
+ 
++/* RISC OS 5 on the ROSGD Box: the Wimp for graphics, OS_Byte-style
++   everything else.  The port lives in PGPLATFO/PGROSC.C. */
++
++#ifdef ROSC_COMPILE
++#define PAIGE_PLATFORM		OTHER_RISC
++#define PAIGE_OS			RISCOS_5
++#define PAIGE_GRAPHICS		RISCOS_WIMP
++#define CURRENT_OS			RISCOS_OS
++#endif
++
+ 
+ /* General platform identifications for character set mapping: */
+ 
+@@ -430,6 +444,7 @@ some each compiler seems to interpret differently.  */
+ #define GENERAL_OS2				0x01000000	/* OS/2, all versions */
+ #define GENERAL_MACOS			0x02000000	/* Modern macOS */
+ #define GENERAL_HAIKU			0x03000000	/* Haiku OS */
++#define GENERAL_RISCOS			0x04000000	/* RISC OS */
+ 
+ /* Which platform */
+ #ifdef MAC_COMPILE
+@@ -456,6 +471,9 @@ some each compiler seems to interpret differently.  */
+ #ifdef HAIKU_COMPILE
+ #define GENERAL_PLATFORM		GENERAL_HAIKU
+ #endif
++#ifdef ROSC_COMPILE
++#define GENERAL_PLATFORM		GENERAL_RISCOS
++#endif
+ 
+ #define pgFromThisPlatform(platform)	((platform & GENERAL_PLATFORM_MASK) == GENERAL_PLATFORM)
+ 
+diff --git a/PGHEADER/PAIGE.H b/PGHEADER/PAIGE.H
+index a6a070f..19a54d8 100644
+--- a/PGHEADER/PAIGE.H
++++ b/PGHEADER/PAIGE.H
+@@ -1016,8 +1016,18 @@ typedef draw_points PG_FAR *draw_points_ptr;
+ 
+ /* Text style run record */
+ 
++/* ROSC_PLATFORM: text offsets are signed, as DataPak wrote them -- the
++64-bit pass made them size_t, and the engine's arithmetic on them (an
++offset less one, compared) went unsigned with it.  On an ILP32 target long
++and size_t are the same size, so nothing moves. */
++#if defined(ROSC_PLATFORM) && !defined(__cplusplus)
++typedef long pg_text_offset;		/* (C++, the PGTXR codecs: size_t, the same size) */
++#else
++typedef size_t pg_text_offset;
++#endif
++
+ struct style_run {
+-	size_t		offset;			/* Absolute text offset */
++	pg_text_offset	offset;			/* Absolute text offset */
+ 	pg_short_t	style_item;		/* Index to style records */
+ };
+ 
+@@ -1085,8 +1095,8 @@ typedef tab_stop PG_FAR *tab_stop_ptr;	/* "FAR" pointer for tab record */
+ /* Pair defining a selection range:  */
+ 
+ struct select_pair {
+-	size_t		begin;				/* Beginning offset of some text portion */
+-	size_t		end;				/* Ending offset of some text portion */
++	pg_text_offset	begin;				/* Beginning offset of some text portion */
++	pg_text_offset	end;				/* Ending offset of some text portion */
+ };
+ 
+ typedef struct select_pair select_pair;
+@@ -1108,7 +1118,7 @@ typedef pg_kb_data PG_FAR *pg_kb_ptr;
+ /* Text selection point record (defines "caret" or visual selection points): */
+ 
+ struct t_select {
+-	size_t				offset;				/* Absolute text offset */
++	pg_text_offset		offset;				/* Absolute text offset */
+ 	select_pair			word_offsets;		/* Original word offsets if applicable */
+ 	co_ordinate			original_pt;		/* Original point of selection */
+ 	pg_short_t			line;				/* Point start number */
+diff --git a/PGHEADER/PGEXCEPS.H b/PGHEADER/PGEXCEPS.H
+index 1341bdd..958a11d 100644
+--- a/PGHEADER/PGEXCEPS.H
++++ b/PGHEADER/PGEXCEPS.H
+@@ -31,7 +31,7 @@ development for Windows (when users use pure MFC their compiler complains about
+ #include "CPUDEFS.H"
+ #include "PGSETJMP.H"
+ 
+-#if !defined(POSIX_PLATFORM) || !defined(__cplusplus)
++#if !defined(POSIX_PLATFORM) || !defined(__cplusplus) || defined(ROSC_PLATFORM)
+ #include <setjmp.h>
+ #ifdef _INC_SETJMP
+ #ifdef WIN16_COMPILE
+@@ -46,13 +46,15 @@ struct pg_fail_info
+ {
+ 	pg_fail_info_ptr	next;			/* Pointer to next handler	*/
+ 	pg_error_handler	handler;		/* Optional error handler proc */
+-#if !defined(POSIX_PLATFORM) || !defined(__cplusplus)
++#if !defined(POSIX_PLATFORM) || !defined(__cplusplus) || defined(ROSC_PLATFORM)
+ 	jmp_buf				regs;			/* This is machine and environment specific but C takes care of it */
+ #endif
+ };
+ 
+ 
+-#if defined(POSIX_PLATFORM) && defined(__cplusplus)
++/* ROSC_PLATFORM: C++ (the PGTXR codecs) uses setjmp too -- the box has no
++C++ exception runtime, and the engine, C, fails by longjmp */
++#if defined(POSIX_PLATFORM) && defined(__cplusplus) && !defined(ROSC_PLATFORM)
+ 
+ struct pg_cpp_failure
+ {
+diff --git a/PGHEADER/PGHTMDEF.H b/PGHEADER/PGHTMDEF.H
+index 69c33b7..0910588 100644
+--- a/PGHEADER/PGHTMDEF.H
++++ b/PGHEADER/PGHTMDEF.H
+@@ -19,7 +19,11 @@
+ #define DATA_COMMAND			3
+ #define TABLE_DATA_COMMAND		4
+ 
++#ifdef ROSC_PLATFORM
++#define DEF_POINT_LEVEL			3	/* ROSGD: HTML's own default size, 3: 12 point */
++#else
+ #define DEF_POINT_LEVEL			2
++#endif
+ #define DEFLIST_INDENT_VALUE	36
+ #define LINE_BREAK_EXTRA		12
+ 
+@@ -41,7 +45,17 @@
+ 
+ #endif
+ 
+-#ifdef POSIX_PLATFORM
++#ifdef ROSC_PLATFORM
++
++/* ROSGD: the Font Manager's fixed pitch, as pg_chars (a C literal is bytes) */
++static pg_char rosc_fixed_font[] = { (pg_char)'C', (pg_char)'o', (pg_char)'r', (pg_char)'p',
++	(pg_char)'u', (pg_char)'s', 0 };
++#define PRETAG_DEF_FONT rosc_fixed_font
++#define CODETAG_DEF_FONT rosc_fixed_font
++#define PRETAG_DEF_POINTSIZE 10
++#define CODETAG_DEF_POINTSIZE 9
++
++#elif defined(POSIX_PLATFORM)
+ 
+ #ifdef __cplusplus
+ inline pg_char PRETAG_DEF_FONT_VALUE[] = {
+diff --git a/PGHEADER/PGMTRAPS.H b/PGHEADER/PGMTRAPS.H
+index 5b160a3..40c90bc 100644
+--- a/PGHEADER/PGMTRAPS.H
++++ b/PGHEADER/PGMTRAPS.H
+@@ -122,4 +122,45 @@ platform.  */
+ 
+ #endif
+ 
++
++#ifdef ROSC_PLATFORM
++
++#include <stdlib.h>
++#include <string.h>
++
++#define MASTER_ENTRY_SIZE	sizeof(memory_ref)
++#define MASTER_ENTRY_NULL	MEM_NULL
++#define SPARE_TIRE_SIZE		0x00000400
++
++/* roscmem.c: refs are cells; blocks move, cells do not */
++extern void PG_FAR *rosc_alloc(long size);
++extern void PG_FAR *rosc_alloc_clear(long size);
++extern void PG_FAR *rosc_block_of(void PG_FAR *ref);
++extern long rosc_memsize(void PG_FAR *ref);
++extern void PG_FAR *rosc_resize_err(void PG_FAR *ref, long size, void PG_FAR *err);
++extern void rosc_free(void PG_FAR *ref);
++extern void PG_FAR *rosc_ref_of(void PG_FAR *block);
++
++#define pgMemoryPtr(ref) (mem_rec_ptr)rosc_block_of((void PG_FAR *)(ref))
++#define pgFreePtr(ref)
++#define pgAllocMemory(bytesize) (generic_var)rosc_alloc((long)(bytesize))
++#define pgAllocMemoryClear(bytesize) (generic_var)rosc_alloc_clear((long)(bytesize))
++#define pgLockMemory(ref)
++#define pgLockMemoryHi(ref)
++#define pgUnlockMemory(ref)
++#define pgResizeMemory(globals, ref, bytesize) { \
++	void PG_FAR *rosc_new = rosc_resize_err((void PG_FAR *)(ref), (long)(bytesize), &(globals)->last_error); \
++	(void)rosc_new; \
++	}
++#define pgMemorySize(ref) (long)rosc_memsize((void PG_FAR *)(ref))
++#define pgFreeMemory(ref) rosc_free((void PG_FAR *)(ref))
++#define pgMemoryError(globals) ((globals)->last_error)
++#define pgRecoverMemory(ptr) (memory_ref)rosc_ref_of((void PG_FAR *)(ptr))
++#define Debugger()
++#define DebugStr(s)
++#define ExitToShell() abort()
++#define BlockMove(src, dest, size) memcpy((dest), (src), (size))
++
+ #endif
++
++#endif /* PGMTRAPS_H */
+diff --git a/PGHEADER/PGRTFDEF.H b/PGHEADER/PGRTFDEF.H
+index 0a0749e..c325319 100644
+--- a/PGHEADER/PGRTFDEF.H
++++ b/PGHEADER/PGRTFDEF.H
+@@ -167,6 +167,8 @@ enum {
+ 	underline_command,
+ 	dotted_underline_command,
+ 	double_underline_command,
++	ulnone_command,		/* ROSGD: \ulnone (RTF 1.5 on) ends underlining -- in the
++						   table's alphabetical place, which the matcher relies on */
+ 	word_underline_command,
+ 	superscript_command,
+ 	invis_text_command,
+diff --git a/PGPLATFO/PGMEMMGR.C b/PGPLATFO/PGMEMMGR.C
+index 6cf82a8..6614998 100644
+--- a/PGPLATFO/PGMEMMGR.C
++++ b/PGPLATFO/PGMEMMGR.C
+@@ -66,7 +66,7 @@ static pg_boolean quick_ref_check (memory_ref ref);
+ static void extend_master_list (pgm_globals_ptr mem_globals);
+ static void unuse_all_memory (pgm_globals_ptr mem_globals, long memory_id, pg_boolean failed_unuse);
+ static void dispose_all_memory (pgm_globals_ptr mem_globals, long memory_id, pg_boolean dispose_failed);
+-static void resize_purged_memory (memory_ref ref);
++static void resize_purged_memory (pgm_globals_ptr globals, memory_ref ref);
+ 
+ 
+ #ifdef PG_DEBUG
+@@ -158,7 +158,7 @@ PG_PASCAL (void) pgMemShutdown (pgm_globals_ptr mem_globals)
+ 
+ 		master_qty = GetHandleSize(mem_globals->master_handle) / sizeof(memory_ref);
+ 		HLock(mem_globals->master_handle);
+-		master_list = (master_list_ptr)*(mem_globals->master_handle);
++		master_list = (master_list_ptr)*(void **)mem_globals->master_handle;
+ 		
+ 		while (master_qty) {
+ 			
+@@ -180,6 +180,20 @@ PG_PASCAL (void) pgMemShutdown (pgm_globals_ptr mem_globals)
+ 
+ #endif
+ 
++#ifdef ROSC_PLATFORM
++
++	if (mem_globals->spare_tire)
++		rosc_free(mem_globals->spare_tire);
++	
++	if (mem_globals->master_handle)
++		rosc_free(mem_globals->master_handle);
++	/* the refs themselves are the app's and the engine's to dispose; the
++	 * POSIX build's DisposeMemory leaves master entries non-NULL, so a
++	 * walk here would free twice */
++
++#endif
++
++
+ #ifdef WINDOWS_PLATFORM
+ 
+ 	if (mem_globals->spare_tire)
+@@ -650,8 +664,15 @@ PG_PASCAL (pg_handle) DetachMemory (memory_ref ref)
+ 	globals->total_unpurged -= real_bytesize;
+ 
+ #ifdef MAC_PLATFORM
+-	ref_storage = (master_list_ptr) *(globals->master_handle);
++	ref_storage = (master_list_ptr) *(void **)globals->master_handle;
++	ref_storage += storage_index;
++#endif
++
++#ifdef ROSC_PLATFORM
++	ref_storage = (master_list_ptr) *(void **)globals->master_handle;
+ 	ref_storage += storage_index;
++	if ((storage_index < globals->next_master) || (globals->next_master == (size_t)-1))
++		globals->next_master = storage_index;
+ #endif
+ 
+ #ifdef WINDOWS_PLATFORM
+@@ -715,7 +736,7 @@ PG_PASCAL (memory_ref) DisposeMemory (memory_ref ref)
+ 	globals->total_unpurged -= disposed_size;
+ 
+ #ifdef MAC_PLATFORM
+-	ref_storage = (master_list_ptr) *(globals->master_handle);
++	ref_storage = (master_list_ptr) *(void **)globals->master_handle;
+ #ifdef PG_DEBUG
+ 	if (ref_storage[storage_index] != (Handle)ref)
+ 		globals->debug_proc(BAD_LINK_ERR, ref);
+@@ -727,6 +748,15 @@ PG_PASCAL (memory_ref) DisposeMemory (memory_ref ref)
+ 
+ #endif
+ 
++#ifdef ROSC_PLATFORM
++	/* the slot freed for the next ref, as the Mac's */
++	ref_storage = (master_list_ptr) *(void **)globals->master_handle;
++	ref_storage[storage_index] = NULL;
++
++	if ((storage_index < globals->next_master) || (globals->next_master == (size_t)-1))
++		globals->next_master = storage_index;
++#endif
++
+ #ifdef MAC_PLATFORM
+ #ifdef PG_DEBUG
+ 	if (validate_ref(ref) == NO_ERROR)
+@@ -913,7 +943,7 @@ PG_PASCAL (void) SetMemoryPurge (memory_ref ref, short purge_priority,
+ 
+ 	data = pgMemoryPtr(ref);
+ 
+-	if (purge_priority != PURGE_NO_CHANGE) {
++	if ((pg_short_t)purge_priority != PURGE_NO_CHANGE) {
+ 
+ 		data->purge &= (~PURGE_VALUE_MASK);
+ 		data->purge |= (purge_priority & PURGE_VALUE_MASK);
+@@ -1000,7 +1030,7 @@ PG_PASCAL (size_t) GetAllMemorySize (pgm_globals_ptr mem_globals, long memory_id
+ 
+ 	for (index = 0; index < master_list_size; ++index) {
+ 
+-		storage_list = (master_list_ptr) *(globals->master_handle);
++		storage_list = (master_list_ptr) *(void **)globals->master_handle;
+ 		ref_in_question = (memory_ref)storage_list[index];
+ 
+ 		if (ref_in_question) {
+@@ -1081,7 +1111,7 @@ PG_PASCAL (void) PurgeAllMemory (pgm_globals_ptr mem_globals, long memory_id)
+ 
+ 	for (index = 0; index < master_list_size; ++index) {
+ 
+-		storage_list = (master_list_ptr) *(globals->master_handle);
++		storage_list = (master_list_ptr) *(void **)globals->master_handle;
+ 		ref_in_question = (memory_ref)storage_list[index];
+ 
+ 		if (ref_in_question) {
+@@ -1148,7 +1178,7 @@ PG_PASCAL (memory_ref) InitMemoryRef (pgm_globals_ptr mem_globals, pg_handle bas
+ 	
+ 	globals = mem_globals;
+ 	
+-	if (globals->next_master < 0)  /* Master list requires extension */
++	if (globals->next_master == (size_t)-1)  /* Master list requires extension (-1: size_t) */
+ 		extend_master_list(globals);
+ 
+ 	storage_index = globals->next_master;
+@@ -1157,7 +1187,16 @@ PG_PASCAL (memory_ref) InitMemoryRef (pgm_globals_ptr mem_globals, pg_handle bas
+ 	HNoPurge((Handle)base_ref);
+ 	remaining_qty = (GetHandleSize(globals->master_handle) / sizeof(Handle)) - storage_index - 1;
+ 
+-	storage_list = (master_list_ptr) *(globals->master_handle);
++	storage_list = (master_list_ptr) *(void **)globals->master_handle;
++	storage_list += storage_index;
++	*storage_list = base_ref;
++	new_ref = (memory_ref)base_ref;
++#endif
++
++#ifdef ROSC_PLATFORM
++	remaining_qty = (rosc_memsize(globals->master_handle) / MASTER_ENTRY_SIZE) - storage_index - 1;
++
++	storage_list = (master_list_ptr) *(void **)globals->master_handle;
+ 	storage_list += storage_index;
+ 	*storage_list = base_ref;
+ 	new_ref = (memory_ref)base_ref;
+@@ -1510,7 +1549,7 @@ PG_PASCAL (long) pgUniqueMemoryID (pgm_globals_ptr globals)
+ /* Allocates memory with a specific id */
+ 
+ PG_PASCAL (memory_ref) MemoryAllocID (pgm_globals_ptr globals,
+-	pg_short_t rec_size, long num_recs, short extend_size, long mem_id)
++	pg_short_t rec_size, size_t num_recs, short extend_size, long mem_id)
+ {
+    mem_rec_ptr			data;
+    memory_ref 			ref;
+@@ -1526,7 +1565,7 @@ PG_PASCAL (memory_ref) MemoryAllocID (pgm_globals_ptr globals,
+ /* Allocates and clears memory with a specific id */
+ 
+ PG_PASCAL (memory_ref) MemoryAllocClearID (pgm_globals_ptr globals,
+-	pg_short_t rec_size, long num_recs, short extend_size, long mem_id)
++	pg_short_t rec_size, size_t num_recs, short extend_size, long mem_id)
+ {
+    mem_rec_ptr			data;
+    memory_ref 			ref;
+@@ -2128,11 +2167,11 @@ I have saved the data to a file.	*/
+ 					pgUnlockMemory(ref);
+ 					pgFreePtr(ref);
+ 		            
+-		            resize_purged_memory(ref);		            
++		            resize_purged_memory(mem_globals, ref);		            
+ 					pgFailError(mem_globals, pgMemoryError(mem_globals));
+ 				}
+ 	            else
+-	            	resize_purged_memory(ref);
++	            	resize_purged_memory(mem_globals, ref);
+ 
+ 				data = pgMemoryPtr(ref);
+ 				data->purge |= PURGED_FLAG;
+@@ -2449,7 +2488,7 @@ PG_PASCAL (long) TotalPaigeMemory (void)
+ 	globals = debug_globals;
+ 	total = 0;
+ 	master_list_size = GetHandleSize(globals->master_handle) / sizeof(Handle);
+-	storage_list = (master_list_ptr) *(globals->master_handle);
++	storage_list = (master_list_ptr) *(void **)globals->master_handle;
+ 
+ 	for (index = 0; index < master_list_size; ++index, ++storage_list) {
+ 
+@@ -2648,7 +2687,7 @@ static void purge_excess_memory (pgm_globals_ptr globals, memory_ref mask_ref)
+ }
+ 
+ 
+-static void resize_purged_memory (memory_ref ref)
++static void resize_purged_memory (pgm_globals_ptr globals, memory_ref ref)
+ {
+ #ifdef WINDOWS_PLATFORM
+     mem_rec_ptr			data;
+@@ -2665,7 +2704,7 @@ static void resize_purged_memory (memory_ref ref)
+ 	pgBlockMove(&temp_copy, data, sizeof(purged_mem_rec));
+ 	GlobalUnlock(*global_handle);
+ #else
+-	pgResizeMemory(mem_globals, ref, sizeof(mem_rec) + PAIR_SIZE);
++	pgResizeMemory(globals, ref, (long)(sizeof(mem_rec) + PAIR_SIZE));
+ #endif
+ }
+ 
+@@ -2903,9 +2942,39 @@ static void extend_master_list (pgm_globals_ptr mem_globals)
+ 		mem_globals->last_error = NO_ERROR;
+ 	}
+ 
+-	mem_globals->next_master = old_size / MASTER_ENTRY_SIZE;
+-	zeros_ptr = (unsigned char *)*(mem_globals->master_handle);
+-	pgFillBlock(&zeros_ptr[old_size], extend_size, 0);
++#endif
++
++#ifdef ROSC_PLATFORM
++
++	{
++		unsigned char	*zeros_ptr;
++		long			old_size;
++		
++		old_size = (long)rosc_memsize(mem_globals->master_handle);
++		
++		for (;;) {
++			
++			required_purge = mem_globals->purge_threshold + extend_size;
++			pgResizeMemory(mem_globals, mem_globals->master_handle, old_size + extend_size);
++			if ((err = pgMemoryError(mem_globals)) == NO_ERROR)
++				break;
++			
++			pgFailNotError(mem_globals, NO_MEMORY_ERR, err);
++			pgFailNIL(mem_globals, (void PG_FAR*) mem_globals->spare_tire);
++			
++			rosc_free(mem_globals->spare_tire);
++			mem_globals->spare_tire = NULL;
++			mem_globals->total_unpurged -= SPARE_TIRE_SIZE;
++			
++			err = MemoryPurge(mem_globals, required_purge, MEM_NULL);
++			pgFailError(mem_globals, err);
++			mem_globals->last_error = NO_ERROR;
++		}
++		
++		mem_globals->next_master = old_size / MASTER_ENTRY_SIZE;
++		zeros_ptr = (unsigned char *)*(void **)mem_globals->master_handle;
++		pgFillBlock(&zeros_ptr[old_size], extend_size, 0);
++	}
+ 
+ #endif
+ 
+@@ -2993,7 +3062,7 @@ static void dispose_all_memory (pgm_globals_ptr mem_globals, long memory_id, pg_
+ 
+ 	for (index = 0; index < master_list_size; ++index) {
+ 
+-		storage_list = (master_list_ptr) *(globals->master_handle);
++		storage_list = (master_list_ptr) *(void **)globals->master_handle;
+ 		ref_in_question = (memory_ref)storage_list[index];
+ 
+ 		if (ref_in_question) {
+@@ -3070,7 +3139,7 @@ static void unuse_all_memory (pgm_globals_ptr mem_globals, long memory_id, pg_bo
+ 
+ 	for (index = 0; index < master_list_size; ++index) {
+ 
+-		storage_list = (master_list_ptr) *(globals->master_handle);
++		storage_list = (master_list_ptr) *(void **)globals->master_handle;
+ 		ref_in_question = (memory_ref)storage_list[index];
+ 
+ 		if (ref_in_question) {
+diff --git a/PGSOURCE/PGCLIPBD.C b/PGSOURCE/PGCLIPBD.C
+index 7910784..6f25ec9 100644
+--- a/PGSOURCE/PGCLIPBD.C
++++ b/PGSOURCE/PGCLIPBD.C
+@@ -1382,7 +1382,7 @@ static void apply_text_styles (const paige_rec_ptr src_pg, paige_rec_ptr target_
+ 	else
+ 		++run_rec_num;
+ 	
+-	target_run = (style_run_ptr) InsertMemory(target_pg->t_style_run, run_rec_num, num_runs + 1);
++	target_run = start_target = (style_run_ptr) InsertMemory(target_pg->t_style_run, run_rec_num, num_runs + 1);	/* ROSGD: start_target as DataPak had it (the 64-bit pass lost it) */
+ 	base_run_offset = src_run->offset;
+ 	num_resolved = 0;
+ 
+diff --git a/PGSOURCE/PGDEFSTL.C b/PGSOURCE/PGDEFSTL.C
+index 8cc9d4f..a64a2ad 100644
+--- a/PGSOURCE/PGDEFSTL.C
++++ b/PGSOURCE/PGDEFSTL.C
+@@ -332,7 +332,7 @@ PG_PASCAL (pg_boolean) pgWalkStyle (style_walk_ptr walker, size_t amount)
+ 	walk = walker;
+ 	result = FALSE;
+ 
+-	if ((walk->current_offset += amount) < 0)
++	if ((long)(walk->current_offset += amount) < 0)
+ 		walk->current_offset = 0;
+ 
+ 	new_position = walk->current_offset;
+diff --git a/PGSOURCE/PGEMBED.C b/PGSOURCE/PGEMBED.C
+index 8879722..7e5d816 100644
+--- a/PGSOURCE/PGEMBED.C
++++ b/PGSOURCE/PGEMBED.C
+@@ -295,7 +295,7 @@ PG_PASCAL (embed_ref) pgFindNextEmbed (pg_ref pg, size_t PG_FAR *text_position,
+    pg_rec = (paige_rec_ptr) UseMemory(pg);
+    result = MEM_NULL;
+    
+-   if (*text_position < 0)
++   if ((long)*text_position < 0)
+          *text_position = pgFixOffset(pg_rec, *text_position);
+    
+    if (*text_position >= pg_rec->t_length) {
+@@ -1175,7 +1175,7 @@ PG_PASCAL (pg_boolean) pgEmbedReadHandler (paige_rec_ptr pg, pg_file_key key, me
+          styles->procs.duplicate = embed_copy;
+          styles->procs.delete_style = embed_delete;
+          styles->procs.track_ctl = track_embed_ctl;
+-         styles->embed_entry = reinterpret_cast<void *>(callback);
++         styles->embed_entry = (callback);
+ 
+          embed_ptr->style = styles;
+          embed_ptr->style_refcon = styles->embed_style_refcon;
+@@ -1768,7 +1768,7 @@ PG_PASCAL (long) pgInitEmbedStyleInfo (paige_rec_ptr pg, long position, embed_re
+    style->procs.delete_style = embed_delete;
+    style->procs.track_ctl = track_embed_ctl;
+ 
+-   style->embed_entry = reinterpret_cast<void *>(use_callback);
++   style->embed_entry = (use_callback);
+    style->embed_object = ref;
+    style->embed_refcon = new_embed->user_refcon;
+    style->embed_style_refcon = callback_refcon;
+diff --git a/PGSOURCE/PGFILES.C b/PGSOURCE/PGFILES.C
+index bf56402..9124d27 100644
+--- a/PGSOURCE/PGFILES.C
++++ b/PGSOURCE/PGFILES.C
+@@ -24,7 +24,7 @@ reuse of this code for extensions that extend the structure - TRS OITC, Inc. Boa
+ create a handler that does nothing for reading. */
+ 
+ PG_PASCAL (pg_boolean) pgDummyReadHandler (paige_rec_ptr pg, pg_file_key key, memory_ref key_data,
+-		long PG_FAR *element_info, void PG_FAR *aux_data, long PG_FAR *unpacked_size)
++		size_t PG_FAR *element_info, void PG_FAR *aux_data, size_t PG_FAR *unpacked_size)
+ {
+ #ifdef MAC_PLATFORM
+ #pragma unused (pg, key, key_data, element_info, aux_data)
+@@ -40,7 +40,7 @@ PG_PASCAL (pg_boolean) pgDummyReadHandler (paige_rec_ptr pg, pg_file_key key, me
+ create a handler that does nothing for writing. */
+ 
+ PG_PASCAL (pg_boolean) pgDummyWriteHandler (paige_rec_ptr pg, pg_file_key key, memory_ref key_data,
+-		long PG_FAR *element_info, void PG_FAR *aux_data, long PG_FAR *unpacked_size)
++		size_t PG_FAR *element_info, void PG_FAR *aux_data, size_t PG_FAR *unpacked_size)
+ {
+ #ifdef MAC_PLATFORM
+ #pragma unused (pg, key, element_info, aux_data)
+diff --git a/PGSOURCE/PGUTILS.C b/PGSOURCE/PGUTILS.C
+index e275ec3..2e2d1ac 100644
+--- a/PGSOURCE/PGUTILS.C
++++ b/PGSOURCE/PGUTILS.C
+@@ -219,7 +219,7 @@ PG_PASCAL (size_t) pgFixOffset (paige_rec_ptr pg, size_t wanted_offset)
+ 	if (wanted_offset == CURRENT_POSITION)
+ 		return	pgCurrentInsertion(pg);
+ 	
+-	if (wanted_offset < 0)
++	if ((long)wanted_offset < 0)
+ 		return	0;
+ 	if (wanted_offset > pg->t_length)
+ 		return	pg->t_length;
+diff --git a/PGTXR/PGEXPORT.CPP b/PGTXR/PGEXPORT.CPP
+index 7d937d8..82eef0f 100644
+--- a/PGTXR/PGEXPORT.CPP
++++ b/PGTXR/PGEXPORT.CPP
+@@ -292,7 +292,7 @@ pg_error PaigeExportFilter::pgExportFile (pg_ref pg, select_pair_ptr range, long
+ 				
+ 				output_text = (pg_char_ptr)::UseMemory(translator.data);
+ 				local_begin = export_range.begin - block->begin;
+-				pgBlockMove(&text[local_begin], output_text, translator.bytes_transferred);
++				pgBlockMove(&text[local_begin], output_text, translator.bytes_transferred * sizeof(pg_char));	// ROSGD: a count of pg_chars, as bytes
+ 				::UnuseMemory(translator.data);
+ 				
+ 			// Check possible embed_ref sitting in this position:
+diff --git a/PGTXR/PGHTMDEF.C b/PGTXR/PGHTMDEF.C
+index 14396ed..7fb19f2 100644
+--- a/PGTXR/PGHTMDEF.C
++++ b/PGTXR/PGHTMDEF.C
+@@ -7,29 +7,31 @@ tags and tag attribute keywords that we support (in some fashion) for HTML. */
+ 
+ 
+ pg_char PG_FAR control_commands[] = {
+-
++/* ROSGD: one word to each of PGHTMDEF.H's control_commands (the enums grew,
++   the tables did not), alphabetical as table_command needs */
+ 	(pg_char)0x62, (pg_char)0x61, (pg_char)0x73, (pg_char)0x65, (pg_char)0x20, (pg_char)0x62, (pg_char)0x61, (pg_char)0x73, (pg_char)0x65, (pg_char)0x66, (pg_char)0x6F, (pg_char)0x6E,
+ 	(pg_char)0x74, (pg_char)0x20, (pg_char)0x62, (pg_char)0x6F, (pg_char)0x64, (pg_char)0x79, (pg_char)0x20, (pg_char)0x62, (pg_char)0x72, (pg_char)0x20, (pg_char)0x64, (pg_char)0x69,
+-	(pg_char)0x72, (pg_char)0x20, (pg_char)0x64, (pg_char)0x6C, (pg_char)0x20, (pg_char)0x68, (pg_char)0x65, (pg_char)0x61, (pg_char)0x64, (pg_char)0x20, (pg_char)0x68, (pg_char)0x72,
+-	(pg_char)0x20, (pg_char)0x68, (pg_char)0x74, (pg_char)0x6D, (pg_char)0x6C, (pg_char)0x20, (pg_char)0x6C, (pg_char)0x69, (pg_char)0x20, (pg_char)0x6C, (pg_char)0x69, (pg_char)0x73,
+-	(pg_char)0x74, (pg_char)0x69, (pg_char)0x6E, (pg_char)0x67, (pg_char)0x20, (pg_char)0x6D, (pg_char)0x65, (pg_char)0x6E, (pg_char)0x75, (pg_char)0x20, (pg_char)0x6F, (pg_char)0x6C,
+-	(pg_char)0x20, (pg_char)0x70, (pg_char)0x20, (pg_char)0x74, (pg_char)0x69, (pg_char)0x74, (pg_char)0x6C, (pg_char)0x65, (pg_char)0x20, (pg_char)0x75, (pg_char)0x6C, (pg_char)0x20,
+-	(pg_char)0x77, (pg_char)0x62, (pg_char)0x72, (pg_char)0x20, (pg_char)0x00, (pg_char)0x00
+-
++	(pg_char)0x72, (pg_char)0x20, (pg_char)0x64, (pg_char)0x69, (pg_char)0x76, (pg_char)0x20, (pg_char)0x64, (pg_char)0x6C, (pg_char)0x20, (pg_char)0x68, (pg_char)0x65, (pg_char)0x61,
++	(pg_char)0x64, (pg_char)0x20, (pg_char)0x68, (pg_char)0x72, (pg_char)0x20, (pg_char)0x68, (pg_char)0x74, (pg_char)0x6D, (pg_char)0x6C, (pg_char)0x20, (pg_char)0x6C, (pg_char)0x69,
++	(pg_char)0x20, (pg_char)0x6C, (pg_char)0x69, (pg_char)0x73, (pg_char)0x74, (pg_char)0x69, (pg_char)0x6E, (pg_char)0x67, (pg_char)0x20, (pg_char)0x6D, (pg_char)0x65, (pg_char)0x6E,
++	(pg_char)0x75, (pg_char)0x20, (pg_char)0x6F, (pg_char)0x6C, (pg_char)0x20, (pg_char)0x70, (pg_char)0x20, (pg_char)0x73, (pg_char)0x74, (pg_char)0x79, (pg_char)0x6C, (pg_char)0x65,
++	(pg_char)0x20, (pg_char)0x74, (pg_char)0x69, (pg_char)0x74, (pg_char)0x6C, (pg_char)0x65, (pg_char)0x20, (pg_char)0x75, (pg_char)0x6C, (pg_char)0x20, (pg_char)0x77, (pg_char)0x62,
++	(pg_char)0x72, (pg_char)0x20, (pg_char)0x78, (pg_char)0x2D, (pg_char)0x74, (pg_char)0x61, (pg_char)0x62, (pg_char)0x20, (pg_char)0x78, (pg_char)0x2D, (pg_char)0x73, (pg_char)0x69,
++	(pg_char)0x67, (pg_char)0x6E, (pg_char)0x61, (pg_char)0x74, (pg_char)0x75, (pg_char)0x72, (pg_char)0x65, (pg_char)0x20, (pg_char)0x00, (pg_char)0x00
+ };
+ pg_char PG_FAR control_attributes[] = {
+-
++/* ROSGD: one word to each of PGHTMDEF.H's control_attributes (the enums grew,
++   the tables did not), alphabetical as table_command needs */
+ 	(pg_char)0x61, (pg_char)0x6C, (pg_char)0x69, (pg_char)0x67, (pg_char)0x6E, (pg_char)0x20, (pg_char)0x61, (pg_char)0x6C, (pg_char)0x69, (pg_char)0x6E, (pg_char)0x6B, (pg_char)0x20,
+ 	(pg_char)0x62, (pg_char)0x61, (pg_char)0x63, (pg_char)0x6B, (pg_char)0x67, (pg_char)0x72, (pg_char)0x6F, (pg_char)0x75, (pg_char)0x6E, (pg_char)0x64, (pg_char)0x20, (pg_char)0x62,
+-	(pg_char)0x67, (pg_char)0x63, (pg_char)0x6F, (pg_char)0x6C, (pg_char)0x6F, (pg_char)0x72, (pg_char)0x20, (pg_char)0x63, (pg_char)0x6F, (pg_char)0x6C, (pg_char)0x6F, (pg_char)0x72,
+-	(pg_char)0x20, (pg_char)0x68, (pg_char)0x72, (pg_char)0x65, (pg_char)0x66, (pg_char)0x20, (pg_char)0x6C, (pg_char)0x65, (pg_char)0x66, (pg_char)0x74, (pg_char)0x6D, (pg_char)0x61,
+-	(pg_char)0x72, (pg_char)0x67, (pg_char)0x69, (pg_char)0x6E, (pg_char)0x20, (pg_char)0x6C, (pg_char)0x69, (pg_char)0x6E, (pg_char)0x6B, (pg_char)0x20, (pg_char)0x6E, (pg_char)0x6F,
+-	(pg_char)0x73, (pg_char)0x68, (pg_char)0x61, (pg_char)0x64, (pg_char)0x65, (pg_char)0x20, (pg_char)0x73, (pg_char)0x69, (pg_char)0x7A, (pg_char)0x65, (pg_char)0x20, (pg_char)0x73,
+-	(pg_char)0x74, (pg_char)0x61, (pg_char)0x72, (pg_char)0x74, (pg_char)0x20, (pg_char)0x74, (pg_char)0x65, (pg_char)0x78, (pg_char)0x74, (pg_char)0x20, (pg_char)0x74, (pg_char)0x6F,
+-	(pg_char)0x70, (pg_char)0x6D, (pg_char)0x61, (pg_char)0x72, (pg_char)0x67, (pg_char)0x69, (pg_char)0x6E, (pg_char)0x20, (pg_char)0x74, (pg_char)0x79, (pg_char)0x70, (pg_char)0x65,
+-	(pg_char)0x20, (pg_char)0x76, (pg_char)0x6C, (pg_char)0x69, (pg_char)0x6E, (pg_char)0x6B, (pg_char)0x20, (pg_char)0x77, (pg_char)0x69, (pg_char)0x64, (pg_char)0x74, (pg_char)0x68,
+-	(pg_char)0x20, (pg_char)0x00, (pg_char)0x00
+-
++	(pg_char)0x67, (pg_char)0x63, (pg_char)0x6F, (pg_char)0x6C, (pg_char)0x6F, (pg_char)0x72, (pg_char)0x20, (pg_char)0x63, (pg_char)0x6C, (pg_char)0x61, (pg_char)0x73, (pg_char)0x73,
++	(pg_char)0x20, (pg_char)0x63, (pg_char)0x6F, (pg_char)0x6C, (pg_char)0x6F, (pg_char)0x72, (pg_char)0x20, (pg_char)0x68, (pg_char)0x72, (pg_char)0x65, (pg_char)0x66, (pg_char)0x20,
++	(pg_char)0x6C, (pg_char)0x65, (pg_char)0x66, (pg_char)0x74, (pg_char)0x6D, (pg_char)0x61, (pg_char)0x72, (pg_char)0x67, (pg_char)0x69, (pg_char)0x6E, (pg_char)0x20, (pg_char)0x6C,
++	(pg_char)0x69, (pg_char)0x6E, (pg_char)0x6B, (pg_char)0x20, (pg_char)0x6E, (pg_char)0x6F, (pg_char)0x73, (pg_char)0x68, (pg_char)0x61, (pg_char)0x64, (pg_char)0x65, (pg_char)0x20,
++	(pg_char)0x73, (pg_char)0x69, (pg_char)0x7A, (pg_char)0x65, (pg_char)0x20, (pg_char)0x73, (pg_char)0x74, (pg_char)0x61, (pg_char)0x72, (pg_char)0x74, (pg_char)0x20, (pg_char)0x74,
++	(pg_char)0x65, (pg_char)0x78, (pg_char)0x74, (pg_char)0x20, (pg_char)0x74, (pg_char)0x6F, (pg_char)0x70, (pg_char)0x6D, (pg_char)0x61, (pg_char)0x72, (pg_char)0x67, (pg_char)0x69,
++	(pg_char)0x6E, (pg_char)0x20, (pg_char)0x74, (pg_char)0x79, (pg_char)0x70, (pg_char)0x65, (pg_char)0x20, (pg_char)0x76, (pg_char)0x6C, (pg_char)0x69, (pg_char)0x6E, (pg_char)0x6B,
++	(pg_char)0x20, (pg_char)0x77, (pg_char)0x69, (pg_char)0x64, (pg_char)0x74, (pg_char)0x68, (pg_char)0x20, (pg_char)0x00, (pg_char)0x00
+ };
+ 
+ 
+@@ -64,23 +66,29 @@ pg_char PG_FAR table_data_commands[] = {
+ };
+ 
+ pg_char PG_FAR data_commands[] = {
+-
+-	(pg_char)0x61, (pg_char)0x20, (pg_char)0x69, (pg_char)0x6D, (pg_char)0x67, (pg_char)0x20, (pg_char)0x00, (pg_char)0x00
+-
++/* ROSGD: one word to each of PGHTMDEF.H's data_commands (the enums grew,
++   the tables did not), alphabetical as table_command needs */
++	(pg_char)0x61, (pg_char)0x20, (pg_char)0x65, (pg_char)0x6D, (pg_char)0x62, (pg_char)0x65, (pg_char)0x64, (pg_char)0x20, (pg_char)0x69, (pg_char)0x6D, (pg_char)0x67, (pg_char)0x20,
++	(pg_char)0x6F, (pg_char)0x62, (pg_char)0x6A, (pg_char)0x65, (pg_char)0x63, (pg_char)0x74, (pg_char)0x20, (pg_char)0x70, (pg_char)0x61, (pg_char)0x72, (pg_char)0x61, (pg_char)0x6D,
++	(pg_char)0x20, (pg_char)0x00, (pg_char)0x00
+ };
+ pg_char PG_FAR data_attributes[] = {
+-
++/* ROSGD: one word to each of PGHTMDEF.H's data_attributes (the enums grew,
++   the tables did not), alphabetical as table_command needs */
+ 	(pg_char)0x61, (pg_char)0x6C, (pg_char)0x69, (pg_char)0x67, (pg_char)0x6E, (pg_char)0x20, (pg_char)0x61, (pg_char)0x6C, (pg_char)0x74, (pg_char)0x20, (pg_char)0x62, (pg_char)0x67,
+ 	(pg_char)0x63, (pg_char)0x6F, (pg_char)0x6C, (pg_char)0x6F, (pg_char)0x72, (pg_char)0x20, (pg_char)0x62, (pg_char)0x6F, (pg_char)0x72, (pg_char)0x64, (pg_char)0x65, (pg_char)0x72,
+ 	(pg_char)0x20, (pg_char)0x63, (pg_char)0x65, (pg_char)0x6C, (pg_char)0x6C, (pg_char)0x70, (pg_char)0x61, (pg_char)0x64, (pg_char)0x64, (pg_char)0x69, (pg_char)0x6E, (pg_char)0x67,
+ 	(pg_char)0x20, (pg_char)0x63, (pg_char)0x65, (pg_char)0x6C, (pg_char)0x6C, (pg_char)0x73, (pg_char)0x70, (pg_char)0x61, (pg_char)0x63, (pg_char)0x69, (pg_char)0x6E, (pg_char)0x67,
+-	(pg_char)0x20, (pg_char)0x63, (pg_char)0x6F, (pg_char)0x6C, (pg_char)0x73, (pg_char)0x70, (pg_char)0x61, (pg_char)0x6E, (pg_char)0x20, (pg_char)0x68, (pg_char)0x65, (pg_char)0x69,
+-	(pg_char)0x67, (pg_char)0x68, (pg_char)0x74, (pg_char)0x20, (pg_char)0x68, (pg_char)0x73, (pg_char)0x70, (pg_char)0x61, (pg_char)0x63, (pg_char)0x65, (pg_char)0x20, (pg_char)0x68,
+-	(pg_char)0x72, (pg_char)0x65, (pg_char)0x66, (pg_char)0x20, (pg_char)0x69, (pg_char)0x73, (pg_char)0x6D, (pg_char)0x61, (pg_char)0x70, (pg_char)0x20, (pg_char)0x6C, (pg_char)0x6F,
+-	(pg_char)0x77, (pg_char)0x73, (pg_char)0x72, (pg_char)0x63, (pg_char)0x20, (pg_char)0x6E, (pg_char)0x61, (pg_char)0x6D, (pg_char)0x65, (pg_char)0x20, (pg_char)0x73, (pg_char)0x72,
+-	(pg_char)0x63, (pg_char)0x20, (pg_char)0x76, (pg_char)0x61, (pg_char)0x6C, (pg_char)0x69, (pg_char)0x67, (pg_char)0x6E, (pg_char)0x20, (pg_char)0x76, (pg_char)0x73, (pg_char)0x70,
+-	(pg_char)0x61, (pg_char)0x63, (pg_char)0x65, (pg_char)0x20, (pg_char)0x77, (pg_char)0x69, (pg_char)0x64, (pg_char)0x74, (pg_char)0x68, (pg_char)0x20, (pg_char)0x00, (pg_char)0x00
+-
++	(pg_char)0x20, (pg_char)0x63, (pg_char)0x6C, (pg_char)0x61, (pg_char)0x73, (pg_char)0x73, (pg_char)0x69, (pg_char)0x64, (pg_char)0x20, (pg_char)0x63, (pg_char)0x6F, (pg_char)0x6C,
++	(pg_char)0x73, (pg_char)0x70, (pg_char)0x61, (pg_char)0x6E, (pg_char)0x20, (pg_char)0x65, (pg_char)0x75, (pg_char)0x64, (pg_char)0x6F, (pg_char)0x72, (pg_char)0x61, (pg_char)0x20,
++	(pg_char)0x68, (pg_char)0x65, (pg_char)0x69, (pg_char)0x67, (pg_char)0x68, (pg_char)0x74, (pg_char)0x20, (pg_char)0x68, (pg_char)0x73, (pg_char)0x70, (pg_char)0x61, (pg_char)0x63,
++	(pg_char)0x65, (pg_char)0x20, (pg_char)0x68, (pg_char)0x72, (pg_char)0x65, (pg_char)0x66, (pg_char)0x20, (pg_char)0x69, (pg_char)0x64, (pg_char)0x20, (pg_char)0x69, (pg_char)0x73,
++	(pg_char)0x6D, (pg_char)0x61, (pg_char)0x70, (pg_char)0x20, (pg_char)0x6C, (pg_char)0x6F, (pg_char)0x77, (pg_char)0x73, (pg_char)0x72, (pg_char)0x63, (pg_char)0x20, (pg_char)0x6E,
++	(pg_char)0x61, (pg_char)0x6D, (pg_char)0x65, (pg_char)0x20, (pg_char)0x73, (pg_char)0x72, (pg_char)0x63, (pg_char)0x20, (pg_char)0x74, (pg_char)0x69, (pg_char)0x74, (pg_char)0x6C,
++	(pg_char)0x65, (pg_char)0x20, (pg_char)0x76, (pg_char)0x61, (pg_char)0x6C, (pg_char)0x69, (pg_char)0x67, (pg_char)0x6E, (pg_char)0x20, (pg_char)0x76, (pg_char)0x61, (pg_char)0x6C,
++	(pg_char)0x75, (pg_char)0x65, (pg_char)0x20, (pg_char)0x76, (pg_char)0x61, (pg_char)0x6C, (pg_char)0x75, (pg_char)0x65, (pg_char)0x74, (pg_char)0x79, (pg_char)0x70, (pg_char)0x65,
++	(pg_char)0x20, (pg_char)0x76, (pg_char)0x73, (pg_char)0x70, (pg_char)0x61, (pg_char)0x63, (pg_char)0x65, (pg_char)0x20, (pg_char)0x77, (pg_char)0x69, (pg_char)0x64, (pg_char)0x74,
++	(pg_char)0x68, (pg_char)0x20, (pg_char)0x00, (pg_char)0x00
+ };
+ pg_char PG_FAR data_values[] = {
+ 
+@@ -421,6 +429,16 @@ PG_PASCAL (void) CreateHTMLStyles (pg_ref pg, pg_char_ptr def_font, long PG_FAR
+ 
+ 	if (!html_styles[code_def_stylesheet])
+ 		html_styles[code_def_stylesheet] = make_style(pg, code_def_style, code_def_stylesheet, X_ITALIC_BIT, 9, (pg_char_ptr)"Courier New\0", &par_heading);
++#elif defined(ROSC_PLATFORM)
++	/* ROSGD: the fixed pitch font as pg_chars */
++	if (!html_styles[pre_tag_stylesheet])
++		html_styles[pre_tag_stylesheet] = make_style(pg, pre_tag_style, pre_tag_stylesheet, X_PLAIN_TEXT, PRETAG_DEF_POINTSIZE, PRETAG_DEF_FONT, &par_heading);
++	if (!html_styles[teletype_stylesheet])
++		html_styles[teletype_stylesheet] = make_style(pg, teletype_style, teletype_stylesheet, X_PLAIN_TEXT, 12, PRETAG_DEF_FONT, &par_heading);
++	if (!html_styles[code_stylesheet])
++		html_styles[code_stylesheet] = make_style(pg, code_style, code_stylesheet, X_PLAIN_TEXT, CODETAG_DEF_POINTSIZE, CODETAG_DEF_FONT, &par_heading);
++	if (!html_styles[code_def_stylesheet])
++		html_styles[code_def_stylesheet] = make_style(pg, code_def_style, code_def_stylesheet, X_ITALIC_BIT, 9, CODETAG_DEF_FONT, &par_heading);
+ #else
+ 
+ 	if (!html_styles[pre_tag_stylesheet])
+diff --git a/PGTXR/PGHTMEXP.CPP b/PGTXR/PGHTMEXP.CPP
+index 207a85d..540b307 100644
+--- a/PGTXR/PGHTMEXP.CPP
++++ b/PGTXR/PGHTMEXP.CPP
+@@ -54,13 +54,16 @@ PaigeHTMLExportFilter::PaigeHTMLExportFilter ()
+ 
+    pgFillBlock((void PG_FAR *)file_kind, KIND_STR_SIZE * sizeof(pg_char), 0);
+    pgBlockMove((void PG_FAR *)FILETYPE_HTML, (void PG_FAR *)file_kind, FILETYPE_STR_SIZE * sizeof(pg_char));
+-   pgFillBlock(file_extension, 8, 0);
++   pgFillBlock(file_extension, sizeof(file_extension), 0);
+ 
+    pretag_font = pretag_pointsize = 0;
+    chars_since_cr = 0;
+ 
+ #ifdef MAC_PLATFORM
+    pgBlockMove(".html", file_extension, 5);
++#elif defined(ROSC_PLATFORM)
++   file_extension[0] = '.', file_extension[1] = 'h', file_extension[2] = 't';  // ROSGD: pg_chars,
++   file_extension[3] = 'm', file_extension[4] = 'l';                           // not the literal's bytes
+ #else
+    pgBlockMove(".htm", file_extension, 4);
+ #endif
+@@ -165,7 +168,7 @@ pg_error PaigeHTMLExportFilter::pgPrepareExport (void)
+ 		UnuseMemory(export_pg_rec->doc_info.title);
+ 		SetMemorySize(export_pg_rec->doc_info.title, title_size + 1);
+ 		title_ptr = (pg_char_ptr)UseMemory(export_pg_rec->doc_info.title);
+-		pgBlockMove(untitled_title, title_ptr, title_size + 1);
++		pgBlockMove(untitled_title, title_ptr, (title_size + 1) * sizeof(pg_char));	// ROSGD: pg_chars
+ 	}
+ 	
+ 	pgWriteString(title_ptr, 0, 0);
+@@ -408,7 +411,7 @@ pg_boolean PaigeHTMLExportFilter::pgWriteNextBlock (void)
+ 				if (special_char(*text))
+ 					OutputSpecialChar(*text);
+ 				else
+-					pgWriteByte(*text);
++					pgWriteChar(*text);	// ROSGD: a character (pgWriteByte is half of one, UNICODE)
+ 				
+ 				++real_text_out;
+ 				++row_char_count;
+@@ -584,7 +587,7 @@ void PaigeHTMLExportFilter::ConvertURL (pg_char_ptr input, pg_char_ptr output)
+ 	input_size = pgCStrLength(input);
+ 	
+ 	if (!extension_size || !input_size || has_colons(input))
+-		pgBlockMove(input, output, input_size + 1);
++		pgBlockMove(input, output, (input_size + 1) * sizeof(pg_char));	// ROSGD: pg_chars
+ 	else {
+ 		pg_char_ptr			in_ptr, out_ptr;
+ 		
+@@ -630,7 +633,7 @@ void PaigeHTMLExportFilter::OutputSpecialChar (pg_char the_char)
+ 	
+ 	if (the_char == 0x22) {
+ 	
+-		pgBlockMove("quot", &char_str[1], 4);
++		char_str[1] = 'q', char_str[2] = 'u', char_str[3] = 'o', char_str[4] = 't';	// ROSGD: pg_chars
+ 		char_str[5] = ';';
+ 		char_str[6] = 0;
+ 	}
+@@ -709,7 +712,7 @@ void PaigeHTMLExportFilter::OutputImage (memory_ref embed, embed_callback callba
+ 			alt_text_size = 63;
+ 		
+ 		if (alt_text_size)
+-			pgBlockMove(alt_text, image.alt_string, alt_text_size);
++			pgBlockMove(alt_text, image.alt_string, alt_text_size * sizeof(pg_char));	// ROSGD: pg_chars
+ 	}
+ 	
+ 	callback(export_pg_rec, embed_ptr, embed_url_image, EMBED_SAVE_IMAGE, embed_ptr->user_refcon,
+@@ -843,7 +846,7 @@ void PaigeHTMLExportFilter::OutputStyleTags (pg_char_ptr text, long remaining_ch
+ 			pg_char			font_and_alt[130];
+ 			
+ 			fontsize = pgCStrLength(&translator.font.name[1]);
+-			pgBlockMove(&translator.font.name[1], font_and_alt, fontsize);
++			pgBlockMove(&translator.font.name[1], font_and_alt, fontsize * sizeof(pg_char));	// ROSGD: pg_chars
+ 			
+ 			if ((alt_size = MapExportFont(&translator.font, &font_and_alt[fontsize + 2])) > 0) {
+ 				
+@@ -1319,11 +1322,11 @@ void PaigeHTMLExportFilter::WriteTag (pg_char_ptr tag_table,
+ 	long			num_params;
+ 	short			table_item;
+ 
+-	pgWriteByte((pg_char)'<');
++	pgWriteChar((pg_char)'<');	// ROSGD: pgWriteChar throughout (pgWriteByte is half a character)
+ 	
+ 	if ((table_item = table_entry) < 0) {
+ 		
+-		pgWriteByte((pg_char)0x2F);
++		pgWriteChar((pg_char)0x2F);
+ 		table_item = -table_item;
+ 	}
+ 	
+@@ -1359,7 +1362,7 @@ void PaigeHTMLExportFilter::WriteTag (pg_char_ptr tag_table,
+ 	SetMemorySize(params_ref, 0);
+ 
+ 	if (terminate_tag)
+-		pgWriteByte('>');
++		pgWriteChar('>');
+ 	
+ 	if (send_CR)
+ 		OutputCR();
+@@ -1425,7 +1428,7 @@ void PaigeHTMLExportFilter::InsertParameter(short code, pg_char_ptr table_used,
+ 		if (params->param_size > 256)
+ 			params->param_size = 256;
+ 		
+-		pgBlockMove(param, params->param, params->param_size);
++		pgBlockMove(param, params->param, params->param_size * sizeof(pg_char));	// ROSGD: pg_chars
+ 	}
+ 	
+ 	UnuseMemory(params_ref);
+diff --git a/PGTXR/PGHTMIMP.CPP b/PGTXR/PGHTMIMP.CPP
+index 1ec5574..823f20c 100644
+--- a/PGTXR/PGHTMIMP.CPP
++++ b/PGTXR/PGHTMIMP.CPP
+@@ -115,6 +115,14 @@ pg_error PaigeHTMLImportFilter::pgPrepareImport (void)
+ #ifdef MAC_PLATFORM
+       pgBlockMove("Times", &default_font.name[1], 5);
+       default_font.name[0] = 5;
++#elif defined(ROSC_PLATFORM)
++      {   /* ROSGD: the Font Manager's serif, as pg_chars */
++         static const char trinity[] = "Trinity";
++         short i;
++         for (i = 0; trinity[i]; ++i)
++            default_font.name[i + 1] = (pg_char)trinity[i];
++         default_font.name[0] = (pg_char)i;
++      }
+ #else
+       pgBlockMove("Times New Roman", &default_font.name[1], 15);
+       default_font.name[0] = 15;
+@@ -1435,7 +1443,7 @@ pg_boolean PaigeHTMLImportFilter::DoDataTag (short tag, tag_attribute_ptr params
+                if ((param_size = param_ptr->param_size) > 63)
+                   param_size = 63;
+                
+-               pgBlockMove(param_ptr->param, image_record.alt_string, param_size);
++               pgBlockMove(param_ptr->param, image_record.alt_string, param_size * sizeof(pg_char));	// ROSGD: pg_chars
+             }
+ 
+          	if (find_parameter(params, num_params, ismap_attribute))
+@@ -2357,7 +2365,7 @@ void PaigeHTMLImportFilter::ProcessAttributes (pg_char_ptr attribute_table, shor
+                if (arg_size >= 256)
+                   arg_size = 255;
+                
+-               pgBlockMove(command, params->param, (long)arg_size);
++               pgBlockMove(command, params->param, (long)arg_size * sizeof(pg_char));	// ROSGD: pg_chars
+                params->param_size = (short)arg_size;
+             }
+          }
+@@ -2840,7 +2848,7 @@ static void translate_single_file (pg_char_ptr URL, pg_char_ptr filename)
+ 		output_size = 31;
+ 	
+ 	if (output_size)
+-		pgBlockMove(&URL[index], filename, output_size);
++		pgBlockMove(&URL[index], filename, output_size * sizeof(pg_char));	// ROSGD: pg_chars
+ 	
+ 	filename[output_size] = 0;
+ }
+diff --git a/PGTXR/PGRTFDEF.C b/PGTXR/PGRTFDEF.C
+index df8849f..d1fa3a8 100644
+--- a/PGTXR/PGRTFDEF.C
++++ b/PGTXR/PGRTFDEF.C
+@@ -32,21 +32,25 @@ pg_char PG_FAR group_avoid_commands[] = {
+ };
+ 
+ 
++/* ROSGD: as the 8-bit table below -- the UNICODE one had lost objdata,
++   result and trowd, so every command after them was written as another */
+ pg_char PG_FAR destination_commands[] = {
+ 
+ 	(pg_char)0x61, (pg_char)0x6E, (pg_char)0x73, (pg_char)0x69, (pg_char)0x20, (pg_char)0x62, (pg_char)0x69, (pg_char)0x6E, (pg_char)0x20, (pg_char)0x63, (pg_char)0x6F, (pg_char)0x6C,
+ 	(pg_char)0x6F, (pg_char)0x72, (pg_char)0x74, (pg_char)0x62, (pg_char)0x6C, (pg_char)0x20, (pg_char)0x64, (pg_char)0x65, (pg_char)0x66, (pg_char)0x66, (pg_char)0x20, (pg_char)0x66,
+ 	(pg_char)0x6F, (pg_char)0x6E, (pg_char)0x74, (pg_char)0x74, (pg_char)0x62, (pg_char)0x6C, (pg_char)0x20, (pg_char)0x6D, (pg_char)0x61, (pg_char)0x63, (pg_char)0x20, (pg_char)0x6D,
+-	(pg_char)0x61, (pg_char)0x63, (pg_char)0x70, (pg_char)0x69, (pg_char)0x63, (pg_char)0x74, (pg_char)0x20, (pg_char)0x6F, (pg_char)0x62, (pg_char)0x6A, (pg_char)0x65, (pg_char)0x63,
+-	(pg_char)0x74, (pg_char)0x20, (pg_char)0x6F, (pg_char)0x62, (pg_char)0x6A, (pg_char)0x68, (pg_char)0x20, (pg_char)0x6F, (pg_char)0x62, (pg_char)0x6A, (pg_char)0x77, (pg_char)0x20,
+-	(pg_char)0x70, (pg_char)0x69, (pg_char)0x63, (pg_char)0x74, (pg_char)0x20, (pg_char)0x70, (pg_char)0x69, (pg_char)0x63, (pg_char)0x68, (pg_char)0x20, (pg_char)0x70, (pg_char)0x69,
+-	(pg_char)0x63, (pg_char)0x68, (pg_char)0x67, (pg_char)0x6F, (pg_char)0x61, (pg_char)0x6C, (pg_char)0x20, (pg_char)0x70, (pg_char)0x69, (pg_char)0x63, (pg_char)0x73, (pg_char)0x63,
+-	(pg_char)0x61, (pg_char)0x6C, (pg_char)0x65, (pg_char)0x78, (pg_char)0x20, (pg_char)0x70, (pg_char)0x69, (pg_char)0x63, (pg_char)0x73, (pg_char)0x63, (pg_char)0x61, (pg_char)0x6C,
+-	(pg_char)0x65, (pg_char)0x79, (pg_char)0x20, (pg_char)0x70, (pg_char)0x69, (pg_char)0x63, (pg_char)0x77, (pg_char)0x20, (pg_char)0x70, (pg_char)0x69, (pg_char)0x63, (pg_char)0x77,
+-	(pg_char)0x67, (pg_char)0x6F, (pg_char)0x61, (pg_char)0x6C, (pg_char)0x20, (pg_char)0x72, (pg_char)0x74, (pg_char)0x66, (pg_char)0x20, (pg_char)0x73, (pg_char)0x62, (pg_char)0x61,
+-	(pg_char)0x73, (pg_char)0x65, (pg_char)0x64, (pg_char)0x6F, (pg_char)0x6E, (pg_char)0x20, (pg_char)0x73, (pg_char)0x74, (pg_char)0x79, (pg_char)0x6C, (pg_char)0x65, (pg_char)0x73,
+-	(pg_char)0x68, (pg_char)0x65, (pg_char)0x65, (pg_char)0x74, (pg_char)0x20, (pg_char)0x77, (pg_char)0x6D, (pg_char)0x65, (pg_char)0x74, (pg_char)0x61, (pg_char)0x66, (pg_char)0x69,
+-	(pg_char)0x6C, (pg_char)0x65, (pg_char)0x20, (pg_char)0x00, (pg_char)0x00
++	(pg_char)0x61, (pg_char)0x63, (pg_char)0x70, (pg_char)0x69, (pg_char)0x63, (pg_char)0x74, (pg_char)0x20, (pg_char)0x6F, (pg_char)0x62, (pg_char)0x6A, (pg_char)0x64, (pg_char)0x61,
++	(pg_char)0x74, (pg_char)0x61, (pg_char)0x20, (pg_char)0x6F, (pg_char)0x62, (pg_char)0x6A, (pg_char)0x65, (pg_char)0x63, (pg_char)0x74, (pg_char)0x20, (pg_char)0x6F, (pg_char)0x62,
++	(pg_char)0x6A, (pg_char)0x68, (pg_char)0x20, (pg_char)0x6F, (pg_char)0x62, (pg_char)0x6A, (pg_char)0x77, (pg_char)0x20, (pg_char)0x70, (pg_char)0x69, (pg_char)0x63, (pg_char)0x74,
++	(pg_char)0x20, (pg_char)0x70, (pg_char)0x69, (pg_char)0x63, (pg_char)0x68, (pg_char)0x20, (pg_char)0x70, (pg_char)0x69, (pg_char)0x63, (pg_char)0x68, (pg_char)0x67, (pg_char)0x6F,
++	(pg_char)0x61, (pg_char)0x6C, (pg_char)0x20, (pg_char)0x70, (pg_char)0x69, (pg_char)0x63, (pg_char)0x73, (pg_char)0x63, (pg_char)0x61, (pg_char)0x6C, (pg_char)0x65, (pg_char)0x78,
++	(pg_char)0x20, (pg_char)0x70, (pg_char)0x69, (pg_char)0x63, (pg_char)0x73, (pg_char)0x63, (pg_char)0x61, (pg_char)0x6C, (pg_char)0x65, (pg_char)0x79, (pg_char)0x20, (pg_char)0x70,
++	(pg_char)0x69, (pg_char)0x63, (pg_char)0x77, (pg_char)0x20, (pg_char)0x70, (pg_char)0x69, (pg_char)0x63, (pg_char)0x77, (pg_char)0x67, (pg_char)0x6F, (pg_char)0x61, (pg_char)0x6C,
++	(pg_char)0x20, (pg_char)0x72, (pg_char)0x65, (pg_char)0x73, (pg_char)0x75, (pg_char)0x6C, (pg_char)0x74, (pg_char)0x20, (pg_char)0x72, (pg_char)0x74, (pg_char)0x66, (pg_char)0x20,
++	(pg_char)0x73, (pg_char)0x62, (pg_char)0x61, (pg_char)0x73, (pg_char)0x65, (pg_char)0x64, (pg_char)0x6F, (pg_char)0x6E, (pg_char)0x20, (pg_char)0x73, (pg_char)0x74, (pg_char)0x79,
++	(pg_char)0x6C, (pg_char)0x65, (pg_char)0x73, (pg_char)0x68, (pg_char)0x65, (pg_char)0x65, (pg_char)0x74, (pg_char)0x20, (pg_char)0x74, (pg_char)0x72, (pg_char)0x6F, (pg_char)0x77,
++	(pg_char)0x64, (pg_char)0x20, (pg_char)0x77, (pg_char)0x6D, (pg_char)0x65, (pg_char)0x74, (pg_char)0x61, (pg_char)0x66, (pg_char)0x69, (pg_char)0x6C, (pg_char)0x65, (pg_char)0x20,
++	(pg_char)0x00, (pg_char)0x00
+ 
+ };
+ 
+@@ -80,7 +84,6 @@ pg_char PG_FAR paragraph_commands[] = {
+ };
+ 
+ pg_char PG_FAR style_commands[] = {
+-
+ 	(pg_char)0x62, (pg_char)0x20, (pg_char)0x62, (pg_char)0x6B, (pg_char)0x20, (pg_char)0x62, (pg_char)0x6C, (pg_char)0x75, (pg_char)0x65, (pg_char)0x20, (pg_char)0x63, (pg_char)0x61,
+ 	(pg_char)0x70, (pg_char)0x73, (pg_char)0x20, (pg_char)0x63, (pg_char)0x63, (pg_char)0x68, (pg_char)0x73, (pg_char)0x20, (pg_char)0x63, (pg_char)0x66, (pg_char)0x20, (pg_char)0x64,
+ 	(pg_char)0x6E, (pg_char)0x20, (pg_char)0x65, (pg_char)0x78, (pg_char)0x70, (pg_char)0x6E, (pg_char)0x64, (pg_char)0x20, (pg_char)0x66, (pg_char)0x20, (pg_char)0x66, (pg_char)0x63,
+@@ -91,8 +94,8 @@ pg_char PG_FAR style_commands[] = {
+ 	(pg_char)0x72, (pg_char)0x69, (pg_char)0x6B, (pg_char)0x65, (pg_char)0x20, (pg_char)0x73, (pg_char)0x75, (pg_char)0x62, (pg_char)0x20, (pg_char)0x73, (pg_char)0x75, (pg_char)0x70,
+ 	(pg_char)0x65, (pg_char)0x72, (pg_char)0x20, (pg_char)0x74, (pg_char)0x63, (pg_char)0x20, (pg_char)0x74, (pg_char)0x63, (pg_char)0x6C, (pg_char)0x20, (pg_char)0x75, (pg_char)0x6C,
+ 	(pg_char)0x20, (pg_char)0x75, (pg_char)0x6C, (pg_char)0x64, (pg_char)0x20, (pg_char)0x75, (pg_char)0x6C, (pg_char)0x64, (pg_char)0x62, (pg_char)0x20, (pg_char)0x75, (pg_char)0x6C,
+-	(pg_char)0x77, (pg_char)0x20, (pg_char)0x75, (pg_char)0x70, (pg_char)0x20, (pg_char)0x76, (pg_char)0x20, (pg_char)0x78, (pg_char)0x65, (pg_char)0x20, (pg_char)0x00, (pg_char)0x00
+-
++	(pg_char)0x6E, (pg_char)0x6F, (pg_char)0x6E, (pg_char)0x65, (pg_char)0x20, (pg_char)0x75, (pg_char)0x6C, (pg_char)0x77, (pg_char)0x20, (pg_char)0x75, (pg_char)0x70, (pg_char)0x20,
++	(pg_char)0x76, (pg_char)0x20, (pg_char)0x78, (pg_char)0x65, (pg_char)0x20, (pg_char)0x00, (pg_char)0x00
+ };
+ 
+ pg_char PG_FAR info_commands[] = {
+@@ -220,7 +223,6 @@ pg_char PG_FAR paragraph_commands[] = {
+ };
+ 
+ pg_char PG_FAR style_commands[] = {
+-
+ 	(pg_char)0x62, (pg_char)0x20, (pg_char)0x62, (pg_char)0x6B, (pg_char)0x20, (pg_char)0x62, (pg_char)0x6C, (pg_char)0x75, (pg_char)0x65, (pg_char)0x20, (pg_char)0x63, (pg_char)0x61,
+ 	(pg_char)0x70, (pg_char)0x73, (pg_char)0x20, (pg_char)0x63, (pg_char)0x63, (pg_char)0x68, (pg_char)0x73, (pg_char)0x20, (pg_char)0x63, (pg_char)0x66, (pg_char)0x20, (pg_char)0x64,
+ 	(pg_char)0x6E, (pg_char)0x20, (pg_char)0x65, (pg_char)0x78, (pg_char)0x70, (pg_char)0x6E, (pg_char)0x64, (pg_char)0x20, (pg_char)0x66, (pg_char)0x20, (pg_char)0x66, (pg_char)0x63,
+@@ -231,8 +233,8 @@ pg_char PG_FAR style_commands[] = {
+ 	(pg_char)0x72, (pg_char)0x69, (pg_char)0x6B, (pg_char)0x65, (pg_char)0x20, (pg_char)0x73, (pg_char)0x75, (pg_char)0x62, (pg_char)0x20, (pg_char)0x73, (pg_char)0x75, (pg_char)0x70,
+ 	(pg_char)0x65, (pg_char)0x72, (pg_char)0x20, (pg_char)0x74, (pg_char)0x63, (pg_char)0x20, (pg_char)0x74, (pg_char)0x63, (pg_char)0x6C, (pg_char)0x20, (pg_char)0x75, (pg_char)0x6C,
+ 	(pg_char)0x20, (pg_char)0x75, (pg_char)0x6C, (pg_char)0x64, (pg_char)0x20, (pg_char)0x75, (pg_char)0x6C, (pg_char)0x64, (pg_char)0x62, (pg_char)0x20, (pg_char)0x75, (pg_char)0x6C,
+-	(pg_char)0x77, (pg_char)0x20, (pg_char)0x75, (pg_char)0x70, (pg_char)0x20, (pg_char)0x76, (pg_char)0x20, (pg_char)0x78, (pg_char)0x65, (pg_char)0x20, (pg_char)0x00, (pg_char)0x00
+-
++	(pg_char)0x6E, (pg_char)0x6F, (pg_char)0x6E, (pg_char)0x65, (pg_char)0x20, (pg_char)0x75, (pg_char)0x6C, (pg_char)0x77, (pg_char)0x20, (pg_char)0x75, (pg_char)0x70, (pg_char)0x20,
++	(pg_char)0x76, (pg_char)0x20, (pg_char)0x78, (pg_char)0x65, (pg_char)0x20, (pg_char)0x00, (pg_char)0x00
+ };
+ 
+ pg_char PG_FAR info_commands[] = {
+diff --git a/PGTXR/PGRTFIMP.CPP b/PGTXR/PGRTFIMP.CPP
+index bac006a..f51de24 100644
+--- a/PGTXR/PGRTFIMP.CPP
++++ b/PGTXR/PGRTFIMP.CPP
+@@ -411,6 +411,9 @@ long PaigeRTFImportFilter::ReadCommand (short PG_FAR *param, pg_char_ptr termina
+ 				return	0;
+ 			}
+ 			else
++			if (*command_buffer_ptr == 0x0D || *command_buffer_ptr == 0x0A)	// ROSGD: \ then a line's end is \par
++				return	((long)cr_command | ((long)SPECIAL_CHAR_COMMAND << 16));
++			else
+ 			if (!regular_letter(*command_buffer_ptr))
+ 				return	DO_NOTHING_COMMAND;
+ 		}
+@@ -717,6 +720,9 @@ pg_boolean PaigeRTFImportFilter::DoDestinationCommand (short command, short para
+ 					}
+ 				}
+ 				else
++				if (next_char == 0x0D || next_char == 0x0A)
++					;		// ROSGD: a line's end in the source is nothing (RTF), not a name's
++				else
+ 				if (command == font_table_command && !avoid_level) {
+ 					
+ 					if (fontname_level == 0)
+@@ -1455,11 +1461,18 @@ pg_boolean PaigeRTFImportFilter::DoStyleCommand (short command, short parameter)
+ 
+ 		case underline_command:
+ 			if (had_actual_param && parameter == 0)
+-				current_style.styles[italic_var] = 0;
++				current_style.styles[underline_var] = 0;	// ROSGD: \ul0 is underline's off (was italic's)
+ 			else
+ 				current_style.styles[underline_var] = -1;
+ 			break;
+ 
++		case ulnone_command:		// ROSGD: every kind of underline off
++			current_style.styles[underline_var] = 0;
++			current_style.styles[dotted_underline_var] = 0;
++			current_style.styles[dbl_underline_var] = 0;
++			current_style.styles[word_underline_var] = 0;
++			break;
++
+ 		case dotted_underline_command:
+ 			current_style.styles[dotted_underline_var] = -1;
+ 			break;

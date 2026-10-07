@@ -1,0 +1,24 @@
+SparkFS's memory when SparkFS$Memory is not set: SparkFSApp's !Run's, not 64K.
+
+meminit reads SparkFS$Memory as the module starts -- !Run sets it just
+before it loads the module, and on RISC OS 5 leaves it -&2000000, a dynamic
+area of up to 32 MB.  Unset, meminit takes a fixed 64K of the RMA.  In
+the box's ROM the module starts before any !Run has run; !Run's RMEnsure
+then finds it there and loads nothing, so !Run's setting would never be
+read.  So unset is now what !Run would have set.  A set
+SparkFS$Memory is used as before (*RMReInit SparkFS reads it again).
+
+--- a/SparkFS/mem.c
++++ b/SparkFS/mem.c
+@@ -538,7 +538,10 @@
+ 
+  err=_kernel_swi(OS_ReadVarVal,&rx,&rx);
+ 
+- if(err || rx.r[4]!=1 || rx.r[2]!=4) size=0x10000;
++ /* ROSGD: in the ROM, SparkFS starts before any !Run can set
++    SparkFS$Memory.  Unset, it is what SparkFSApp's !Run sets on RISC OS 5,
++    -&2000000 -- a dynamic area of up to 32 MB -- not a 64K block of the RMA */
++ if(err || rx.r[4]!=1 || rx.r[2]!=4) size=-0x2000000;
+ 
+  err=NULL;
+ 

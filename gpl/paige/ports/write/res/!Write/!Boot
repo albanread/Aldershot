@@ -1,0 +1,11 @@
+| !Boot for Write
+If "<Write$Dir>"="" Then Set Write$Dir <Obey$Dir>
+IconSprites <Write$Dir>.!Sprites
+If "<File$Type_0A0>"="" Then Set File$Type_0A0 Write
+If "<Alias$@RunType_0A0>"="" Then Set Alias$@RunType_0A0 Run <Write$Dir>.!Run %%*0
+| RTF (&C32): Write opens it, unless another application has said it will
+If "<File$Type_C32>"="" Then Set File$Type_C32 RTF
+If "<Alias$@RunType_C32>"="" Then Set Alias$@RunType_C32 Run <Write$Dir>.!Run %%*0
+| the spelling dictionary: the box disc's (ports/rossqlite), as a macro so
+| that BoxDisc$Dir is read when Write starts
+If "<Write$Dictionary>"="" Then SetMacro Write$Dictionary <BoxDisc$Dir>.Resources.Dictionaries.spelldict

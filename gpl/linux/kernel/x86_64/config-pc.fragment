@@ -1,0 +1,167 @@
+# The ROSGD kernel for PCs: VMware and real hardware, booted by UEFI.
+#
+# Merged over config-x86_64.fragment (the QEMU box's), which it extends:
+# everything the box has, plus what a PC's firmware and devices need.  Still
+# everything built in, no modules.  build-kernel.sh pc names the options that
+# must survive olddefconfig.
+#
+# The kernel is its own boot loader: with the EFI stub, bzImage is a UEFI
+# application, copied to the ESP as \EFI\BOOT\BOOTX64.EFI -- the path any
+# UEFI firmware boots from a removable or unconfigured disc.  Firmware passes
+# it no command line and no initrd, so both are built in: the command line
+# below, and the ROM (the initramfs), whose path build-kernel.sh sets.
+
+# ---- booting: UEFI, the kernel as an EFI application -------------------------
+CONFIG_EFI=y
+CONFIG_EFI_STUB=y
+CONFIG_RELOCATABLE=y
+CONFIG_CMDLINE_BOOL=y
+# console=: the screen, then the serial port -- the last is /dev/console,
+# where /init reports (a VM's serial port is a file; a PC without one loses
+# nothing).  ip=dhcp as the QEMU box, but giving up after 8 s without a
+# cable.  rosgd.prompt: the * prompt, not the desktop.
+# rosgd.disc: wait for the RISC OS disc partition, which on a USB stick
+# appears a moment after /init starts.
+# rosgd.startwidth=1280: start in the display's own mode scaled to at least
+# 1280 across -- VMware's 1280 x 800 as it is, a 4K screen at 1920 x 1080
+# (the default, 640, halved VMware's to 640 x 400).
+# rosgd.boot: the RISC OS disc's own !Boot first (Choices$Write, Wimp$Scrap,
+# the file types its applications claim), then the desktop, as a RISC OS
+# machine starts.  rosgd.prompt in its place gives the * prompt instead.
+# rosgd.sshd: the SSH server, so the machine can be managed from another
+# one -- the keys that may log in are on its disc (image/build-image.sh),
+# and its own host key joins them there on the first boot.
+CONFIG_CMDLINE="console=tty0 console=ttyS0 quiet ip=dhcp carrier_timeout=8 rosgd.disc rosgd.boot rosgd.sshd rosgd.backdrop rosgd.startwidth=1280 rosgd.deskclock rosgd.deskmeter"
+
+# ---- the machine -------------------------------------------------------------
+CONFIG_HYPERVISOR_GUEST=y
+CONFIG_X86_X2APIC=y
+CONFIG_X86_PAT=y
+CONFIG_MTRR=y
+CONFIG_PCIEPORTBUS=y
+
+# ---- display ---------------------------------------------------------------
+# VMware's SVGA II adapter
+CONFIG_DRM_VMWGFX=y
+# anything else: the framebuffer the firmware left set up (UEFI's GOP), at
+# its one size; vmwgfx replaces it when it finds its device
+CONFIG_SYSFB_SIMPLEFB=y
+CONFIG_DRM_SIMPLEDRM=y
+# NVIDIA cards: nouveau, which drives the display engine itself -- real
+# modes on the card's own outputs, a hardware cursor, and the screen
+# scanned out of memory the box writes, with nothing copying it.  Turing
+# (the T1000's TU117) needs no firmware for that.  Its graphics engine
+# does: linux-firmware has it, much of it as links to TU116's
+# (deps/get-nvidia-firmware.sh fetches it), for GL ES through Mesa --
+# RISCOSGrandDesign design 29, G5.  Without it the card draws nothing of
+# its own, which is all RISC OS asks of it.  nouveau.modeset=0 on the
+# command line falls back to the firmware framebuffer above.
+CONFIG_DRM_NOUVEAU=y
+# QEMU's standard adapter, so an image tried in a virtual machine has a
+# driver of the same shape as the card's rather than the firmware's
+CONFIG_DRM_BOCHS=y
+# and the other cards a PC may have, so the box drives whatever is in the
+# machine: Intel's own graphics (no firmware needed to set a mode), the
+# chips a server's board carries for its remote console, and QXL for a
+# virtual machine.  AMD is deliberately absent: amdgpu and radeon claim the
+# card and then need firmware for the generation in hand, so without the
+# right blobs they take the screen away and leave nothing -- worse than
+# simpledrm, which always works.  The box picks the card with a display
+# connected to it, so a machine with two (a card and the processor's own)
+# comes up on the right one.
+CONFIG_DRM_I915=y
+CONFIG_DRM_AST=y
+CONFIG_DRM_MGAG200=y
+CONFIG_DRM_QXL=y
+
+# ---- sound: the base fragment's HD Audio, plus the codec a graphics card
+# carries -- a monitor or television on HDMI or DisplayPort is a sound
+# output of its own (an NVIDIA card's, say)
+CONFIG_SND_HDA_CODEC_HDMI=y
+# the codecs other boards carry, since which one a PC has is the board's
+# business and a box that cannot drive it has no sound at all
+CONFIG_SND_HDA_CODEC_ANALOG=y
+CONFIG_SND_HDA_CODEC_SIGMATEL=y
+CONFIG_SND_HDA_CODEC_VIA=y
+CONFIG_SND_HDA_CODEC_CONEXANT=y
+CONFIG_SND_HDA_CODEC_CMEDIA=y
+CONFIG_SND_HDA_CODEC_CA0132=y
+# and sound over USB: speakers, headsets and the little DACs, which are
+# how a machine with no socket of its own is heard
+CONFIG_SND_USB=y
+CONFIG_SND_USB_AUDIO=y
+
+# ---- the processors --------------------------------------------------------
+# The base fragment's eight are QEMU's; a PC has more, and the Worker module
+# runs its jobs on the ones the tasks are not using (design 28), so it is
+# the count Linux sees that decides how much of the machine is usable.
+# Thirty-two covers an i7-12700's twenty threads with room, at a few
+# kilobytes of per-processor state each.
+CONFIG_NR_CPUS=32
+
+# ---- restarting without the firmware ---------------------------------------
+# *Reboot loads the system on the EFI partition and jumps straight to it
+# (kexec), which takes seconds where a PC's own restart sits through its
+# POST; reading that partition wants vfat.  (*Restart, which starts RISC OS
+# again on the running kernel, needs nothing from the kernel at all.)
+CONFIG_KEXEC=y
+CONFIG_KEXEC_FILE=y
+CONFIG_FAT_FS=y
+CONFIG_VFAT_FS=y
+CONFIG_NLS=y
+CONFIG_NLS_CODEPAGE_437=y
+CONFIG_NLS_ISO8859_1=y
+CONFIG_NLS_DEFAULT="iso8859-1"
+
+# ---- input -----------------------------------------------------------------
+# a PC's own keyboard and mouse (VMware's, and laptops'), and VMware's
+# absolute pointer on it
+CONFIG_SERIO=y
+CONFIG_SERIO_I8042=y
+CONFIG_INPUT_KEYBOARD=y
+CONFIG_KEYBOARD_ATKBD=y
+CONFIG_INPUT_MOUSE=y
+CONFIG_MOUSE_PS2=y
+CONFIG_MOUSE_PS2_VMMOUSE=y
+# USB keyboards, mice and tablets
+CONFIG_USB_SUPPORT=y
+CONFIG_USB=y
+CONFIG_USB_PCI=y
+CONFIG_USB_XHCI_HCD=y
+CONFIG_USB_XHCI_PCI=y
+CONFIG_USB_EHCI_HCD=y
+CONFIG_USB_EHCI_PCI=y
+CONFIG_USB_OHCI_HCD=y
+CONFIG_USB_OHCI_HCD_PCI=y
+CONFIG_USB_UHCI_HCD=y
+CONFIG_HID_SUPPORT=y
+CONFIG_HID=y
+CONFIG_HID_GENERIC=y
+CONFIG_USB_HID=y
+# wireless keyboards and mice on a Logitech receiver, which a PC desktop
+# often has; everything else is a boot-protocol device hid-generic drives
+CONFIG_HID_LOGITECH=y
+CONFIG_HID_LOGITECH_DJ=y
+
+# ---- discs: the RISC OS disc (ext4, a GPT partition named "RISC OS disc") ----
+# on VMware's SATA disc, or on the USB stick a PC boots from
+CONFIG_ATA=y
+CONFIG_SATA_AHCI=y
+CONFIG_SCSI=y
+CONFIG_BLK_DEV_SD=y
+CONFIG_USB_STORAGE=y
+CONFIG_USB_UAS=y
+# and a PC's own NVMe disc, for a box installed on one rather than run from
+# the stick
+CONFIG_BLK_DEV_NVME=y
+
+# ---- network: common wired NICs, and VMware's --------------------------------
+CONFIG_ETHERNET=y
+CONFIG_NET_VENDOR_INTEL=y
+CONFIG_E1000=y
+CONFIG_E1000E=y
+CONFIG_IGB=y
+CONFIG_IGC=y
+CONFIG_NET_VENDOR_REALTEK=y
+CONFIG_R8169=y
+CONFIG_VMXNET3=y

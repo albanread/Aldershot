@@ -1,0 +1,21 @@
+SparkCPIO's loadheader: newc's and crc's 8 hex digits end before strtoul.
+
+For the ASCII headers loadheader reads each field into temp[16] and converts
+it with strtoul.  The octal cases end the digits (temp[6]=0, temp[11]=0); the
+hex case ('x': newc, crc) does not, so the bytes after the 8 digits -- what
+was last on the stack there -- are read as more digits when they happen to be
+hex.  RISC OS 5.30's SparkFS then calls a newc archive "Bad archive", once
+something (an odc archive's 11 octal digits, for one) has left digits there,
+until a reset.  The 8 digits are now ended, as the other cases end theirs.
+
+diff -ru a/SparkCPIO/cat.c b/SparkCPIO/cat.c
+--- a/SparkCPIO/cat.c	2026-10-02 07:42:26.730995919 +0100
++++ b/SparkCPIO/cat.c	2026-10-02 07:42:26.746836749 +0100
+@@ -463,6 +463,7 @@
+    case 'x':
+             err=readarc(arc,temp,8);
+             if(err) break;
++            temp[8]=0;                   /* as 'o' and 'O' end theirs */
+             val=strtoul(temp,0,16);
+             hdr->array[o]=val;
+             break;

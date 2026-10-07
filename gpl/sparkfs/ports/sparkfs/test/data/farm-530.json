@@ -1,0 +1,834 @@
+{
+ "530-s1m0": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "530_s1m0 DWR/ Directory 00012AC3",
+   "Docs D/ Directory 00:00:00 01-Jan-1900 73 kbytes",
+   "Empty WR/ Data 06:43:13 02-Oct-2026 0 bytes",
+   "ReadMe WR/ Text 06:43:13 02-Oct-2026 56 bytes",
+   "Runs WR/ Data 06:43:13 02-Oct-2026 1327 bytes",
+   "Random WR/ Data 06:43:13 02-Oct-2026 12 kbytes",
+   "Sub DWR/ Directory 00:00:00 01-Jan-1900 16 kbytes",
+   "Text WR/ Text 06:43:13 02-Oct-2026 46 kbytes",
+   "Mixed WR/ Data 06:43:13 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "530-s1m1": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "530_s1m1 DWR/ Directory 00006762",
+   "Docs D/ Directory 00:00:00 01-Jan-1900 26 kbytes",
+   "Empty WR/ Data 06:43:13 02-Oct-2026 0 bytes",
+   "ReadMe WR/ Text 06:43:13 02-Oct-2026 56 bytes",
+   "Runs WR/ Data 06:43:13 02-Oct-2026 1327 bytes",
+   "Random WR/ Data 06:43:13 02-Oct-2026 12 kbytes",
+   "Sub DWR/ Directory 00:00:00 01-Jan-1900 7 kbytes",
+   "Text WR/ Text 06:43:13 02-Oct-2026 46 kbytes",
+   "Mixed WR/ Data 06:43:13 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "530-s1m11": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "530_s1m11 DWR/ Directory 0000641E",
+   "Docs D/ Directory 00:00:00 01-Jan-1900 25 kbytes",
+   "Empty WR/ Data 06:43:13 02-Oct-2026 0 bytes",
+   "ReadMe WR/ Text 06:43:13 02-Oct-2026 56 bytes",
+   "Runs WR/ Data 06:43:13 02-Oct-2026 1327 bytes",
+   "Random WR/ Data 06:43:13 02-Oct-2026 12 kbytes",
+   "Sub DWR/ Directory 00:00:00 01-Jan-1900 7 kbytes",
+   "Text WR/ Text 06:43:13 02-Oct-2026 46 kbytes",
+   "Mixed WR/ Data 06:43:13 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "530-s1m12": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "530_s1m12 DWR/ Directory 0000AC5D",
+   "Docs D/ Directory 00:00:00 01-Jan-1900 43 kbytes",
+   "Empty WR/ Data 06:43:13 02-Oct-2026 0 bytes",
+   "ReadMe WR/ Text 06:43:13 02-Oct-2026 56 bytes",
+   "Runs WR/ Data 06:43:13 02-Oct-2026 1327 bytes",
+   "Random WR/ Data 06:43:13 02-Oct-2026 12 kbytes",
+   "Sub DWR/ Directory 00:00:00 01-Jan-1900 6 kbytes",
+   "Text WR/ Text 06:43:13 02-Oct-2026 46 kbytes",
+   "Mixed WR/ Data 06:43:13 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "530-s1m6": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "530_s1m6 DWR/ Directory 0000641B",
+   "Docs D/ Directory 00:00:00 01-Jan-1900 25 kbytes",
+   "Empty WR/ Data 06:43:13 02-Oct-2026 0 bytes",
+   "ReadMe WR/ Text 06:43:13 02-Oct-2026 56 bytes",
+   "Runs WR/ Data 06:43:13 02-Oct-2026 1327 bytes",
+   "Random WR/ Data 06:43:13 02-Oct-2026 12 kbytes",
+   "Sub DWR/ Directory 00:00:00 01-Jan-1900 7 kbytes",
+   "Text WR/ Text 06:43:13 02-Oct-2026 46 kbytes",
+   "Mixed WR/ Data 06:43:13 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "530-s1m7": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "530_s1m7 DWR/ Directory 0000670B",
+   "Docs D/ Directory 00:00:00 01-Jan-1900 25 kbytes",
+   "Empty WR/ Data 06:43:13 02-Oct-2026 0 bytes",
+   "ReadMe WR/ Text 06:43:13 02-Oct-2026 56 bytes",
+   "Runs WR/ Data 06:43:13 02-Oct-2026 1327 bytes",
+   "Random WR/ Data 06:43:13 02-Oct-2026 12 kbytes",
+   "Sub DWR/ Directory 00:00:00 01-Jan-1900 7 kbytes",
+   "Text WR/ Text 06:43:13 02-Oct-2026 46 kbytes",
+   "Mixed WR/ Data 06:43:13 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "530-s3m0": {
+  "files": {
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c",
+   "Text": "a69c2d2a813b952cde4d3cd18db91f7030511696"
+  },
+  "listing": [
+   "530_s3m0 DWR/ Directory 00012A25",
+   "Empty WR/WR Data 06:43:12 02-Oct-2026 0 bytes",
+   "Mixed WR/WR Data 06:43:12 02-Oct-2026 16 kbytes",
+   "Random WR/WR Data 06:43:12 02-Oct-2026 12 kbytes",
+   "ReadMe WR/WR Data 06:43:12 02-Oct-2026 56 bytes",
+   "Runs WR/WR Data 06:43:12 02-Oct-2026 1327 bytes",
+   "Text WR/WR Text 06:43:12 02-Oct-2026 46 kbytes"
+  ]
+ },
+ "530-s3m1": {
+  "files": {
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c",
+   "Text": "a69c2d2a813b952cde4d3cd18db91f7030511696"
+  },
+  "listing": [
+   "530_s3m1 DWR/ Directory 000066C4",
+   "Empty WR/WR Data 06:43:12 02-Oct-2026 0 bytes",
+   "Mixed WR/WR Data 06:43:12 02-Oct-2026 16 kbytes",
+   "Random WR/WR Data 06:43:12 02-Oct-2026 12 kbytes",
+   "ReadMe WR/WR Data 06:43:12 02-Oct-2026 56 bytes",
+   "Runs WR/WR Data 06:43:12 02-Oct-2026 1327 bytes",
+   "Text WR/WR Text 06:43:12 02-Oct-2026 46 kbytes"
+  ]
+ },
+ "530-s3m12": {
+  "files": {
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c",
+   "Text": "a69c2d2a813b952cde4d3cd18db91f7030511696"
+  },
+  "listing": [
+   "530_s3m12 DWR/ Directory 0000ABBF",
+   "Empty WR/WR Data 06:43:12 02-Oct-2026 0 bytes",
+   "Mixed WR/WR Data 06:43:12 02-Oct-2026 16 kbytes",
+   "Random WR/WR Data 06:43:12 02-Oct-2026 12 kbytes",
+   "ReadMe WR/WR Data 06:43:12 02-Oct-2026 56 bytes",
+   "Runs WR/WR Data 06:43:12 02-Oct-2026 1327 bytes",
+   "Text WR/WR Text 06:43:12 02-Oct-2026 46 kbytes"
+  ]
+ },
+ "530-s3m6": {
+  "files": {
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c",
+   "Text": "a69c2d2a813b952cde4d3cd18db91f7030511696"
+  },
+  "listing": [
+   "530_s3m6 DWR/ Directory 00006400",
+   "Empty WR/WR Data 06:43:12 02-Oct-2026 0 bytes",
+   "Mixed WR/WR Data 06:43:12 02-Oct-2026 16 kbytes",
+   "Random WR/WR Data 06:43:12 02-Oct-2026 12 kbytes",
+   "ReadMe WR/WR Data 06:43:12 02-Oct-2026 56 bytes",
+   "Runs WR/WR Data 06:43:12 02-Oct-2026 1327 bytes",
+   "Text WR/WR Text 06:43:12 02-Oct-2026 46 kbytes"
+  ]
+ },
+ "arcfs-82": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "arcfs_82 DWR/ Directory 00012B61",
+   "ReadMe WR/WR Text 06:08:30 02-Oct-2026 56 bytes",
+   "Docs DWR/ Directory 06:08:30 02-Oct-2026 1 byte",
+   "Runs WR/WR Data 06:08:30 02-Oct-2026 1327 bytes",
+   "Empty WR/WR Data 06:08:30 02-Oct-2026 0 bytes",
+   "Text WR/WR Text 06:08:30 02-Oct-2026 46 kbytes",
+   "Random WR/WR Data 06:08:30 02-Oct-2026 12 kbytes",
+   "Sub DWR/ Directory 06:08:30 02-Oct-2026 1 byte",
+   "Mixed WR/WR Data 06:08:30 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "arcfs-83": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "arcfs_83 DWR/ Directory 0001269E",
+   "ReadMe WR/WR Text 06:08:30 02-Oct-2026 56 bytes",
+   "Docs DWR/ Directory 06:08:30 02-Oct-2026 1 byte",
+   "Runs WR/WR Data 06:08:30 02-Oct-2026 1327 bytes",
+   "Empty WR/WR Data 06:08:30 02-Oct-2026 0 bytes",
+   "Text WR/WR Text 06:08:30 02-Oct-2026 46 kbytes",
+   "Random WR/WR Data 06:08:30 02-Oct-2026 12 kbytes",
+   "Sub DWR/ Directory 06:08:30 02-Oct-2026 1 byte",
+   "Mixed WR/WR Data 06:08:30 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "arcfs-ff": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "arcfs_ff DWR/ Directory 00006459",
+   "ReadMe WR/WR Text 06:08:30 02-Oct-2026 56 bytes",
+   "Docs DWR/ Directory 06:08:30 02-Oct-2026 1 byte",
+   "Runs WR/WR Data 06:08:30 02-Oct-2026 1327 bytes",
+   "Empty WR/WR Data 06:08:30 02-Oct-2026 0 bytes",
+   "Text WR/WR Text 06:08:30 02-Oct-2026 46 kbytes",
+   "Random WR/WR Data 06:08:30 02-Oct-2026 12 kbytes",
+   "Sub DWR/ Directory 06:08:30 02-Oct-2026 1 byte",
+   "Mixed WR/WR Data 06:08:30 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "arj-0": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "arj_0 DWR/ Directory 00012AD8",
+   "Docs DWR/WR Directory 06:08:30 02-Oct-2026 73 kbytes",
+   "Empty WR/WR Data 06:08:30 02-Oct-2026 0 bytes",
+   "ReadMe WR/WR Data 06:08:30 02-Oct-2026 56 bytes",
+   "Runs WR/WR Data 06:08:30 02-Oct-2026 1327 bytes",
+   "Random WR/WR Data 06:08:30 02-Oct-2026 12 kbytes",
+   "Sub DWR/WR Directory 06:08:30 02-Oct-2026 16 kbytes",
+   "Text WR/WR Data 06:08:30 02-Oct-2026 46 kbytes",
+   "Mixed WR/WR Data 06:08:30 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "arj-1": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "arj_1 DWR/ Directory 00006039",
+   "Docs DWR/WR Directory 06:08:30 02-Oct-2026 24 kbytes",
+   "Empty WR/WR Data 06:08:30 02-Oct-2026 0 bytes",
+   "ReadMe WR/WR Data 06:08:30 02-Oct-2026 56 bytes",
+   "Runs WR/WR Data 06:08:30 02-Oct-2026 1327 bytes",
+   "Random WR/WR Data 06:08:30 02-Oct-2026 12 kbytes",
+   "Sub DWR/WR Directory 06:08:30 02-Oct-2026 7 kbytes",
+   "Text WR/WR Data 06:08:30 02-Oct-2026 46 kbytes",
+   "Mixed WR/WR Data 06:08:30 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "arj-4": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "arj_4 DWR/ Directory 000069FB",
+   "Docs DWR/WR Directory 06:08:30 02-Oct-2026 26 kbytes",
+   "Empty WR/WR Data 06:08:30 02-Oct-2026 0 bytes",
+   "ReadMe WR/WR Data 06:08:30 02-Oct-2026 56 bytes",
+   "Runs WR/WR Data 06:08:30 02-Oct-2026 1327 bytes",
+   "Random WR/WR Data 06:08:30 02-Oct-2026 12 kbytes",
+   "Sub DWR/WR Directory 06:08:30 02-Oct-2026 8 kbytes",
+   "Text WR/WR Data 06:08:30 02-Oct-2026 46 kbytes",
+   "Mixed WR/WR Data 06:08:30 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "cab-mszip": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "cab_mszip DWR/ Directory 00006698",
+   "Docs DWR/WR Directory 06:08:30 02-Oct-2026 73 kbytes",
+   "Empty WR/WR Data 06:08:30 02-Oct-2026 0 bytes",
+   "ReadMe WR/WR Data 06:08:30 02-Oct-2026 56 bytes",
+   "Runs WR/WR Data 06:08:30 02-Oct-2026 1327 bytes",
+   "Random WR/WR Data 06:08:30 02-Oct-2026 12 kbytes",
+   "Sub DWR/WR Directory 06:08:30 02-Oct-2026 16 kbytes",
+   "Text WR/WR Data 06:08:30 02-Oct-2026 46 kbytes",
+   "Mixed WR/WR Data 06:08:30 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "cab-store": {
+  "files": {
+   "Docs/Random": "f4ef8d78b25f8ed640ee0de3eb4fa119d3576f4a",
+   "Docs/Sub/Mixed": "b61ce2120f66b4f5b5adfc7bb4b868a89a2171fc",
+   "Docs/Text": "79252d6a94d71d5a7df96806369de77a3f83c6ef",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "913b6aa3231544db8a76b50894325fd268ac8a42",
+   "Runs": "5ebaf289821a7cd9c2b2b9651ec6bb2f3a415c54"
+  },
+  "listing": [
+   "cab_store DWR/ Directory 00012A50",
+   "Docs DWR/WR Directory 06:08:30 02-Oct-2026 73 kbytes",
+   "Empty WR/WR Data 06:08:30 02-Oct-2026 0 bytes",
+   "ReadMe WR/WR Data 06:08:30 02-Oct-2026 56 bytes",
+   "Runs WR/WR Data 06:08:30 02-Oct-2026 1327 bytes",
+   "Random WR/WR Data 06:08:30 02-Oct-2026 12 kbytes",
+   "Sub DWR/WR Directory 06:08:30 02-Oct-2026 16 kbytes",
+   "Text WR/WR Data 06:08:30 02-Oct-2026 46 kbytes",
+   "Mixed WR/WR Data 06:08:30 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "cpio-bin": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "cpio_bin DWR/ Directory 00012AB6",
+   "Docs DWR/WR Directory 06:08:30 02-Oct-2026 0 bytes",
+   "Empty WR/WR Data 06:08:30 02-Oct-2026 0 bytes",
+   "ReadMe WR/WR Data 06:08:30 02-Oct-2026 56 bytes",
+   "Runs WR/WR Data 06:08:30 02-Oct-2026 1327 bytes",
+   "Random WR/WR Data 06:08:30 02-Oct-2026 12 kbytes",
+   "Sub DWR/WR Directory 06:08:30 02-Oct-2026 0 bytes",
+   "Text WR/WR Data 06:08:30 02-Oct-2026 46 kbytes",
+   "Mixed WR/WR Data 06:08:30 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "cpio-newc": {
+  "error": "Bad archive",
+  "files": {},
+  "listing": [
+   "cpio_newc DWR/ Directory 00012DB4"
+  ]
+ },
+ "cpio-odc": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "cpio_odc DWR/ Directory 00012C71",
+   "Docs DWR/WR Directory 06:08:30 02-Oct-2026 0 bytes",
+   "Empty WR/WR Data 06:08:30 02-Oct-2026 0 bytes",
+   "ReadMe WR/WR Data 06:08:30 02-Oct-2026 56 bytes",
+   "Runs WR/WR Data 06:08:30 02-Oct-2026 1327 bytes",
+   "Random WR/WR Data 06:08:30 02-Oct-2026 12 kbytes",
+   "Sub DWR/WR Directory 06:08:30 02-Oct-2026 0 bytes",
+   "Text WR/WR Data 06:08:30 02-Oct-2026 46 kbytes",
+   "Mixed WR/WR Data 06:08:30 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "cpt": {
+  "files": {
+   "Docs/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917"
+  },
+  "listing": [
+   "cpt DWR/ Directory 0000F728",
+   "ReadMe WR/WR Text 06:06:57 03-Oct-2026 56 bytes",
+   "Docs DWR/WR Directory 06:06:57 03-Oct-2026 0 bytes",
+   "Empty WR/WR Text 06:06:57 03-Oct-2026 0 bytes",
+   "Text WR/WR Text 06:06:57 03-Oct-2026 46 kbytes",
+   "Mixed WR/WR Text 06:06:57 03-Oct-2026 16 kbytes"
+  ]
+ },
+ "cpt-nested": {
+  "files": {
+   "Docs/Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917"
+  },
+  "listing": [
+   "cpt_nested DWR/ Directory 0000F72E",
+   "ReadMe WR/WR Text 06:06:57 03-Oct-2026 56 bytes",
+   "Docs DWR/WR Directory 06:06:57 03-Oct-2026 0 bytes",
+   "Text WR/WR Text 06:06:57 03-Oct-2026 46 kbytes",
+   "Sub DWR/WR Directory 06:06:57 03-Oct-2026 0 bytes",
+   "Empty WR/WR Text 06:06:57 03-Oct-2026 0 bytes"
+  ]
+ },
+ "lzh-l0lh0": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "lzh_l0lh0 DWR/ Directory 00012A37",
+   "Docs DWR/WR Directory 06:08:30 02-Oct-2026 73 kbytes",
+   "Empty WR/WR Data 06:08:30 02-Oct-2026 0 bytes",
+   "ReadMe WR/WR Data 06:08:30 02-Oct-2026 56 bytes",
+   "Runs WR/WR Data 06:08:30 02-Oct-2026 1327 bytes",
+   "Random WR/WR Data 06:08:30 02-Oct-2026 12 kbytes",
+   "Sub DWR/WR Directory 06:08:30 02-Oct-2026 16 kbytes",
+   "Text WR/WR Data 06:08:30 02-Oct-2026 46 kbytes",
+   "Mixed WR/WR Data 06:08:30 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "lzh-l0lh5": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "lzh_l0lh5 DWR/ Directory 00005E18",
+   "Docs DWR/WR Directory 06:08:30 02-Oct-2026 23 kbytes",
+   "Empty WR/WR Data 06:08:30 02-Oct-2026 0 bytes",
+   "ReadMe WR/WR Data 06:08:30 02-Oct-2026 56 bytes",
+   "Runs WR/WR Data 06:08:30 02-Oct-2026 1327 bytes",
+   "Random WR/WR Data 06:08:30 02-Oct-2026 12 kbytes",
+   "Sub DWR/WR Directory 06:08:30 02-Oct-2026 7 kbytes",
+   "Text WR/WR Data 06:08:30 02-Oct-2026 46 kbytes",
+   "Mixed WR/WR Data 06:08:30 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "lzh-l1lh4": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "lzh_l1lh4 DWR/ Directory 00005E23",
+   "Docs DWR/WR Directory 06:08:30 02-Oct-2026 23 kbytes",
+   "Empty WR/WR Data 06:08:30 02-Oct-2026 0 bytes",
+   "ReadMe WR/WR Data 06:08:30 02-Oct-2026 56 bytes",
+   "Runs WR/WR Data 06:08:30 02-Oct-2026 1327 bytes",
+   "Random WR/WR Data 06:08:30 02-Oct-2026 12 kbytes",
+   "Sub DWR/WR Directory 06:08:30 02-Oct-2026 7 kbytes",
+   "Text WR/WR Data 06:08:30 02-Oct-2026 46 kbytes",
+   "Mixed WR/WR Data 06:08:30 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "lzh-l1lh5": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "lzh_l1lh5 DWR/ Directory 00005E7D",
+   "Docs DWR/WR Directory 06:08:30 02-Oct-2026 23 kbytes",
+   "Empty WR/WR Data 06:08:30 02-Oct-2026 0 bytes",
+   "ReadMe WR/WR Data 06:08:30 02-Oct-2026 56 bytes",
+   "Runs WR/WR Data 06:08:30 02-Oct-2026 1327 bytes",
+   "Random WR/WR Data 06:08:30 02-Oct-2026 12 kbytes",
+   "Sub DWR/WR Directory 06:08:30 02-Oct-2026 7 kbytes",
+   "Text WR/WR Data 06:08:30 02-Oct-2026 46 kbytes",
+   "Mixed WR/WR Data 06:08:30 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "lzh-l2lh0": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "lzh_l2lh0 DWR/ Directory 00012AAC",
+   "Docs DWR/WR Directory 09:19:00 31-May-2033 73 kbytes",
+   "Empty WR/WR Data 09:19:00 31-May-2033 0 bytes",
+   "ReadMe WR/WR Data 09:19:00 31-May-2033 56 bytes",
+   "Runs WR/WR Data 09:19:00 31-May-2033 1327 bytes",
+   "Random WR/WR Data 09:19:00 31-May-2033 12 kbytes",
+   "Sub DWR/WR Directory 09:19:00 31-May-2033 16 kbytes",
+   "Text WR/WR Data 09:19:00 31-May-2033 46 kbytes",
+   "Mixed WR/WR Data 09:19:00 31-May-2033 16 kbytes"
+  ]
+ },
+ "lzh-l2lh5": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "lzh_l2lh5 DWR/ Directory 00005E8D",
+   "Docs DWR/WR Directory 09:19:00 31-May-2033 23 kbytes",
+   "Empty WR/WR Data 09:19:00 31-May-2033 0 bytes",
+   "ReadMe WR/WR Data 09:19:00 31-May-2033 56 bytes",
+   "Runs WR/WR Data 09:19:00 31-May-2033 1327 bytes",
+   "Random WR/WR Data 09:19:00 31-May-2033 12 kbytes",
+   "Sub DWR/WR Directory 09:19:00 31-May-2033 7 kbytes",
+   "Text WR/WR Data 09:19:00 31-May-2033 46 kbytes",
+   "Mixed WR/WR Data 09:19:00 31-May-2033 16 kbytes"
+  ]
+ },
+ "nested": {
+  "files": {
+   "Level1.arc/FIle1": "f7ff9e8b7bb2e09b70935a5d785e0cc5d9d0abf0",
+   "Level1.arc/Folder1/FIle2": "f7ff9e8b7bb2e09b70935a5d785e0cc5d9d0abf0"
+  },
+  "listing": [
+   "nested DWR/ Directory 000000B4",
+   "Level1/arc D/ Directory 21:40:09 10-Jun-2023 137 bytes",
+   "FIle1 WR/WR Text 21:39:58 10-Jun-2023 5 bytes",
+   "Folder1 DWR/WR Directory 21:39:51 10-Jun-2023 48 bytes",
+   "FIle2 WR/WR Text 21:39:58 10-Jun-2023 5 bytes"
+  ]
+ },
+ "packdir": {
+  "files": {
+   "Packed/Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Packed/Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Packed/Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Packed/Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "Packed/ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Packed/Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "packdir DWR/ Directory 000063DA",
+   "Packed DWR/R Directory 06:08:30 02-Oct-2026 0 bytes",
+   "ReadMe WR/WR Text 06:08:30 02-Oct-2026 56 bytes",
+   "Docs DWR/R Directory 06:08:30 02-Oct-2026 0 bytes",
+   "Runs WR/WR Data 06:08:30 02-Oct-2026 1327 bytes",
+   "Empty WR/WR Data 06:08:30 02-Oct-2026 0 bytes",
+   "Text WR/WR Text 06:08:30 02-Oct-2026 46 kbytes",
+   "Random WR/WR Data 06:08:30 02-Oct-2026 12 kbytes",
+   "Sub DWR/R Directory 06:08:30 02-Oct-2026 0 bytes",
+   "Mixed WR/WR Data 06:08:30 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "pit-4": {
+  "files": {
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c",
+   "Text": "a69c2d2a813b952cde4d3cd18db91f7030511696"
+  },
+  "listing": [
+   "pit_4 DWR/ Directory 0000AE99",
+   "ReadMe WR/WR Text 06:06:57 03-Oct-2026 56 bytes",
+   "Text WR/WR Text 06:06:57 03-Oct-2026 46 kbytes",
+   "Random WR/WR Text 06:06:57 03-Oct-2026 12 kbytes",
+   "Mixed WR/WR Text 06:06:57 03-Oct-2026 16 kbytes",
+   "Runs WR/WR Text 06:06:57 03-Oct-2026 1327 bytes",
+   "Empty WR/WR Text 06:06:57 03-Oct-2026 0 bytes"
+  ]
+ },
+ "pit-both": {
+  "error": "Not enough free memory",
+  "files": {
+   "Mixed": "107bdf569d5ecfd88dd5d959c295cca020ba9634",
+   "Random": "a4ee48863eb92f6328f39e1955eb2a8fb9636c3c",
+   "ReadMe": "f505af98a92f22bdd0799c168c407e6ddc204293",
+   "Runs": "0d2f1ca8f4b504b0cbc8ca0de1bbd793d40d6ca3",
+   "Text": "01d81b166106f1c40cb1ccca70a51bdbc0b1966f"
+  },
+  "listing": [
+   "pit_both DWR/ Directory 0000AE99",
+   "ReadMe WR/WR Text 06:06:57 03-Oct-2026 416 bytes",
+   "Text WR/WR Text 06:06:57 03-Oct-2026 46 kbytes",
+   "Random WR/WR Text 06:06:57 03-Oct-2026 12 kbytes",
+   "Mixed WR/WR Text 06:06:57 03-Oct-2026 16 kbytes",
+   "Runs WR/WR Text 06:06:57 03-Oct-2026 1455 bytes",
+   "Empty WR/WR Text 06:06:57 03-Oct-2026 128 bytes"
+  ]
+ },
+ "pit-g": {
+  "files": {
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c",
+   "Text": "a69c2d2a813b952cde4d3cd18db91f7030511696"
+  },
+  "listing": [
+   "pit_g DWR/ Directory 00012CB9",
+   "ReadMe WR/WR Text 06:06:57 03-Oct-2026 56 bytes",
+   "Text WR/WR Text 06:06:57 03-Oct-2026 46 kbytes",
+   "Random WR/WR Text 06:06:57 03-Oct-2026 12 kbytes",
+   "Mixed WR/WR Text 06:06:57 03-Oct-2026 16 kbytes",
+   "Runs WR/WR Text 06:06:57 03-Oct-2026 1327 bytes",
+   "Empty WR/WR Text 06:06:57 03-Oct-2026 0 bytes"
+  ]
+ },
+ "sit-0": {
+  "files": {
+   "Docs/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "sit_0 DWR/ Directory 00012DF3",
+   "ReadMe WR/WR Text 06:06:57 03-Oct-2026 56 bytes",
+   "Docs DWR/WR Directory 06:06:57 03-Oct-2026 0 bytes",
+   "Runs WR/WR Text 06:06:57 03-Oct-2026 1327 bytes",
+   "Empty WR/WR Text 06:06:57 03-Oct-2026 0 bytes",
+   "Text WR/WR Text 06:06:57 03-Oct-2026 46 kbytes",
+   "Random WR/WR Text 06:06:57 03-Oct-2026 12 kbytes",
+   "Mixed WR/WR Text 06:06:57 03-Oct-2026 16 kbytes"
+  ]
+ },
+ "sit-1": {
+  "files": {
+   "Docs/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "sit_1 DWR/ Directory 00012930",
+   "ReadMe WR/WR Text 06:06:57 03-Oct-2026 56 bytes",
+   "Docs DWR/WR Directory 06:06:57 03-Oct-2026 0 bytes",
+   "Runs WR/WR Text 06:06:57 03-Oct-2026 1327 bytes",
+   "Empty WR/WR Text 06:06:57 03-Oct-2026 0 bytes",
+   "Text WR/WR Text 06:06:57 03-Oct-2026 46 kbytes",
+   "Random WR/WR Text 06:06:57 03-Oct-2026 12 kbytes",
+   "Mixed WR/WR Text 06:06:57 03-Oct-2026 16 kbytes"
+  ]
+ },
+ "sit-2": {
+  "files": {
+   "Docs/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "sit_2 DWR/ Directory 000066D5",
+   "ReadMe WR/WR Text 06:06:57 03-Oct-2026 56 bytes",
+   "Docs DWR/WR Directory 06:06:57 03-Oct-2026 0 bytes",
+   "Runs WR/WR Text 06:06:57 03-Oct-2026 1327 bytes",
+   "Empty WR/WR Text 06:06:57 03-Oct-2026 0 bytes",
+   "Text WR/WR Text 06:06:57 03-Oct-2026 46 kbytes",
+   "Random WR/WR Text 06:06:57 03-Oct-2026 12 kbytes",
+   "Mixed WR/WR Text 06:06:57 03-Oct-2026 16 kbytes"
+  ]
+ },
+ "sit-both": {
+  "files": {
+   "Docs/Mixed": "225bc530ec6295d435a1e9be064779c8cfcc1dca",
+   "Docs/Random": "8e0fd8987df890c58fe3c2d867214cb62eb7b317",
+   "Docs/Text": "c30f1011a66554a5041e4c122a8cea4dad9c93bb",
+   "Empty": "3310830e7a33f85dbc9ff6666844e236037c82b1",
+   "ReadMe": "fd6bc7cf063389ce8a4289df15f9ee95062e4068",
+   "Runs": "e51ea04e70f0d023caf0c726ae99389255b51d6c"
+  },
+  "listing": [
+   "sit_both DWR/ Directory 000066D5",
+   "ReadMe WR/WR Text 06:06:57 03-Oct-2026 512 bytes",
+   "Docs DWR/WR Directory 06:06:57 03-Oct-2026 0 bytes",
+   "Runs WR/WR Text 06:06:57 03-Oct-2026 1536 bytes",
+   "Empty WR/WR Text 06:06:57 03-Oct-2026 128 bytes",
+   "Text WR/WR Text 06:06:57 03-Oct-2026 46 kbytes",
+   "Random WR/WR Text 06:06:57 03-Oct-2026 12 kbytes",
+   "Mixed WR/WR Text 06:06:57 03-Oct-2026 16 kbytes"
+  ]
+ },
+ "sit-nested": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c",
+   "Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f"
+  },
+  "listing": [
+   "sit_nested DWR/ Directory 000067B5",
+   "ReadMe WR/WR Text 06:06:57 03-Oct-2026 56 bytes",
+   "Docs DWR/WR Directory 06:06:57 03-Oct-2026 0 bytes",
+   "Sub DWR/WR Directory 06:06:57 03-Oct-2026 0 bytes",
+   "Runs WR/WR Text 06:06:57 03-Oct-2026 1327 bytes",
+   "Empty WR/WR Text 06:06:57 03-Oct-2026 0 bytes",
+   "Text WR/WR Text 06:06:57 03-Oct-2026 46 kbytes",
+   "Random WR/WR Text 06:06:57 03-Oct-2026 12 kbytes"
+  ]
+ },
+ "zoo-0": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "zoo_0 DWR/ Directory 00012BA1",
+   "Docs DWR/WR Directory 06:08:30 02-Oct-2026 73 kbytes",
+   "Empty WR/WR Data 06:08:30 02-Oct-2026 0 bytes",
+   "ReadMe WR/WR Data 06:08:30 02-Oct-2026 56 bytes",
+   "Runs WR/WR Data 06:08:30 02-Oct-2026 1327 bytes",
+   "Random WR/WR Data 06:08:30 02-Oct-2026 12 kbytes",
+   "Sub DWR/WR Directory 06:08:30 02-Oct-2026 16 kbytes",
+   "Text WR/WR Data 06:08:30 02-Oct-2026 46 kbytes",
+   "Mixed WR/WR Data 06:08:30 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "zoo-1": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "zoo_1 DWR/ Directory 00006503",
+   "Docs DWR/WR Directory 06:08:30 02-Oct-2026 25 kbytes",
+   "Empty WR/WR Data 06:08:30 02-Oct-2026 0 bytes",
+   "ReadMe WR/WR Data 06:08:30 02-Oct-2026 56 bytes",
+   "Runs WR/WR Data 06:08:30 02-Oct-2026 1327 bytes",
+   "Random WR/WR Data 06:08:30 02-Oct-2026 12 kbytes",
+   "Sub DWR/WR Directory 06:08:30 02-Oct-2026 7 kbytes",
+   "Text WR/WR Data 06:08:30 02-Oct-2026 46 kbytes",
+   "Mixed WR/WR Data 06:08:30 02-Oct-2026 16 kbytes"
+  ]
+ },
+ "zoo-2": {
+  "files": {
+   "Docs/Random": "db9a5f023f56fd8c1c1979cf395231c7bd6fe4ee",
+   "Docs/Sub/Mixed": "de6176a370cd848513082f85d8bda689c670135f",
+   "Docs/Text": "a69c2d2a813b952cde4d3cd18db91f7030511696",
+   "Empty": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+   "ReadMe": "2ec2c150944b641d0e5e20132d6a9a99fd17c917",
+   "Runs": "320020dc14d68feb8f69afeee33384571c56143c"
+  },
+  "listing": [
+   "zoo_2 DWR/ Directory 00005F89",
+   "Docs DWR/WR Directory 06:08:30 02-Oct-2026 23 kbytes",
+   "Empty WR/WR Data 06:08:30 02-Oct-2026 0 bytes",
+   "ReadMe WR/WR Data 06:08:30 02-Oct-2026 56 bytes",
+   "Runs WR/WR Data 06:08:30 02-Oct-2026 1327 bytes",
+   "Random WR/WR Data 06:08:30 02-Oct-2026 12 kbytes",
+   "Sub DWR/WR Directory 06:08:30 02-Oct-2026 7 kbytes",
+   "Text WR/WR Data 06:08:30 02-Oct-2026 46 kbytes",
+   "Mixed WR/WR Data 06:08:30 02-Oct-2026 16 kbytes"
+  ]
+ }
+}

@@ -1,0 +1,201 @@
+# The ROSGD guest kernel, arm64, for Apple's Virtualization framework (the
+# Apple Silicon box, RISCOSGrandDesign design 26 §4): merged over
+# `make ARCH=arm64 tinyconfig`.
+#
+# The x86-64 fragment's box, for VZ's devices instead of QEMU's.  Everything
+# built in, no modules: the kernel carries exactly what the personality asks
+# of it (design 10).  build-kernel.sh box-aarch64 names the options that must
+# survive olddefconfig, and fails if one does not.
+#
+# VZ's machine (the device tree VZLinuxBootLoader hands the kernel,
+# "apple,virtualization-generic-platform"): GICv3 without an ITS, the arch
+# timer, PSCI 0.2 by HVC, a generic ECAM PCI host whose devices interrupt by
+# INTx, a PL031 clock, and a PL061 with a gpio-keys "power" key on it.  There
+# is no UART: the console is virtio-console.
+
+# ---- the machine ---------------------------------------------------------
+# 4 KB pages on the Mac's 16 KB: the arena maps RISC OS's pages at 4 KB
+# granularity (design 26 P1).  48-bit VAs leave the arena's [0, 68 GB) and
+# everything above it for Linux.
+CONFIG_ARM64_4K_PAGES=y
+CONFIG_ARM64_VA_BITS_48=y
+CONFIG_SMP=y
+CONFIG_NR_CPUS=16
+# PSCI: CPUs brought up, and SYSTEM_OFF -- the guest's power-off, which ends
+# rosgd-vz's run with status 0
+CONFIG_ARM_PSCI_FW=y
+# the PL031 and PL061 are AMBA PrimeCells
+CONFIG_ARM_AMBA=y
+CONFIG_RTC_CLASS=y
+CONFIG_RTC_HCTOSYS=y
+CONFIG_RTC_DRV_PL031=y
+# VZ's PCI: ECAM, described by the device tree.  VZ's GIC has no ITS, so
+# its devices interrupt by INTx (PCI_MSI comes in anyway, selected).
+CONFIG_PCI=y
+CONFIG_PCI_HOST_GENERIC=y
+
+# ---- power: VZ's polite stop ----------------------------------------------
+# rosgd-vz's host-side stop (a signal, the window, --seconds) is VZ's
+# requestStop, which presses a power button: a gpio-keys key on the PL061.
+# It reaches evdev as KEY_POWER (116) from the device "gpio-keys"; the box's
+# input module turns it into a shutdown.  Without these every stop is forced
+# after rosgd-vz's grace period.
+CONFIG_GPIOLIB=y
+CONFIG_OF_GPIO=y
+CONFIG_GPIO_PL061=y
+CONFIG_INPUT_KEYBOARD=y
+CONFIG_KEYBOARD_GPIO=y
+
+# ---- what /init needs from the kernel ------------------------------------
+CONFIG_PRINTK=y
+CONFIG_PRINTK_TIME=y
+CONFIG_BUG=y
+CONFIG_MULTIUSER=y
+# static musl binary as /init, from an initramfs
+CONFIG_BINFMT_ELF=y
+# #! scripts, which the x86 box leaves out: the box's /init is a static
+# binary, but the guests that test this kernel (vz/smoke's, and so
+# tests/a64x32's) run a shell script as /init.  A few hundred bytes.
+CONFIG_BINFMT_SCRIPT=y
+CONFIG_BLK_DEV_INITRD=y
+CONFIG_RD_GZIP=y
+# /dev, /proc, /sys (and /proc/sys, where the runtime reads mmap_min_addr)
+CONFIG_DEVTMPFS=y
+CONFIG_PROC_FS=y
+CONFIG_PROC_SYSCTL=y
+CONFIG_SYSFS=y
+# the arena: memfd regions and slots mapped at fixed low addresses
+CONFIG_SHMEM=y
+CONFIG_TMPFS=y
+CONFIG_MEMFD_CREATE=y
+# Nothing may be mapped below &4000, where RISC OS's ScratchSpace begins
+# (application space follows at &8000); above it, the arena is the
+# runtime's (design 11).  Pages 0-3 stay unmapped, for null pointers.
+CONFIG_DEFAULT_MMAP_MIN_ADDR=16384
+# the personality lock, I/O pumps and timers
+CONFIG_FUTEX=y
+CONFIG_EPOLL=y
+CONFIG_SIGNALFD=y
+CONFIG_TIMERFD=y
+CONFIG_EVENTFD=y
+
+# ---- Linux programs: OpenSSH's sshd ------------------------------------------
+# setitimer, for its login grace time; seccomp filters, the sandbox of its
+# pre-authentication process (modules/sshd)
+CONFIG_POSIX_TIMERS=y
+CONFIG_SECCOMP=y
+CONFIG_SECCOMP_FILTER=y
+
+# ---- Linux programs: sandboxes (design 23 R10) -------------------------------
+# Namespaces, for bubblewrap: WebKit's web and network processes run in its
+# sandbox, and GTK's image loaders (glycin) in theirs.  Each process gets its
+# own view of the mounts, process ids, IPC, host name and, where asked, the
+# network; with seccomp above, that is the sandbox WebKit expects.  SysV IPC
+# is what an IPC namespace has to separate.
+CONFIG_NAMESPACES=y
+CONFIG_USER_NS=y
+CONFIG_PID_NS=y
+CONFIG_NET_NS=y
+CONFIG_UTS_NS=y
+CONFIG_SYSVIPC=y
+CONFIG_IPC_NS=y
+
+# ---- SMB: LanManFS's shares (cifs, SMB2/3) and the server (ksmbd) -----------
+CONFIG_NETWORK_FILESYSTEMS=y
+CONFIG_CIFS=y
+CONFIG_FILE_LOCKING=y
+CONFIG_SMB_SERVER=y
+CONFIG_NLS=y
+CONFIG_NLS_UTF8=y
+CONFIG_NLS_DEFAULT="utf8"
+
+# ---- console ---------------------------------------------------------------
+CONFIG_TTY=y
+CONFIG_VT=y
+CONFIG_VT_CONSOLE=y
+CONFIG_UNIX98_PTYS=y
+# The console is virtio-console, hvc0 (console=hvc0): where the runtime
+# reports, and the launcher's stdout.  VZ has no PL011, so no earlycon and
+# no ttyAMA0 (SERIAL_AMBA_PL011 is left out); the first ~0.07 s of messages,
+# before hvc0 registers, reach dmesg only.
+CONFIG_VIRTIO_CONSOLE=y
+
+# ---- virtio ----------------------------------------------------------------
+CONFIG_VIRTIO_MENU=y
+CONFIG_VIRTIO=y
+CONFIG_VIRTIO_PCI=y
+CONFIG_HW_RANDOM=y
+CONFIG_HW_RANDOM_VIRTIO=y
+
+# ---- display: screen memory is a DRM dumb buffer ---------------------------
+# VZVirtioGraphicsDevice, in rosgd-vz --gui's window
+CONFIG_DRM=y
+CONFIG_DRM_VIRTIO_GPU=y
+# the kernel's own console on the screen until the runtime takes it over
+CONFIG_DRM_FBDEV_EMULATION=y
+CONFIG_FRAMEBUFFER_CONSOLE=y
+
+# ---- input: KeyV and PointerV come from evdev ------------------------------
+# VZ's USB keyboard and screen-coordinate pointer ("Apple Inc. Virtual USB
+# Keyboard", "Virtual USB Digitizer", absolute) on its xHCI controller.
+# VZ's own virtio-input would need a patched virtio_input (design 26 §4);
+# VIRTIO_INPUT is kept for QEMU's virt machine, which has it.
+CONFIG_INPUT=y
+CONFIG_INPUT_EVDEV=y
+CONFIG_VIRTIO_INPUT=y
+# /init watches /dev/input with inotify for devices that come late (the
+# Input module, platform/input_evdev.c): VZ's USB keyboard and digitizer
+# appear 0.5-0.8 s after /init starts.  tinyconfig leaves inotify out.
+CONFIG_INOTIFY_USER=y
+CONFIG_USB_SUPPORT=y
+CONFIG_USB=y
+CONFIG_USB_PCI=y
+CONFIG_USB_XHCI_HCD=y
+CONFIG_USB_XHCI_PCI=y
+CONFIG_HID_SUPPORT=y
+CONFIG_HID=y
+CONFIG_HID_GENERIC=y
+CONFIG_USB_HID=y
+
+# ---- network: the Internet module's API is Linux's sockets -----------------
+CONFIG_NET=y
+CONFIG_INET=y
+CONFIG_IPV6=y
+CONFIG_UNIX=y
+CONFIG_PACKET=y
+CONFIG_NETDEVICES=y
+CONFIG_NET_CORE=y
+CONFIG_VIRTIO_NET=y
+# ip=dhcp, as the x86 box: the kernel configures the network, and the name
+# servers are in /proc/net/pnp.  VZ's NAT is the Mac's bootpd, which hands
+# the box an address the Mac can reach (192.168.64.x); the lease is not
+# renewed, and rosgd-vz's fixed MAC slots keep the address stable.
+CONFIG_IP_PNP=y
+CONFIG_IP_PNP_DHCP=y
+# vsock: the test harness's transport under VZ (design 26 P3h), in place of
+# QMP
+CONFIG_VSOCKETS=y
+CONFIG_VIRTIO_VSOCKETS=y
+
+# ---- files: the boot share, and a disc -------------------------------------
+# The share is virtio-fs (VZVirtioFileSystemDevice), tag "host":
+# mount -t virtiofs host /host, where the x86 box mounts 9p
+CONFIG_FUSE_FS=y
+CONFIG_VIRTIO_FS=y
+# 9p as well, for QEMU's virt machine with HVF (design 26 §4's other host):
+# it costs little and keeps /init's 9p path working there
+CONFIG_NET_9P=y
+CONFIG_NET_9P_VIRTIO=y
+CONFIG_9P_FS=y
+CONFIG_BLOCK=y
+CONFIG_VIRTIO_BLK=y
+CONFIG_EXT4_FS=y
+
+# ---- sound: SharedSound's driver, ALSA over virtio-snd ----------------------
+# VZVirtioSoundDevice, one output stream to the Mac's default output
+CONFIG_SOUND=y
+CONFIG_SND=y
+CONFIG_SND_TIMER=y
+CONFIG_SND_PCM=y
+CONFIG_SND_HRTIMER=y
+CONFIG_SND_VIRTIO=y

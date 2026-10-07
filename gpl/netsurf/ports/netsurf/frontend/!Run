@@ -1,0 +1,5 @@
+| !Run -- NetSurf, the native RISC OS front end on ROSGD (design 22, section 11)
+Set NetSurf$Dir <Obey$Dir>
+IconSprites <NetSurf$Dir>.!Sprites
+WimpSlot -min 8M -max 8M
+Run <NetSurf$Dir>.NetSurf %*0

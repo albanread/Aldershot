@@ -1,0 +1,44 @@
+Write -- a word processor
+=========================
+
+Click SELECT on Write's icon on the icon bar for a new document.  Drop a
+Write document or a text file on the icon to open it; double-click a
+Write document to open it.  Drop one into a document to put it in at
+the caret.
+
+In a document:
+
+  Typing            goes in at the caret
+  SELECT            places the caret; drag to select; double-click a word
+  ADJUST            extends the selection
+  Backspace         deletes to the left; Delete deletes to the right
+  Arrows            move the caret; Shift-Left and Shift-Right select
+  Home, Copy        the start, the end of the document
+  Ctrl-Z            undo (again: redo)
+  Ctrl-X, -C, -V    cut, copy, paste -- with other applications too
+  Ctrl-A            select all
+  Ctrl-B, Ctrl-U    bold, underline
+  Ctrl-S            save
+  Ctrl-P            print
+
+The toolbar along the top of a document's window makes the selection
+bold, italic or underlined (or not), sets its paragraphs flush left,
+centred, flush right or justified, and gives them a style from its
+pop-up menu: Normal, or Heading 1, 2 or 3.  Its buttons show what the
+selection is.
+
+MENU in a document gives File (Save, Save as, Export text), Edit, Style,
+Size, Font and Spell.  Spell checks the word at the caret and offers
+words to replace it with; Next misspelling (Ctrl-N) finds the next word
+not in the dictionary; Mark as you type underlines them in red; Learn
+adds a word to your own words (Choices:Write.Words), Forget takes it out.  Style, Size and Font apply to the selection, or to what is
+typed next.
+
+Write saves its own documents, type &0A0, keeping their styles.  It
+reads and writes RTF too (type &C32): an RTF document opened in Write is
+saved back as RTF, and Export RTF writes any document as one.  HTML
+pages (&FAF) dropped on Write open too, and Export HTML writes a page.  Export
+text saves the words alone, as a text file.
+
+Write is the Paige text engine (DataPak Software, revived by Team HERMES,
+LGPL-2.1) with the box's machine layer and desktop front end.

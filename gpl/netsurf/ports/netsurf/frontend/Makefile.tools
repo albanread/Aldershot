@@ -1,0 +1,4 @@
+# NetSurf's native RISC OS front end on ROSGD: its tools (design 22, section 11).
+# CC, AR and PKG_CONFIG_LIBDIR come from ports/netsurf/build.sh.
+
+PKG_CONFIG := pkg-config

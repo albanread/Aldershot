@@ -1,0 +1,37 @@
+| !SparkFS.Load -- set SparkFS up at the command line, without the desktop,
+| as !Run and !RunImage do: SparkFS started afresh with its !Run's settings
+| (memory from a dynamic area, the image filing system on, names up to 255
+| characters, 32 archives open, an image closed after 5 seconds unused,
+| changes cached), then its file extensions and the types it leaves
+| uncompressed (its Config.Extensions and Config.NoCo, as its !RunImage
+| gives them), then the codecs, which register their archive types as image
+| filing systems: all ten, as !RunImage starts each one its Choices installs
+| (the Modules directory's: Zip, Tar, Spark -- Spark, ArcFS and PK arc --
+| Lzh, ARJ, Cab, CPIO, Zoo, McStuffit -- StuffIt, PackIt, Compact Pro -- and
+| PackdDir).  SparkFS and the codecs are the ROM's: each is started again
+| (*RMReInit), as RMLoad would load it afresh -- a codec registers its
+| archive types as it starts, and only once SparkFSImage 1 has said to.
+| The scrap directory: Spark$Scrap if it is set, else Wimp$ScrapDir (this
+| directory is in the ROM, and cannot be written).
+SetEval SparkFS$Memory -2
+Set SparkFSRes$Dir <SparkFS$Dir>.Resources.UK
+If ("<Spark$Scrap>" = "") AND ("<Wimp$ScrapDir>" <> "") Then Set Spark$Scrap <Wimp$ScrapDir>
+RMReInit SparkFS
+SparkFSImage 1
+SparkFSTruncate 255
+SparkFSBuffers 32
+SparkFSImageTimeout 5
+SparkFSCache 1
+SparkFSMemory 27K 4808K
+Obey <SparkFS$Dir>.Resources.Extensions
+Obey <SparkFS$Dir>.Resources.NoCo
+RMReInit Zip
+RMReInit Tar
+RMReInit Spark
+RMReInit Lzh
+RMReInit ARJ
+RMReInit Cab
+RMReInit CPIO
+RMReInit Zoo
+RMReInit McStuffit
+RMReInit PackdDir

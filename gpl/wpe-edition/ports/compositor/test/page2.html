@@ -1,0 +1,11 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Input test</title>
+<style>body{font:20px sans-serif;background:#f4efe1;margin:20px} button{font-size:22px;padding:10px 20px} input{font-size:22px;width:420px}</style></head>
+<body><h2>Input from RISC OS</h2>
+<p><button id="b" onclick="n++;document.getElementById('c').textContent='clicks: '+n">Click me</button> <span id="c">clicks: 0</span></p>
+<p><input id="t" placeholder="type here" oninput="document.getElementById('e').textContent='typed: '+this.value"></p>
+<p id="e">typed:</p><p id="m">pointer: none</p><p id="s">scrolled: 0</p>
+<div style="height:3000px;background:linear-gradient(#f4efe1,#c9b98f)"></div>
+<script>var n=0;document.addEventListener('mousemove',function(ev){document.getElementById('m').textContent='pointer: '+ev.clientX+','+ev.clientY});
+window.addEventListener('scroll',function(){document.getElementById('s').textContent='scrolled: '+Math.round(window.scrollY)});
+document.addEventListener('mousedown',function(ev){document.getElementById('m').textContent+=' down '+ev.button});</script>
+</body></html>

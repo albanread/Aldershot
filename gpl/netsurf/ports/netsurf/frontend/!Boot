@@ -1,0 +1,6 @@
+| !Boot -- NetSurf on ROSGD: HTML files (&FAF) open in it when double-clicked
+Set NetSurf$Dir <Obey$Dir>
+IconSprites <NetSurf$Dir>.!Sprites
+| (with file_faf and small_faf, the HTML file's icons: build.sh)
+Set File$Type_FAF HTML
+Set Alias$@RunType_FAF Run <NetSurf$Dir>.!Run %%*0

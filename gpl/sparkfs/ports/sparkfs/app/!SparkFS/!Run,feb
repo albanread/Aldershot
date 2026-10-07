@@ -1,0 +1,91 @@
+|>!SparkFS.!Run
+|
+| Set up file type aliases and load sprites
+Obey <Obey$Dir>.!Boot
+|
+RMEnsure UtilityModule 3.10 Error This application requires RISC OS 3.10 or later
+|
+| ROSGD: the box's !RunImage is A64X32 or x32 code, 141K, and the C library's root
+| ROSGD: stack is 256K: 448K is the least it starts in ("Not enough memory for C
+| ROSGD: library" below), where the ARM program's 128K was enough
+WimpSlot -min 512K -max 512K
+|
+| Memory mode +N uses N bytes from the RMA
+|             -1 uses the system Sprite area
+|             -2 uses a maximally sized dynamic area
+|             -N uses a dynamic area clamped to N bytes maximum
+SetEval SparkFS$Memory (-&2000000)
+RMEnsure UtilityModule 5.00 SetEval SparkFS$Memory -2
+RMEnsure UtilityModule 3.50 SetEval SparkFS$Memory -1
+|SetEval SparkFS$Memory &40000
+|
+|
+| New enough CLib/FPEmulator/CallASWI/MimeMap built in so don't need to check for System$Path
+SetEval SparkFS$NeedSystem 0
+RMEnsure UtilityModule 3.70 RMEnsure CallASWI 0.02 SetEval SparkFS$NeedSystem 1
+RMEnsure FPEmulator 4.03 SetEval SparkFS$NeedSystem 1
+RMEnsure SharedCLibrary 5.17 SetEval SparkFS$NeedSystem 1
+RMEnsure MimeMap 0.05 SetEval SparkFS$NeedSystem 1
+If <SparkFS$NeedSystem> AND "<System$Path>" = "" then Error 0 System resources cannot be found
+Unset SparkFS$NeedSystem
+|
+RMEnsure UtilityModule 3.70 RMEnsure CallASWI 0.02 RMLoad System:Modules.CallASWI
+RMEnsure UtilityModule 3.70 RMEnsure CallASWI 0.02 Error This application requires CallASWI 0.02 or later
+RMEnsure FPEmulator 4.03 RMLoad System:Modules.FPEmulator
+RMEnsure FPEmulator 4.03 Error This application requires FPEmulator 4.03 or later
+RMEnsure SharedCLibrary 5.17 RMLoad System:Modules.CLib
+RMEnsure SharedCLibrary 5.34 Error This application requires SharedCLibrary 5.34 or later
+|
+| If there's a MimeMap database but MimeMap isn't yet loaded, point at it and then load the MimeMap module
+| ROSGD: Resources.IfThere is an ARM utility (RISC OS 5.30's !SparkFS carries one;
+| ROSGD: the sources do not): the box's BootCmds has *IfThere, which does the same
+If "<InetDBase$Path>" <> "" Then If "<Inet$MimeMappings>" = "" Then IfThere InetDBase:MimeMap Then Set Inet$MimeMappings InetDBase:MimeMap
+RMEnsure MimeMap 0.05 If "<Inet$MimeMappings>" <> "" Then IfThere System:Modules.Network.MimeMap Then RMLoad System:Modules.Network.MimeMap
+|
+|
+Run <SparkFS$Dir>.Resources.Resfind SparkFS
+Set SparkFS$Templates Templates
+|
+| ROSGD: (512K: above)
+WimpSlot -min 512K
+|
+RMEnsure UtilityModule 3.60 RMEnsure SparkFS 1.36 Run <SparkFS$Dir>.Resources.UK.SparkFS
+| ROSGD: SparkFS is in the ROM, as its codecs are (Resources:$.Apps.!SparkFS holds no
+| ROSGD: module): started again if it has been killed (Quit > FS too), as a ROM
+| ROSGD: application's !Run starts its module (RMEnsure !Edit 0.00 RMReInit !Edit)
+RMEnsure SparkFS 1.36 RMReInit SparkFS
+|
+| Uncomment the next line to enable RISC OS 3 image filing system support
+SparkFSImage 1
+|
+| Uncomment the next line to make image files look like applications
+| ROSGD: ImageFSFix is an ARM module with no sources (5.30's !SparkFS carries the
+| ROSGD: binary): not loaded
+|
+SparkFSTruncate 255
+|
+SparkFSBuffers  32
+|
+SparkFSImageTimeout 5
+|
+| Change the 0 to a 1 in the next line to allow SparkFS to cache changes to archives
+SparkFSCache 1
+|
+|
+| Map ArcFS to filetype 0x3FB - uncomment the next three lines
+| (see also !Boot and AtExit files).
+| SparkFSMapFiletype 0x8 0x3FB
+| Set Alias$@RunType_3FB SparkFSFiler_OpenDir %%*0
+| Set File$Type_3FB ArcFSArc
+|
+|
+Set Spark$Template <SparkFSRes$Dir>.Temp
+|
+SparkFSAtExit <Obey$Dir>.Config.AtExit
+| ROSGD: *IfThere, not Resources.IfThere (above)
+IfThere Choices:SparkFS.AtExit Then SparkFSAtExit Choices:SparkFS.AtExit
+|
+| Now the SparkFS Filer is going to be loaded reset the RunSparkFS alias to it instead
+SetMacro Alias$RunSparkFS SparkFSFiler_OpenDir <Obey$Dir>
+|
+Run "<SparkFS$Dir>.!RunImage" %*0

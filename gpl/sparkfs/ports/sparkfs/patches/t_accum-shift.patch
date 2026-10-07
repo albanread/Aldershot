@@ -1,0 +1,50 @@
+t_accum: a 32-bit value shifted right by 32 (SparkTar's and SparkCPIO's c/cat).
+
+t_accum splits a value into bytes with n >> (i * 8) for i = 0..4.  A shift
+of 32 is undefined in C; ARM's shifter gives 0 (what Norcroft's code relies
+on), x86 and AArch64 take the count modulo 32, and clang at -O2 drops the
+fifth byte: a date in an archive came out as 1900.  The shift is now done
+only when it is under 32, else 0, as on ARM.
+
+diff -ru a/SparkCPIO/cat.c b/SparkCPIO/cat.c
+--- a/SparkCPIO/cat.c	2026-10-02 07:12:16.588652412 +0100
++++ b/SparkCPIO/cat.c	2026-10-02 07:12:16.606843048 +0100
+@@ -178,7 +178,7 @@
+         int i, j;
+ 
+         for ( i = 0; i <= 4; ++i )
+-                a[i] = ( n >> ( i * 8 ) & 0xFF );
++                a[i] = ( i < 4 ? n >> ( i * 8 ) & 0xFF : 0 ); /* ARM: >> 32 is 0 */
+         for ( i = 0; i <= 4; ++i )
+         {
+                 n = mul * t->t[i] + a[i];
+@@ -186,7 +186,7 @@
+                 t->t[i] = (n & 0xFF);
+ 
+                 for ( j = i + 1; j <= 4; ++j )
+-                        a[j] += ( n >> ( (j-i) * 8 ) & 0xFF );
++                        a[j] += ( j-i < 4 ? n >> ( (j-i) * 8 ) & 0xFF : 0 );
+         }
+ }
+ 
+diff -ru a/SparkTar/cat.c b/SparkTar/cat.c
+--- a/SparkTar/cat.c	2026-10-02 07:12:16.565046623 +0100
++++ b/SparkTar/cat.c	2026-10-02 07:12:16.582853465 +0100
+@@ -208,7 +208,7 @@
+         int i, j;
+ 
+         for ( i = 0; i <= 4; ++i )
+-                a[i] = ( n >> ( i * 8 ) & 0xFF );
++                a[i] = ( i < 4 ? n >> ( i * 8 ) & 0xFF : 0 ); /* ARM: >> 32 is 0 */
+         for ( i = 0; i <= 4; ++i )
+         {
+                 n = mul * t->t[i] + a[i];
+@@ -216,7 +216,7 @@
+                 t->t[i] = (n & 0xFF);
+ 
+                 for ( j = i + 1; j <= 4; ++j )
+-                        a[j] += ( n >> ( (j-i) * 8 ) & 0xFF );
++                        a[j] += ( j-i < 4 ? n >> ( (j-i) * 8 ) & 0xFF : 0 );
+         }
+ }
+ 

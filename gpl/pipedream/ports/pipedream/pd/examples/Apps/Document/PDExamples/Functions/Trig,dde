@@ -1,0 +1,203 @@
+%OP%VS4.50/41 (19-Mar-2013), PipeDream, R0123 4567 8901 2345
+%OP%DP4
+%OP%LP*
+%OP%TM4
+%OP%BM4
+%OP%LM5
+%OP%FGHomerton.Medium
+%OP%FX160
+%OP%FY160
+%OP%FS0
+%OP%WC2,1482,222,1364,0,1,0,0
+%CO:A,9,100%%C%%H2%Trigonometrical Functions Examples
+
+%C%Function
+
+acosec
+acosech
+acosh
+acot
+acoth
+acs
+asec
+asech
+asinh
+asn
+atan_2
+atanh
+atn
+cos
+cosec
+cosech
+cosh
+cot
+coth
+deg
+pi
+rad
+sec
+sech
+sin
+sinh
+tan
+tanh
+%CO:B,9,0%
+
+%R%Input 1
+
+%V%%R%E19
+%V%%R%E20
+%V%%R%E21
+%V%%R%E22
+%V%%R%E23
+%V%%R%E18
+%V%%R%E27
+%V%%R%E28
+%V%%R%E30
+%V%%R%E29
+%V%%R%3
+%V%%R%E32
+%V%%R%E31
+%V%%R%pi/4
+%V%%R%pi/4
+%V%%R%0.5
+%V%%R%0.5
+%V%%R%pi/4
+%V%%R%0.5
+%V%%R%pi/4
+%R%-
+%V%%R%E24
+%V%%R%pi/4
+%V%%R%0.5
+%V%%R%pi/4
+%V%%R%0.5
+%V%%R%pi/4
+%V%%R%0.5
+%CO:C,8,0%
+
+%R%Input 2
+
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%V%%R%4
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R% -
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%CO:D,8,0%
+
+%R%Input 3
+
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%R%-
+%CO:E,8,0%
+
+%R%Output
+
+%V%%R%acosec(B5)
+%V%%R%acosech(B6)
+%V%%R%acosh(B7)
+%V%%R%acot(B8)
+%V%%R%acoth(B9)
+%V%%R%acs(B10)
+%V%%R%asec(B11)
+%V%%R%asech(B12)
+%V%%R%asinh(B13)
+%V%%R%asn(B14)
+%V%%R%atan_2(B15,C15)
+%V%%R%atanh(B16)
+%V%%R%atn(B17)
+%V%%R%cos(B18)
+%V%%R%cosec(B19)
+%V%%R%cosech(B20)
+%V%%R%cosh(B21)
+%V%%R%cot(B22)
+%V%%R%coth(B22)
+%V%%R%deg(B24)
+%V%%R%pi
+%V%%R%rad(B26)
+%V%%R%sec(B27)
+%V%%R%sech(B28)
+%V%%R%sin(B29)
+%V%%R%sinh(B30)
+%V%%R%tan(B31)
+%V%%R%tanh(B32)
+%CO:F,1,0%%CO:G,63,0%
+
+Summary
+
+Returns the arc cosecant of %H4%Input1%H4% in radians
+Returns the inverse hyperbolic cosecant of %H4%Input1%H4%
+Returns the inverse hyperbolic cosine of %H4%Input1%H4%
+Returns the arc cotangent of %H4%Input1%H4% in radians
+Returns the inverse hyperbolic cotangent of %H4%input1%H4%
+Returns the arc cosine of %H4%Input1%H4% in radians
+Returns the arc secant of %H4%Input1%H4% in radians
+Returns the inverse hyperbolic secant of %H4%Input1%H4%
+Returns the inverse hyperbolic sine of %H4%Input1%H4%
+Returns the arc sine of %H4%Input1%H4% in radians
+Returns the arc tangent of %H4%Input2%H4% / %H4%Input1%H4% in radians
+Returns the inverse hyperbolic tangent of %H4%Input1%H4%
+Returns the arc tangent of %H4%Input1%H4% in radians
+Returns the cosine of %H4%Input1%H4%, given in radians
+Returns the cosecant of %H4%Input1%H4%, given in radians
+Returns the hyperbolic secant of %H4%Input1%H4%
+Returns the hyperbolic cosine of %H4%Input1%H4%
+Returns the cotangent of %H4%Input1%H4%, given in radians
+Returns the hyperbolic cotangent of %H4%Input1%H4%
+Converts an angle from a number of radians to degrees
+Returns the value of pi (3.1415926...)
+Converts an angle in degrees to a number of radians
+Returns the secant of %H4%Input1%H4%, given in radians
+Returns the hyperbolic secant of %H4%Input1%H4%
+Returns the sine of %H4%Input1%H4%, given in radians
+Returns the hyperbolic sine of %H4%Input1%H4%
+Returns the tangent of %H4%Input1%H4%, given in radians
+Returns the hyperbolic tangent of %H4%Input1%H4%

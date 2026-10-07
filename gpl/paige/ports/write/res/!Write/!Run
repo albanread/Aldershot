@@ -1,0 +1,5 @@
+| !Run for Write -- the word processor
+Run <Obey$Dir>.!Boot
+RMEnsure Toolbox 1.36 Error Write needs the Toolbox
+WimpSlot -min 16384k -max 16384k
+Run <Write$Dir>.!RunImage %*0

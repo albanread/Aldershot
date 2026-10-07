@@ -1,0 +1,54 @@
+; > r32/s.h_flags
+
+; This Source Code Form is subject to the terms of the Mozilla Public
+; License, v. 2.0. If a copy of the MPL was not distributed with this
+; file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+; Copyright (C) 1989-1999 Colton Software
+; Copyright (C) 1999-2015 R W Colton
+
+    GBLL    NAMES
+    GBLL    PROFILING
+    GBLL    RELEASED
+
+    GBLL    NORCROFT_INLINE_ASM
+    GBLL    NORCROFT_INLINE_SWIX
+
+NAMES     SETL {TRUE}
+PROFILING SETL {TRUE}
+RELEASED  SETL {FALSE}
+
+NORCROFT_INLINE_ASM     SETL {FALSE}
+NORCROFT_INLINE_SWIX    SETL {FALSE}
+
+PROFILING SETL {FALSE}
+
+NAMES     SETL {FALSE}
+RELEASED  SETL {TRUE}
+
+; keep these consistent with include.h
+NORCROFT_INLINE_ASM     SETL {TRUE}
+NORCROFT_INLINE_SWIX    SETL {TRUE}
+
+ [ (:LNOT: RELEASED) :LOR: PROFILING
+    KEEP  ; Keep debug info
+ ]
+
+; "No26bitCode" means don't rely on 26-bit instructions
+; (eg TEQP and LDM ^) - the code will work on 32-bit systems.
+
+; "No32bitCode" means don't rely on 32-bit instructions
+; (eg MSR and MRS) - the code will work on RISC OS 3.1.
+
+; Setting both to {TRUE} is too much for the macros to cope with -
+; you will have to use run-time code as shown below.
+
+    GBLL    No26bitCode
+    GBLL    No32bitCode
+No26bitCode SETL {FALSE}
+No32bitCode SETL {TRUE}
+
+    GBLL   UROM
+UROM SETL {FALSE}
+
+    END
