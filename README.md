@@ -68,7 +68,12 @@ in `Documents.Licences` on the disc.
 ### The BOX on a PC
 
 **BOX x64** boots a 64-bit PC from a USB stick, UEFI with Secure Boot
-off.
+off: [BOX x64 for PCs, 7 October 2026](https://github.com/albanread/Aldershot/releases/tag/BOX-x64-pc-2026.10.07),
+`BOX-x64-pc-2026.10.07.img.xz` (275 MB; 10 GB unpacked, for a stick of
+16 GB or more). It has the web browser too. Unpack it and write it to the
+whole stick (the release says how on a Mac, Linux and Windows), then boot
+the PC from it. The image trusts no SSH key: put your own in
+`.ssh/authorized_keys` on its RISC OS disc to log in.
 
 ---
 
