@@ -15,6 +15,17 @@ BSD-style ([box/RISCOS.txt](box/RISCOS.txt)). The BOX translates it; no
 ownership is claimed over any work translated to C, and every component keeps
 its upstream terms.
 
+## Source code, and translated code
+
+It is the intention to publish all of the source code of this project,
+especially once it is complete. Until then, the source of every component whose
+licence asks for it is published here, in [../gpl](../gpl/README.md).
+
+The project makes no claim on code that it has translated. RISC OS, and every
+other program or library translated to C for the BOX, remains the work of its
+authors, under its own licence; the translation adds no rights of the project's
+over it.
+
 ## Every component
 
 One file each in [box/](box/), giving the version, where it comes from, what in
