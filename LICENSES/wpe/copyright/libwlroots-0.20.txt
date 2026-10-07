@@ -1,0 +1,152 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: wlroots
+Source: https://gitlab.freedesktop.org/wlroots/wlroots/
+
+Files: *
+Copyright: 2023, The wlroots contributors
+ 2017, 2018, Drew DeVault
+ 2014, Jari Vetoniemi
+License: Expat
+
+Files: debian/*
+Copyright: 2018, Guido Günther <agx@sigxcpu.org>
+License: GPL-2+
+
+Files: include/*
+Copyright: 2012, Intel Corporation
+License: Expat
+
+Files: include/xcursor/*
+Copyright: 1999, SuSE, Inc.
+License: Expat
+
+Files: include/xcursor/xcursor.h
+Copyright: 2002, Keith Packard
+License: Expat
+
+Files: protocol/*
+Copyright: 2019, Purism SPC
+License: Expat
+
+Files: protocol/drm.xml
+Copyright: 2010, 2011, Intel Corporation
+ 2008-2011, Kristian Høgsberg
+License: Expat
+
+Files: protocol/input-method-unstable-v2.xml
+Copyright: 2018, Purism SPC
+ 2017, 2018, Red Hat, Inc.
+ 2015, 2016, Jan Arne Petersen
+ 2012, 2013, Collabora, Ltd.
+ 2010-2013, Intel Corporation
+ 2008-2011, Kristian Høgsberg
+License: Expat
+
+Files: protocol/server-decoration.xml
+Copyright: 2015, Martin Gräßlin
+License: LGPL-2.1+
+
+Files: protocol/virtual-keyboard-unstable-v1.xml
+Copyright: 2018, Purism SPC
+ 2012, 2013, Collabora, Ltd.
+ 2010-2013, Intel Corporation
+ 2008-2011, Kristian Høgsberg
+License: Expat
+
+Files: protocol/wlr-data-control-unstable-v1.xml
+Copyright: 2019, Ivan Molodetskikh
+ 2018, Simon Ser
+License: Expat
+
+Files: protocol/wlr-export-dmabuf-unstable-v1.xml
+Copyright: 2018, Rostislav Pehlivanov
+License: Expat
+
+Files: protocol/wlr-foreign-toplevel-management-unstable-v1.xml
+Copyright: 2018, Ilia Bozhinov
+License: Expat
+
+Files: protocol/wlr-gamma-control-unstable-v1.xml
+Copyright: 2018, Simon Ser
+ 2015, Giulio camuffo
+License: Expat
+
+Files: protocol/wlr-layer-shell-unstable-v1.xml
+Copyright: 2017, Drew DeVault
+License: Expat
+
+Files: protocol/wlr-output-management-unstable-v1.xml
+Copyright: 2019, Purism SPC
+License: Expat
+
+Files: protocol/wlr-screencopy-unstable-v1.xml
+Copyright: 2019, Andri Yngvason
+ 2018, Simon Ser
+License: Expat
+
+Files: protocol/wlr-virtual-pointer-unstable-v1.xml
+Copyright: 2019, Josef Gajdusek
+License: Expat
+
+Files: tinywl/*
+Copyright: 2018, 2019, Drew DeVault
+License: CC0-1.0
+
+Files: xcursor/*
+Copyright: 2012, Intel Corporation
+License: Expat
+
+Files: xcursor/xcursor.c
+Copyright: 2002, Keith Packard
+License: Expat
+
+License: CC0-1.0
+ To the extent possible under law, the author(s) have dedicated all
+ copyright and related and neighboring rights to this software to the public
+ domain worldwide. This software is distributed without any warranty.
+ On Debian systems, the complete text of the CC0 license, version 1.0,
+ can be found in /usr/share/common-licenses/CC0-1.0.
+
+License: Expat
+ Permission is hereby granted, free of charge, to any person obtaining a copy of
+ this software and associated documentation files (the "Software"), to deal in
+ the Software without restriction, including without limitation the rights to
+ use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ of the Software, and to permit persons to whom the Software is furnished to do
+ so, subject to the following conditions:
+ .
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+
+License: GPL-2+
+ This package is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https://www.gnu.org/licenses/>
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License version 2 can be found in "/usr/share/common-licenses/GPL-2".
+
+License: LGPL-2.1+
+ This program is free software; you can redistribute it and/or modify it
+ under the terms of the GNU Lesser General Public License as published by the
+ Free Software Foundation; version 2.1 of the License, or (at
+ your option) any later version.
+ On Debian systems, the complete text of version 2.1 of the GNU Lesser
+ General Public License can be found in '/usr/share/common-licenses/LGPL-2.1'.

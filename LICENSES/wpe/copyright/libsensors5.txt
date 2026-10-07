@@ -1,0 +1,116 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: lm-sensors
+Source: https://github.com/hramrach/lm-sensors
+
+Files:
+ *
+Copyright:
+ Copyright 1999-2002 Merlin Hughes <merlin@merlin.org>
+ Copyright 1998-2003 Frodo Looijaard <frodol@dds.nl> and
+ Copyright 1998-2005 Mark D. Studebaker <mdsxyz123@yahoo.com>
+ Copyright 1999,2001 Philip Edelbrock
+ Copyright 2003 Marius Reiner <marius.reiner@hdev.de>
+ Copyright 2004-2015 Jean Delvare <jdelvare@suse.de>
+ Copyright 2008 Juerg Haefliger <juergh@gmail.com>
+ Copyright 2018 Ondřej Lysoněk
+License: GPL-2+
+
+Files:
+ lib/*
+Copyright:
+ Copyright 1998, 1999 Frodo Looijaard <frodol@dds.nl>
+ Copyright 2005, 2006 Mark M. Hoffman <mhoffman@lightlink.com>
+ Copyright 2007-2014 Jean Delvare <jdelvare@suse.de>
+License: LGPL-2.1+
+
+Files:
+ lib/test/*
+ prog/hotplug/unhide_ICH_SMBus
+Copyright:
+ Copyright (C) 2006 Mark M. Hoffman <mhoffman@lightlink.com>
+ Copyright (C) 2007-2011 Jean Delvare <jdelvare@suse.de>
+License: GPL-2
+
+Files:
+ lib/libsensors.3
+ lib/sensors.conf.5
+ prog/sensord/sensord.8
+ prog/sensors/sensors.1
+Copyright:
+ Copyright 1998, 1999 Adrian Baugh <adrian.baugh@keble.ox.ac.uk>
+ Copyright 1998, 1999 Frodo Looijaard <frodol@dds.nl>
+ Copyright 1999-2002 Merlin Hughes <merlin@merlin.org>
+ Copyright 2007-2013 Jean Delvare <jdelvare@suse.de>
+License: Linux-man-pages-copyleft
+
+License: GPL-2
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; version 2 of the License.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+Comment:
+ On Debian systems, the complete text of the GPL license version 2 can
+ be found in the /usr/share/common-licenses/GPL-2 file.
+
+License: GPL-2+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+Comment:
+ On Debian systems, the complete text of the GPL license version 2 can
+ be found in the /usr/share/common-licenses/GPL-2 file.
+
+License: LGPL-2.1+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
+ .
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+ .
+ You should have received a copy of the GNU Lesser General Public
+ License along with the GNU C Library; if not, see
+ <https://www.gnu.org/licenses/>.
+Comment:
+ On Debian systems, the complete text of the LGPL license can be found
+ in the /usr/share/common-licenses/LGPL-2.1 file.
+
+License: Linux-man-pages-copyleft
+ Permission is granted to make and distribute verbatim copies of this
+ manual provided the copyright notice and this permission notice are
+ preserved on all copies.
+ .
+ Permission is granted to copy and distribute modified versions of this
+ manual under the conditions for verbatim copying, provided that the
+ entire resulting derived work is distributed under the terms of a
+ permission notice identical to this one
+ .
+ Since the Linux kernel and libraries are constantly changing, this
+ manual page may be incorrect or out-of-date.  The author(s) assume no
+ responsibility for errors or omissions, or for damages resulting from
+ the use of the information contained herein.  The author(s) may not
+ have taken the same level of care in the production of this manual,
+ which is licensed free of charge, as they might when working
+ professionally.
+ .
+ Formatted or processed versions of this manual, if unaccompanied by
+ the source, must acknowledge the copyright and authors of this work.

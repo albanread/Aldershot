@@ -1,0 +1,18 @@
+The StrongHelp programming manuals (!Manuals)
+=============================================
+
+Version:  RISC OS 5.30
+From:     https://www.riscosopen.org/content/downloads/raspberry-pi
+Used by:  Utilities.!Manuals, as RISC OS 5.30's image has it, unaltered: the
+          manuals Assembly, Basic, FloatingPt, GPIO, InetSocket, InetSWIs,
+          MiscSWIs, OS, SH-RefMan, Toolbox, VCache, VDU and Wimp
+Licence:  No licence stated; described in the manuals as public domain;
+          distributed by RISC OS Open in RISC OS 5.30's image
+
+The manuals state no licence.  They describe themselves as the main public
+domain programming reference for RISC OS, written and kept up by many
+contributors; their sources are published by riscos.info
+(github.com/riscos-dot-info), also without a licence file.  Some pages quote
+the terms of the software they document (VCache, and Dynamite in MiscSWIs);
+those terms are the software's, not the manuals'.  BOX ships the manuals
+unaltered, as RISC OS Open distributes them in its RISC OS 5.30 disc image.

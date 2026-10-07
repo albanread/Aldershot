@@ -77,6 +77,15 @@ the PC from it. The image trusts no SSH key: put your own in
 
 ---
 
+## Licences
+
+The licence of every component of the BOX releases is in
+[LICENSES](LICENSES/README.md): the BOX's own code (MIT), RISC OS (Apache 2.0),
+each of the fifty-odd packages built into it, QEMU in the Mac releases, and the
+web browser's Linux userland, package by package with Debian's copyright files.
+
+---
+
 ## Standing on
 
 **[RISC OS Open Ltd](https://www.riscosopen.org)** make RISC OS 5 and

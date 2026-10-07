@@ -1,0 +1,89 @@
+AWViewer, the ArtWorks viewer
+=============================
+
+Version:  2.18 (12-Apr-2018)
+From:     http://www.mw-software.com/software/awmodules/awrender.html
+Used by:  Apps.!AWViewer, as RISC OS 5.30's image has it, unaltered (ARM
+          code, run by the ARM container); its modules render ArtWorks
+          pictures for it and for OvationPro
+Licence:  Freely distributable, unaltered and complete, free of charge
+          (Computer Concepts and MW Software)
+
+The ArtWorks file icon BOX shows is the disc's own
+(Resources.ArtWorksSprites), so that !AWViewer is shipped unaltered, as
+these conditions require.
+
+------------------------------------------------------------------------
+!AWViewer.!ReadMe
+------------------------------------------------------------------------
+
+AWViewer 2.18 (12-Apr-2018)
+
+Name:     AWViewer
+Purpose:  ArtWorks file viewer
+Authors:  Computer Concepts Ltd and MW Software
+Requires: RISC OS 3.5 or higher
+          32-bit compatible
+
+This program, including all associated modules, is Copyright © Computer
+Concepts Ltd. 1992-1994 and Copyright © MW Software 2001-2018. All Rights
+Reserved. This version of AWViewer contains an enhanced version of the AWRender
+module with additional code Copyright © MW Software, 2017. All Rights Reserved.
+It also contains bug-fixed, enhanced and 32-bit compatible versions of the
+DitherExtend, GDraw and GSpriteExtend modules. These modules have been updated
+with permission by Computer Concepts Ltd.
+
+Please read the file !ReadMeMW. It contains installation instructions, further
+details about the AWRender enhancements and limitations and a version history.
+
+This software is provided on an "as is" basis, without any other warranties or
+conditions, express or implied.
+
+Permission is hereby given for you to copy this program and freely distribute
+it, subject to the following conditions:
+
+* No charge is made for the program (except nominal media costs).
+* No alterations are made to any of the files within the !AWViewer application.
+* All of the files within the !AWViewer application are supplied, including
+  this one.
+* No attempt is made to reverse engineer any of the programs in the application.
+* This program or modules that make up this program shall not be used in or by
+  any other program.
+* This ReadMe file is supplied, unaltered.
+
+Computer Concepts and MW Software reserve the right to withdraw this permission
+from any individual or organisation at any time for any reason.
+
+Interfacing and licensing details can be obtained from MW Software, see below.
+
+
+Contact information
+===================
+
+Current ArtWorks/AWViewer development and support
+-------------------------------------------------
+MW Software
+Martin Wuerthner
+Rudolf-Breitscheid-Str. 54
+67655 Kaiserslautern
+Germany
+
+Phone: +49-631-3608205
+
+martin@mw-software.com
+http://www.mw-software.com/
+
+
+Original authors of AWViewer
+----------------------------
+Computer Concepts Ltd
+Gaddesden Place
+Hemel Hempstead
+Herts
+HP2 6EX
+
+Tel 01442 351000
+Fax 01442 351010
+
+For information on the Windows version of ArtWorks (Xara Xtreme [Pro])
+see http://www.xara.com/
