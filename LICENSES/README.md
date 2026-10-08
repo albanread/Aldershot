@@ -7,9 +7,11 @@ releases of 7 October 2026.
 ## The BOX itself
 
 **The BOX's own code** is under the MIT licence ([box/BOX.txt](box/BOX.txt)).
-That is the code written for the BOX: the runtime, the modules and
-applications written new for it, its tools (rosasm, rosbas, roscc), the
-compositor and the browser's engine.
+That is any original code written for the BOX, and not translated from
+anyone else's: the runtime, the modules and applications written new for it,
+its tools (rosasm, rosbas, roscc), the compositor, and the interface to the
+browser engine. The browser engine itself, WPE WebKit, is not the BOX's: it
+is under its own licences (below).
 
 **Translated code keeps the licence of the code it was translated from.**
 When the BOX translates a program to C, the C is a translation of the
@@ -103,7 +105,7 @@ Not known: the licences of the fonts NewHall, System, Portrhouse and Sassoon
 
 Since 7 October 2026 every release carries the WPE edition's Linux root: WPE
 WebKit and what it needs, as Debian's own packages (Debian forky), unchanged,
-with the BOX's compositor and the browser's engine added. It is a disk image
+with the BOX's compositor and its interface to the browser engine added. It is a disk image
 inside BOX.app (`Contents/Resources/system/wpe-root.ext4`) and a partition of
 the PC image.
 
