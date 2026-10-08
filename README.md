@@ -30,6 +30,8 @@ BBC BASIC suffers from the translation too, and does not run as much faster as t
 
 ## Documents
 
+- [articles](articles/README.md): technical articles about BOX, in the style of the
+  RISC OS Programmer's Reference Manuals. Start with [BOX Design](articles/0-Design.md).
 - [docs](docs/README.md): documents about BOX. [Bugs and quirks](docs/bugs-and-quirks.md) lists the bugs, quirks and documentation errors noticed in RISC OS 5.30 and its applications while porting them.
 
 ## Licences
