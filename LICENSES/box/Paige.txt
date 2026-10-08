@@ -3,7 +3,8 @@ Paige (HERMES-Paige)
 
 Version:  3.0b (ec53af9a25)
 From:     https://github.com/nmatavka/HERMES-Paige
-Used by:  !Write's text engine
+Used by:  !Write's text engine. BOX's changes to Paige are under Paige's
+          licence
 Licence:  GNU LGPL 2.1
 
 ------------------------------------------------------------------------

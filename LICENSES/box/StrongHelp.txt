@@ -6,9 +6,9 @@ From:     https://sourceforge.net/projects/stronghelp/
 Used by:  Resources:$.Apps.!StrongHlp (in the ROM), its data: its manual,
           Messages, Templates, menus, sprites, configuration and tools, as
           RISC OS 5.30's image has them, with !Run and !Boot changed where
-          they used 2.90's module. The program is BOX's own C (design 31;
-          the file BOX), written from StrongHelp's manuals, not from its
-          source
+          they used 2.90's module. The program is new C (design 31), written
+          from StrongHelp's manuals, not from its source; it is under
+          StrongHelp's licence
 Licence:  BSD 3-clause
 
 ------------------------------------------------------------------------

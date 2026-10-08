@@ -5,7 +5,9 @@ Version:  3.11+ (39da3c3a40)
 From:     https://www.netsurf-browser.org/
 Used by:  Apps.!NetSurf, the web browser, and the libraries it is built
           from: libwapcaplet, libparserutils, libhubbub, libdom, libcss,
-          libnsgif, libnsbmp, libnsutils, libnspsl, libnslog, libsvgtiny
+          libnsgif, libnsbmp, libnsutils, libnspsl, libnslog, libsvgtiny.
+          BOX's changes to NetSurf and its RISC OS front end are under
+          NetSurf's licence
 Licence:  GNU GPL 2 (NetSurf); MIT (its libraries)
 
 ------------------------------------------------------------------------

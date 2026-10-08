@@ -3,7 +3,9 @@ PipeDream
 
 Version:  4.63 (b63a102bd6)
 From:     https://github.com/coltsoft/PipeDream
-Used by:  Apps.!PipeDream and Documents.PipeDream
+Used by:  Apps.!PipeDream and Documents.PipeDream. BOX's port of PipeDream,
+          its changes and the C that replaces its assembler, is under
+          PipeDream's licence
 Licence:  Mozilla Public License 2.0
 
 ------------------------------------------------------------------------

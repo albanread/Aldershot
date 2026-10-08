@@ -3,11 +3,18 @@ BOX (ROSGD)
 
 Version:  this disc's build
 From:     https://github.com/albanread/A7232ToolChain
-Used by:  everything of BOX's own: the runtime (/init), the translated
-          modules' glue, rosbas, roscc, rosasm, pdfsvc, GraphTask, !Write,
-          the StrongED, PipeDream and NetSurf front ends, the Mojo riscos
-          package, the disc's own applications and examples
+Used by:  only the code written new for BOX, and translated from no one
+          else's: the runtime (/init) and the modules written for it, the
+          glue that joins the translated modules to it, rosbas, roscc,
+          rosasm, pdfsvc, GraphTask, !Write's own code, the Mojo riscos
+          package, and the disc's own applications and examples
 Licence:  MIT
+
+Every package BOX ports, translates or builds on keeps its own licence, and
+BOX's port of it, translation and changes included, is under that licence
+too, not MIT: RISC OS (Apache 2.0), PipeDream (MPL 2.0), NetSurf (GPL 2),
+StrongED and StrongHelp (BSD), Paige (LGPL 2.1) and the rest, each in its
+own file here.
 
 ------------------------------------------------------------------------
 BOX's licence

@@ -5,7 +5,8 @@ Version:  4.70a22
 From:     https://stronged.iconbar.com/
 Used by:  Apps.!StrongED: BOX's StrongED is new C, which uses StrongED's own
           data -- its syntax modes, help, messages, templates and key maps
-          -- from the 4.70a22 release
+          -- from the 4.70a22 release. BOX's StrongED is under StrongED's
+          licence
 Licence:  3-clause BSD
 
 StrongED's archives carry no licence file.  They say only "(c) StrongED
