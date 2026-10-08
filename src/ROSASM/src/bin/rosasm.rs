@@ -680,8 +680,7 @@ fn main() {
             "--elf" => elf_out = true,
             // The ObjAsm compiler. -o names a C file. It holds the unit's
             // ROM image at --rom-base and its code compiled to C. A header
-            // of label addresses is written beside it (RISCOSGrandDesign,
-            // design 12).
+            // of label addresses is written beside it.
             "--emit" => {
                 i += 1;
                 match args.get(i).map(String::as_str) {

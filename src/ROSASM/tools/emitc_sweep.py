@@ -52,9 +52,8 @@ ROSGD_INCLUDE = os.path.join(os.path.dirname(paths.ROOT), "rosgd", "include")
 # by its build): with them, registers stay in C locals across those SWIs.
 SWI_REGS = os.path.join(os.path.dirname(paths.ROOT), "rosgd", "build", "gen", "swi_regs.txt")
 
-# Components not compiled, by decision (RISCOSGrandDesign design 16, "The
-# ObjAsm halves of mixed components" and the charter): what they refuse is
-# not a gap in the front end. Their units still go through the compiler as
+# Components not compiled, by decision: what they refuse is not a gap in
+# the front end. Their units still go through the compiler as
 # test material; a refusal among them is reported as decided.
 DECIDED = {
     "Sources/HAL/": "not carried: Linux",
@@ -87,11 +86,11 @@ DECIDED = {
     "Sources/Programmer/HostFS/s/TML_HostFS": "not carried: ROSGD's HostFS is over Linux's VFS",
     "Sources/Kernel/Dev/": "not carried: a test",
     "Sources/Video/Render/Fonts/ROMFonts": "not carried: the fonts are files, through HostFS",
-    # Design 16's first pass: proposals, to be confirmed when taken on.
-    "Sources/HWSupport/Sound/Sound1": "leans reimplement (design 16's first pass)",
-    "Sources/HWSupport/Sound/Sound2": "leans reimplement (design 16's first pass)",
-    "Sources/Internat/Inter": "leans reimplement (design 16's first pass)",
-    "Sources/Video/Render/SpriteUtil": "leans reimplement (design 16's first pass)",
+    # First proposals, to be confirmed when taken on.
+    "Sources/HWSupport/Sound/Sound1": "leans reimplement (first proposal)",
+    "Sources/HWSupport/Sound/Sound2": "leans reimplement (first proposal)",
+    "Sources/Internat/Inter": "leans reimplement (first proposal)",
+    "Sources/Video/Render/SpriteUtil": "leans reimplement (first proposal)",
     "Sources/Lib/DDTLib": "not carried: the debugger",
     "Sources/Lib/Trace": "not carried: tracing",
 }

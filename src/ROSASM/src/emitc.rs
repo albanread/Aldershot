@@ -1,4 +1,4 @@
-//! `rosasm --emit c`: the ObjAsm compiler (RISCOSGrandDesign, design 12).
+//! `rosasm --emit c`: the ObjAsm compiler.
 //!
 //! The input is what rosasm assembled: each area's bytes and relocations,
 //! where each area switches between code and data, where every label
@@ -6079,12 +6079,11 @@ pub fn emit(inp: &Input) -> Result<Output, Vec<String>> {
         format!("/* rom_{name}.c -- {name}, compiled from ObjAsm by rosasm --emit c:"),
         " * do not edit.".to_string(),
         " *".to_string(),
-        " * RISCOSGrandDesign, design 12: each instruction's exact A32 semantics".to_string(),
-        " * over the state block, beside the source line it came from, lifted".to_string(),
-        " * to the expressions they compute where tier 1 can (`R` is the state's".to_string(),
-        format!(" * registers).  The ROM image is here too, placed at &{:08X}: compiled", inp.base),
-        " * code reads its tables, strings and error blocks at the addresses the".to_string(),
-        " * source gave them. */".to_string(),
+        " * Each instruction's exact A32 semantics over the state block, beside".to_string(),
+        " * the source line it came from, lifted to the expressions they compute".to_string(),
+        " * where tier 1 can (`R` is the state's registers).  The ROM image is".to_string(),
+        format!(" * here too, placed at &{:08X}: compiled code reads its tables,", inp.base),
+        " * strings and error blocks at the addresses the source gave them. */".to_string(),
         "#include <stdint.h>".to_string(),
         String::new(),
         "#include \"rosgd/cpu.h\"".to_string(),

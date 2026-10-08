@@ -6,11 +6,11 @@
 //! computed wherever an instruction sets them, and there is one statement
 //! per instruction. This module instead compiles a *block*, meaning
 //! straight-line code entered only at its top, to the C expressions its
-//! instructions compute. This is tier 1 of design 12 in RISCOSGrandDesign.
+//! instructions compute. This is tier 1 of `--emit c`.
 //! It works as follows:
 //!
 //! - Every value is a node in one expression graph. That covers the integer
-//!   registers, floating point (standard C floating point, design 16), and
+//!   registers, floating point (as standard C floating point), and
 //!   each of the flags N, Z, C and V.
 //! - A register is written to the state where it is assigned, if a transfer,
 //!   a call or the next block needs it there. Otherwise it is not written.

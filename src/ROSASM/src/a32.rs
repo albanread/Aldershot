@@ -3,9 +3,9 @@
 //! The compiler reads what was assembled, not what was parsed. An encoding
 //! *is* the instruction, exactly, with its addressing mode, shifter and
 //! condition. The byte-identity gate is what makes rosasm's bytes the same
-//! as ObjAsm's (RISCOSGrandDesign, design 12). So `--emit c` compiles the
-//! words rosasm produced. rosasm supplies what the words cannot: labels,
-//! source lines, and which bytes are code.
+//! as ObjAsm's. So `--emit c` compiles the words rosasm produced. rosasm
+//! supplies what the words cannot: labels, source lines, and which bytes
+//! are code.
 //!
 //! This decodes the ARMv7-A instructions that RISC OS 5's ObjAsm sources
 //! use outside the kernel's hardware code, and their floating point. That
