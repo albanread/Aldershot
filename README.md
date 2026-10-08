@@ -34,3 +34,9 @@ BBC BASIC suffers from the translation too, and does not run as much faster as t
 - [gpl](gpl/README.md): the source of the components under the GNU GPL, GNU LGPL, MPL 2.0 and CDDL.
 
 Code that BOX has translated to C stays under the licence of the code it was translated from: RISC OS translated to C is still under the Apache License 2.0. BOX claims no ownership of translated code.
+
+## Source code
+
+It is the intention to publish all of the source code of this project. Each port will be published when it is feature complete and maintainable. Publishing incomplete, unreadable, automatically translated code would not be a useful contribution to the community. The work will take several months.
+
+Until then, the source of every component whose licence asks for it is published in [gpl](gpl/README.md).
