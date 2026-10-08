@@ -55,3 +55,4 @@ Published so far, in [src](src):
 
 - [ROSASM](src/ROSASM/README.md), the ObjAsm-compatible assembler;
 - [ROSBAS](src/ROSBAS/README.md), the BBC BASIC V compiler (the compiler only; its runtime library will follow).
+- [BBC BASIC V, translated to C](src/translated/bbcbasic/README.md): RISC OS's BBC BASIC interpreter, translated by hand from ARM assembler; under ROOL's Apache License 2.0.
