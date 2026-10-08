@@ -1,5 +1,8 @@
 # Licences
 
+*BOX does not claim ownership of any code that the project did not originally
+write. All of the code will be published when it is ready.*
+
 The licence of everything the BOX releases are made from: the Mac releases
 (`BOX-arm64-mac`, `BOX-x64-mac`) and the PC image (`BOX-x64-pc`), as of the
 releases of 7 October 2026.
