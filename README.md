@@ -30,6 +30,8 @@ BBC BASIC suffers from the translation too, and does not run as much faster as t
 
 ## Licences
 
+*BOX does not claim ownership of any code that the project did not originally write. All of the code will be published when it is ready.*
+
 - [LICENSES](LICENSES/README.md): the licence of every component. BOX's own code is under the MIT licence. RISC OS is RISC OS Open Ltd's, under the Apache License 2.0.
 - [gpl](gpl/README.md): the source of the components under the GNU GPL, GNU LGPL, MPL 2.0 and CDDL.
 
