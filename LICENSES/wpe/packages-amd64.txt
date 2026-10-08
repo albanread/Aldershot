@@ -8,7 +8,7 @@ package                                  version                          source
 at-spi2-common                           2.62.0-2                         at-spi2-core 2.62.0-2
 bubblewrap                               0.13.0-1                         bubblewrap 0.13.0-1
 ca-certificates                          20260816                         ca-certificates 20260816
-dbus-user-session                        1.16.2-5+b1                      dbus 1.16.2-5
+dbus-user-session                        1.16.2-8                         dbus 1.16.2-8
 dconf-gsettings-backend                  51.0-2                           dconf 51.0-2
 dconf-service                            51.0-2                           dconf 51.0-2
 dictionaries-common                      1.31.4                           dictionaries-common 1.31.4
@@ -46,7 +46,7 @@ libcom-err2                              1.47.4-1+b2                      e2fspr
 libcurl4-gnutls                          8.22.0-1                         curl 8.22.0-1
 libdav1d7                                1.5.4-1                          dav1d 1.5.4-1
 libdb5.3t64                              5.3.28+dfsg2-11+b1               db5.3 5.3.28+dfsg2-11
-libdbus-1-3                              1.16.2-5+b1                      dbus 1.16.2-5
+libdbus-1-3                              1.16.2-8                         dbus 1.16.2-8
 libdconf1                                51.0-2                           dconf 51.0-2
 libdisplay-info3                         0.3.0-1+b1                       libdisplay-info 0.3.0-1
 libdrm-amdgpu1                           2.4.134-3                        libdrm 2.4.134-3
@@ -89,7 +89,7 @@ libgudev-1.0-0                           238-7+b2                         libgud
 libharfbuzz-icu0                         12.3.2-2+b2                      harfbuzz 12.3.2-2
 libharfbuzz0b                            12.3.2-2+b2                      harfbuzz 12.3.2-2
 libhogweed6t64                           3.10.2-1+b1                      nettle 3.10.2-1
-libhunspell-1.7-0                        1.7.3+really1.7.3-5              hunspell 1.7.3+really1.7.3-5
+libhunspell-1.7-0                        1.7.4-2                          hunspell 1.7.4-2
 libhwy1t64                               1.3.0-5.1                        highway 1.3.0-5.1
 libhyphen0                               2.8.9-3                          hyphen 2.8.9-3
 libicu78                                 78.3-2                           icu 78.3-2
@@ -119,9 +119,9 @@ liborc-0.4-0t64                          1:0.4.44-1                       orc 1:
 libp11-kit0                              0.26.5-1                         p11-kit 0.26.5-1
 libpam-systemd                           262-1                            systemd 262-1
 libpciaccess0                            0.19-2                           libpciaccess 0.19-2
-libpcre2-8-0                             10.48-3                          pcre2 10.48-3
+libpcre2-8-0                             10.48-3.1                        pcre2 10.48-3.1
 libpixman-1-0                            0.46.4-1+b2                      pixman 0.46.4-1
-libpng16-16t64                           1.6.58-1                         libpng1.6 1.6.58-1
+libpng16-16t64                           1.6.59-1                         libpng1.6 1.6.59-1
 libproc2-1                               2:4.0.7-1                        procps 2:4.0.7-1
 libproxy1v5                              0.5.12-3                         libproxy 0.5.12-3
 libpsl5t64                               0.23.3-1                         libpsl 0.23.3-1
