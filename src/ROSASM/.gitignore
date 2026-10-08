@@ -1,0 +1,22 @@
+# Build output.
+/target
+
+# Harness output: emulator runs and corpus sweeps, all regenerable.
+/tools/runs/
+__pycache__/
+*.pyc
+
+# Per-instance farm summaries, written by tools/farm.py.
+/tools/.farm-*.txt
+
+# Host tools built from the RISC OS BuildHost sources by tools/hosttools.py.
+/tools/hostbin/
+
+# ObjAsm's objects, collected once from the emulator. Derived from the
+# RISC OS sources and rebuilt by `aofdiff.py --collect`.
+tools/objasm-ref/
+
+# macOS scatters these beside whatever it browses. The tree is worked on
+# from a Mac as well now, and neither is anything to do with the assembler.
+.DS_Store
+._*

@@ -1,0 +1,6 @@
+# Windows checkouts convert to CRLF by default (core.autocrlf), which breaks a
+# shell script the moment it is run under a POSIX shell, and does assemblers no
+# favours either. Pin the ones where it matters. Matches the parent tree.
+*.sh    text eol=lf
+*.s     text eol=lf
+*.py    text eol=lf

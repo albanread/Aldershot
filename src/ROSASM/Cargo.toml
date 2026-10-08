@@ -1,0 +1,41 @@
+[package]
+name = "rosasm"
+version = "0.1.0"
+edition = "2021"
+description = "ObjAsm-compatible assembler front end for RISC OS 5; encodes via LLVM"
+license = "MIT"
+authors = ["Alban Read"]
+
+[dependencies]
+
+[[bin]]
+name = "corpus"
+path = "src/bin/corpus.rs"
+
+[[bin]]
+name = "exprcheck"
+path = "src/bin/exprcheck.rs"
+
+[[bin]]
+name = "expandcheck"
+path = "src/bin/expandcheck.rs"
+
+[[bin]]
+name = "difftest"
+path = "src/bin/difftest.rs"
+
+[[bin]]
+name = "roslist"
+path = "src/bin/roslist.rs"
+
+[[bin]]
+name = "rosasm"
+path = "src/bin/rosasm.rs"
+
+[[bin]]
+name = "aofdump"
+path = "src/bin/aofdump.rs"
+
+[[bin]]
+name = "fpacheck"
+path = "src/bin/fpacheck.rs"

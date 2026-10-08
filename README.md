@@ -50,3 +50,5 @@ Code that BOX has translated to C stays under the licence of the code it was tra
 It is the intention to publish all of the source code of this project. Each port will be published when it is feature complete and maintainable. Publishing incomplete, unreadable, automatically translated code would not be a useful contribution to the community. The work will take several months.
 
 Until then, the source of every component whose licence asks for it is published in [gpl](gpl/README.md).
+
+Published so far, in [src](src): [ROSASM](src/ROSASM/README.md), the ObjAsm-compatible assembler.
