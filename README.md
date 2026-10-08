@@ -8,7 +8,7 @@ RISC OS for generic devices: RISC OS translated to C, running on a Linux kernel,
 
 Early previews, from the [Releases page](https://github.com/albanread/Aldershot/releases):
 
-- [BOX for Apple silicon Macs](https://github.com/albanread/Aldershot/releases/tag/BOX-arm64-mac-2026.10.08) (macOS 14 or later)
+- [BOX for Apple silicon Macs](https://github.com/albanread/Aldershot/releases/tag/BOX-arm64-mac-2026.10.08.2) (macOS 14 or later)
 - [BOX for Intel Macs](https://github.com/albanread/Aldershot/releases/tag/BOX-x64-mac-2026.10.07) (macOS 14 or later)
 - [BOX x64 for PCs](https://github.com/albanread/Aldershot/releases/tag/BOX-x64-pc-2026.10.07) (USB stick image, UEFI)
 
