@@ -28,6 +28,10 @@ So BOX is not suited to Raspberry Pi class machines. It performs well on compute
 
 BBC BASIC suffers from the translation too, and does not run as much faster as the difference in processor power might suggest. To make up for this, BOX includes a translator from BBC BASIC to C, `*RosBas`.
 
+## Documents
+
+- [docs](docs/README.md): documents about BOX. [Bugs and quirks](docs/bugs-and-quirks.md) lists the bugs, quirks and documentation errors noticed in RISC OS 5.30 and its applications while porting them.
+
 ## Licences
 
 Important licence update information has been added to the repository: see [LICENSES](LICENSES/README.md).
