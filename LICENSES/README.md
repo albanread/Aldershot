@@ -6,25 +6,33 @@ releases of 7 October 2026.
 
 ## The BOX itself
 
-The BOX's own code -- the translation of RISC OS to C, the runtime, the
-native modules, the compositor and the browser's engine -- is under the MIT
-licence ([box/BOX.txt](box/BOX.txt)).
+**The BOX's own code** is under the MIT licence ([box/BOX.txt](box/BOX.txt)).
+That is the code written for the BOX: the runtime, the modules and
+applications written new for it, its tools (rosasm, rosbas, roscc), the
+compositor and the browser's engine.
 
-**RISC OS** is RISC OS Open's, under the Apache License 2.0, some components
-BSD-style ([box/RISCOS.txt](box/RISCOS.txt)). The BOX translates it; no
-ownership is claimed over any work translated to C, and every component keeps
-its upstream terms.
+**Translated code keeps the licence of the code it was translated from.**
+When the BOX translates a program to C, the C is a translation of the
+original work, not new work of the project's. It stays under the original
+author's licence, and the MIT licence does not apply to it. The project
+claims no ownership of any code it has translated, and the translation adds
+no rights of the project's over it. Where the BOX's C is otherwise derived
+from another author's source, that author's licence applies to it in the same
+way.
 
-## Source code, and translated code
+**RISC OS** is RISC OS Open's, under the Apache License 2.0, with some
+components under BSD-style licences ([box/RISCOS.txt](box/RISCOS.txt)).
+Apache-licensed source is still Apache-licensed after it has been translated
+to C: the licence itself counts a translation of the source as a form of the
+work. So RISC OS translated to C is still RISC OS Open's, under the Apache
+License 2.0, or under the BSD-style licence of the component it came from.
+The same holds for every other program or library translated for the BOX.
+
+## Publishing the source
 
 It is the intention to publish all of the source code of this project,
 especially once it is complete. Until then, the source of every component whose
 licence asks for it is published here, in [../gpl](../gpl/README.md).
-
-The project makes no claim on code that it has translated. RISC OS, and every
-other program or library translated to C for the BOX, remains the work of its
-authors, under its own licence; the translation adds no rights of the project's
-over it.
 
 ## Every component
 

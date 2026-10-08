@@ -33,4 +33,4 @@ BBC BASIC suffers from the translation too, and does not run as much faster as t
 - [LICENSES](LICENSES/README.md): the licence of every component. BOX's own code is under the MIT licence. RISC OS is RISC OS Open Ltd's, under the Apache License 2.0.
 - [gpl](gpl/README.md): the source of the components under the GNU GPL, GNU LGPL, MPL 2.0 and CDDL.
 
-BOX claims no rights over code it has translated. Every original author's licence applies to their work.
+Code that BOX has translated to C stays under the licence of the code it was translated from: RISC OS translated to C is still under the Apache License 2.0. BOX claims no ownership of translated code.
