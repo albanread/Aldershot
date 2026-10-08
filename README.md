@@ -51,4 +51,7 @@ It is the intention to publish all of the source code of this project. Each port
 
 Until then, the source of every component whose licence asks for it is published in [gpl](gpl/README.md).
 
-Published so far, in [src](src): [ROSASM](src/ROSASM/README.md), the ObjAsm-compatible assembler.
+Published so far, in [src](src):
+
+- [ROSASM](src/ROSASM/README.md), the ObjAsm-compatible assembler;
+- [ROSBAS](src/ROSBAS/README.md), the BBC BASIC V compiler (the compiler only; its runtime library will follow).

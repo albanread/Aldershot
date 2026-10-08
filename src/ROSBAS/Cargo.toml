@@ -1,0 +1,13 @@
+[package]
+name = "rosbas"
+version = "0.1.0"
+edition = "2021"
+description = "BBC BASIC V compiler for RISC OS: ROSGD (x32), A32 and A64"
+license = "MIT"
+authors = ["Alban Read"]
+
+[dependencies]
+
+[[bin]]
+name = "rosbas"
+path = "src/bin/rosbas.rs"
