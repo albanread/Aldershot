@@ -32,9 +32,13 @@ The same holds for every other program or library translated for the BOX.
 
 ## Publishing the source
 
-It is the intention to publish all of the source code of this project,
-especially once it is complete. Until then, the source of every component whose
-licence asks for it is published here, in [../gpl](../gpl/README.md).
+It is the intention to publish all of the source code of this project. Each
+port will be published when it is feature complete and maintainable. Publishing
+incomplete, unreadable, automatically translated code would not be a useful
+contribution to the community. The work will take several months.
+
+Until then, the source of every component whose licence asks for it is
+published here, in [../gpl](../gpl/README.md).
 
 ## Every component
 
