@@ -22,6 +22,11 @@ no rights of the project's over it. Where the BOX's C is otherwise derived
 from another author's source, that author's licence applies to it in the same
 way.
 
+**Ports keep their package's licence.** BOX's port of a package -- its
+changes to it, and any C written to replace part of it -- is under that
+package's licence, not MIT: PipeDream's under the MPL 2.0, NetSurf's under the
+GNU GPL 2, StrongED's and StrongHelp's under the BSD licence, and so on.
+
 **RISC OS** is RISC OS Open's, under the Apache License 2.0, with some
 components under BSD-style licences ([box/RISCOS.txt](box/RISCOS.txt)).
 Apache-licensed source is still Apache-licensed after it has been translated
