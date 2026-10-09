@@ -59,7 +59,7 @@ It supports processes and threads because working without these basic operating 
 HybrisOS is a smaller and younger kernel than Linux, and it is worse in several ways:
 
 - It is less well tested. Linux has decades of use on millions of machines; HybrisOS has BOX's own self-test and the programs its author has run.
-- It is less secure. It has a simple permission model, a simpler memory model and none of Linux's hardening, and it has had no independent security review. See Code analysis, below, for the checks that have been made.
+- It is less secure. It has a simple permission model, a simpler memory model and none of Linux's hardening, and it has had no independent security review. See Code analysis, below, for the checks that have been made. This may not be a large problem in practice, because HybrisOS runs only as a guest of QEMU on macOS. The Mac's hypervisor and QEMU stand between it and the rest of the Mac, so a fault in HybrisOS puts at risk the box and what the box can reach: the folder shared with it and the network.
 - It is less performant in some respects. One lock covers the whole kernel, so system calls on different cores wait for each other. The shared folder has no cache, and the kernel waits for QEMU while a file operation completes.
 - It lets you do less. BOX on Linux has the WebKit browser, the SMB server (`*Share`), and Mojo, which needs Linux's dynamic linker. HybrisOS has none of these.
 - It runs BOX on fewer systems: Apple silicon Macs only, under QEMU with the Mac's hypervisor.
@@ -139,4 +139,4 @@ Copyright (c) 2026 Alban Read.
 
 HybrisOS runs the BOX desktop with its applications, the network, sound, the shared folder, the C compiler and the SSH server, on up to eight cores. It passes BOX's self-test apart from the SMB server and Mojo, which it does not provide.
 
-It is an experiment, and it is fun to write.
+It is an experiment, and it is fun to write. It is probably not that useful.
