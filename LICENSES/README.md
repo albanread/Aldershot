@@ -79,6 +79,7 @@ files are on every BOX's disc, in `Documents.Licences`.
 | [libpng](box/libpng.txt) | 1.6.50 | libpng licence (PNG Reference Library License 2) | /init (CompressPNG, SpriteExtend's PNG, ChangeFSI's CFSI), !NetSurf |
 | [Linux](box/Linux.txt) | 6.18.54 | GNU GPL 2, with the Linux syscall note | the kernel BOX runs on (both machines, and the PC image) |
 | [LLVM](box/LLVM.txt) | 22.1.2 | Apache License 2.0 with LLVM Exceptions | both boxes' clang and ld.lld (*CC, *RosBas), compiler-rt's builtins; libc++, libc++abi and libunwind in /init (by zig) |
+| [lwIP](box/lwIP.txt) | 2.2.1 | BSD 3-clause | [HybrisOS](../HybrisOS/README.md), the HAL: its TCP/IP stack, compiled into the HAL edition's kernel image; not in the current releases |
 | [Manuals](box/Manuals.txt) | RISC OS 5.30 | No licence stated; described in the manuals as public domain; distributed by RISC OS Open in RISC OS 5.30's image | Utilities.!Manuals, as RISC OS 5.30's image has it, unaltered: the manuals Assembly, Basic, FloatingPt, GPIO, InetSocket, InetSWIs, MiscSWIs, OS, SH-RefMan, Toolbox, VCache, VDU and Wimp |
 | [mcl](box/mcl.txt) | 5fc4beaf33 | MIT | the ARM container in /init, which runs ARM code (runtime/armrun) |
 | [mimalloc](box/mimalloc.txt) | 3.5.3 | MIT | both boxes' clang (its memory allocator) |
