@@ -17,7 +17,7 @@ This is the source of `/init`, the program at the centre of BOX. It holds the RI
 
 ## What is not here
 
-- Much of RISC OS is translated to C when BOX is built, from RISC OS Open's sources, using ROSASM (`src/ROSASM`). The generated C is not kept.
+- The original assembler of the modules that BOX builds from it. It is in RISC OS Open's repository, and ROSASM (`src/ROSASM`) translates it.
 - The libraries `/init` links: OpenSSL, curl, zlib, libpng, libjpeg-turbo, dynarmic, musl and libsmb2. Their sources are theirs. `gpl/libsmb2` has the source and build script for libsmb2.
 - Compiled RISC OS modules, the disc, the applications and the `hal/` kernel.
 

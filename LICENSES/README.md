@@ -1,7 +1,11 @@
 # Licences
 
 *BOX does not claim ownership of any code that the project did not originally
-write. All of the code will be published when it is ready.*
+write. The project is publishing translated source code: the C in `src/box` is
+translated from other people's code, and keeps their licence. The project
+actually builds most modules from the original assembler code, which is
+typically more readable, and which is available from its own repository (RISC
+OS Open's, at <https://gitlab.riscosopen.org/RiscOS/Sources>).*
 
 The licence of everything the BOX releases are made from: the Mac releases
 (`BOX-arm64-mac`, `BOX-x64-mac`) and the PC image (`BOX-x64-pc`), as of the

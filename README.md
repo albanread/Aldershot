@@ -44,7 +44,7 @@ Important licence update information has been added to the repository: see [LICE
 
 *Anyone with genuine concerns about software licences should raise an issue.*
 
-*BOX does not claim ownership of any code that the project did not originally write. All of the code will be published when it is ready.*
+*BOX does not claim ownership of any code that the project did not originally write. The project is publishing translated source code: the C in [src/box](src/box/README.md) is translated from other people's code, and keeps their licence. The project actually builds most modules from the original assembler code, which is typically more readable, and which is available from its own repository ([RISC OS Open's](https://gitlab.riscosopen.org/RiscOS/Sources)).*
 
 - [LICENSES](LICENSES/README.md): the licence of every component. BOX's own code is under the MIT licence. RISC OS is RISC OS Open Ltd's, under the Apache License 2.0.
 - [gpl](gpl/README.md): the source of the components under the GNU GPL, GNU LGPL, MPL 2.0 and CDDL.
@@ -53,12 +53,13 @@ Code that BOX has translated to C stays under the licence of the code it was tra
 
 ## Source code
 
-It is the intention to publish all of the source code of this project. Each port will be published when it is feature complete and maintainable. Publishing incomplete, unreadable, automatically translated code would not be a useful contribution to the community. The work will take several months.
+The project is publishing translated source code: the C in [src/box](src/box/README.md) is translated from other people's code, and keeps their licence. The project actually builds most modules from the original assembler code, which is typically more readable, and which is available from its own repository ([RISC OS Open's](https://gitlab.riscosopen.org/RiscOS/Sources)).
 
-Until then, the source of every component whose licence asks for it is published in [gpl](gpl/README.md).
+The source of every component whose licence asks for it is in [gpl](gpl/README.md).
 
 Published so far, in [src](src):
 
+- [BOX](src/box/README.md), the source of `/init`: the runtime, the platform layer, the boot code and the modules written for BOX;
 - [ROSASM](src/ROSASM/README.md), the ObjAsm-compatible assembler;
 - [ROSBAS](src/ROSBAS/README.md), the BBC BASIC V compiler (the compiler only; its runtime library will follow).
 - [BBC BASIC V, translated to C](src/translated/bbcbasic/README.md): RISC OS's BBC BASIC interpreter, translated by hand from ARM assembler; under ROOL's Apache License 2.0.
