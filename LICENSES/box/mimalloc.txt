@@ -3,7 +3,7 @@ mimalloc
 
 Version:  3.5.3
 From:     https://github.com/microsoft/mimalloc
-Used by:  both boxes' clang (its memory allocator)
+Used by:  both boxes' clang and the Mojo compiler (its memory allocator)
 Licence:  MIT
 
 ------------------------------------------------------------------------

@@ -4,8 +4,9 @@ musl
 Version:  1.2.6
 From:     https://musl.libc.org/
 Used by:  the C library of /init, ssh, sshd and ksmbd-tools (through zig),
-          of the box's clang and the libraries it links with, and of the
-          box's POSIX C library
+          of the box's clang and the libraries it links with, of the box's
+          POSIX C library, and the Mojo compiler (*Mojo), linked statically
+          (Alpine 3.24's musl-dev 1.2.6)
 Licence:  MIT
 
 ------------------------------------------------------------------------

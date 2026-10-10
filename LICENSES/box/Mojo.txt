@@ -8,14 +8,16 @@ Used by:  *Mojo, BoxTools' Mojo compiler, and its standard library, under
           /usr/lib/mojo
 Licence:  Apache License 2.0 with LLVM Exceptions
 
-BOX's Mojo compiler and its standard library were built from the source of
-the MojoRISCOS fork of Modular's open-source repository: the compiler
-(KGEN), the standard library, AsyncRT and Support, every file of which
-carries the Apache License 2.0 with LLVM Exceptions, as the NOTICE above
-says.  No binary of Modular's was used, and MAX is not included.  Modular's
-Community License governs Modular's own SDK downloads and MAX, so it does
-not apply to what BOX ships.  "Mojo" is a trademark of Modular, Inc., used
-here to name the language.
+BOX's Mojo compiler is one static program linked against musl, with
+libstdc++, libgcc and mimalloc linked in; nothing else is installed beside
+it.  It and its standard library were built from the source of the
+MojoRISCOS fork of Modular's open-source repository: the compiler (KGEN),
+the standard library, AsyncRT and Support, every file of which carries the
+Apache License 2.0 with LLVM Exceptions, as the NOTICE above says.  No
+binary of Modular's was used, and MAX is not included.  Modular's Community
+License governs Modular's own SDK downloads and MAX, so it does not apply to
+what BOX ships.  "Mojo" is a trademark of Modular, Inc., used here to name
+the language.
 
 ------------------------------------------------------------------------
 NOTICE

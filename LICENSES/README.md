@@ -70,9 +70,8 @@ files are on every BOX's disc, in `Documents.Licences`.
 | [Fanwood](box/Fanwood.txt) | 2011 | SIL Open Font License 1.1 | RISC OS 5.30's !Fonts (Resources.!Fonts on the disc), as RISC OS Open converted them |
 | [fmt](box/fmt.txt) | 7b273fbb54 | MIT, with fmt's binary exception | the ARM container in /init, which runs ARM code (runtime/armrun) |
 | [FreeFont](box/FreeFont.txt) | 20120503 | GNU GPL 3 or later, with the font exception | RISC OS 5.30's !Fonts (Resources.!Fonts on the disc), as RISC OS Open converted them |
-| [GCC](box/GCC.txt) | 14.2.0-19 | GNU GPL 3 with the GCC Runtime Library Exception 3.1 | *Mojo: the compiler's C++ runtime, under /usr/lib/mojo/lib |
+| [GCC](box/GCC.txt) | 15.2.0 | GNU GPL 3 with the GCC Runtime Library Exception 3.1 | *Mojo: the compiler's C++ runtime (libstdc++ and libgcc), linked into it |
 | [GLib](box/GLib.txt) | 2.88.3 | GNU LGPL 2.1 or later | ksmbd.tools |
-| [glibc](box/glibc.txt) | 2.41-12+deb13u4 | GNU LGPL 2.1 or later (some parts under other free licences: LICENSES) | *Mojo: the compiler runs on its own copy of glibc, under /usr/lib/mojo/lib |
 | [ksmbd-tools](box/ksmbd-tools.txt) | 3.5.7 | GNU GPL 2 or later | ksmbd.tools in the ROM (*Share, the box's SMB server) |
 | [libjpeg-turbo](box/libjpeg-turbo.txt) | 3.2.0 | IJG licence, Modified (3-clause) BSD, zlib | /init (CompressJPEG, SpriteExtend's JPEG, ChangeFSI's CFSI), !NetSurf |
 | [libnl](box/libnl.txt) | 3.12.0 | GNU LGPL 2.1 | ksmbd.tools |
@@ -82,9 +81,9 @@ files are on every BOX's disc, in `Documents.Licences`.
 | [lwIP](box/lwIP.txt) | 2.2.1 | BSD 3-clause | [HybrisOS](../HybrisOS/README.md), the HAL: its TCP/IP stack, compiled into the HAL edition's kernel image; not in the current releases |
 | [Manuals](box/Manuals.txt) | RISC OS 5.30 | No licence stated; described in the manuals as public domain; distributed by RISC OS Open in RISC OS 5.30's image | Utilities.!Manuals, as RISC OS 5.30's image has it, unaltered: the manuals Assembly, Basic, FloatingPt, GPIO, InetSocket, InetSWIs, MiscSWIs, OS, SH-RefMan, Toolbox, VCache, VDU and Wimp |
 | [mcl](box/mcl.txt) | 5fc4beaf33 | MIT | the ARM container in /init, which runs ARM code (runtime/armrun) |
-| [mimalloc](box/mimalloc.txt) | 3.5.3 | MIT | both boxes' clang (its memory allocator) |
-| [Mojo](box/Mojo.txt) | 1.1 | Apache License 2.0 with LLVM Exceptions | *Mojo, BoxTools' Mojo compiler, and its standard library, under /usr/lib/mojo |
-| [musl](box/musl.txt) | 1.2.6 | MIT | the C library of /init, ssh, sshd and ksmbd-tools (through zig), of the box's clang and the libraries it links with, and of the box's POSIX C library |
+| [mimalloc](box/mimalloc.txt) | 3.5.3 | MIT | both boxes' clang and the Mojo compiler (its memory allocator) |
+| [Mojo](box/Mojo.txt) | 1.1 | Apache License 2.0 with LLVM Exceptions | *Mojo, BoxTools' Mojo compiler, and its standard library, under /usr/lib/mojo. The compiler is one static program, linked against musl with libstdc++, libgcc and mimalloc |
+| [musl](box/musl.txt) | 1.2.6 | MIT | the C library of /init, ssh, sshd and ksmbd-tools (through zig), of the box's clang and the libraries it links with, of the box's POSIX C library, and the Mojo compiler (*Mojo), linked statically |
 | [NetSurf](box/NetSurf.txt) | 3.11+ (39da3c3a40) | GNU GPL 2 (NetSurf); MIT (its libraries) | Apps.!NetSurf, the web browser, and the libraries it is built from: libwapcaplet, libparserutils, libhubbub, libdom, libcss, libnsgif, libnsbmp, libnsutils, libnspsl, libnslog, libsvgtiny. BOX's changes to NetSurf and its RISC OS front end are under NetSurf's licence |
 | [oaknut](box/oaknut.txt) | 94c726ce03 | MIT | the ARM container in /init, which runs ARM code (runtime/armrun), on Apple Silicon |
 | [OpenSSH](box/OpenSSH.txt) | 10.5p1 | BSD-style (several) | ssh, ssh-keygen and sshd in the ROM (*SSH, logging in to the box) |

@@ -1,9 +1,9 @@
-GCC runtime libraries: libstdc++ and libgcc_s (Debian 13)
+GCC runtime libraries: libstdc++ and libgcc (Alpine 3.24)
 =========================================================
 
-Version:  14.2.0-19
+Version:  15.2.0-r5
 From:     https://gcc.gnu.org/
-Used by:  *Mojo: the compiler's C++ runtime, under /usr/lib/mojo/lib
+Used by:  *Mojo: the compiler's C++ runtime, linked into it
 Licence:  GNU GPL 3 with the GCC Runtime Library Exception 3.1
 
 ------------------------------------------------------------------------
