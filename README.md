@@ -1,6 +1,8 @@
 # BOX
 
-RISC OS for generic devices: RISC OS translated to C, running on a Linux kernel, on a 64-bit PC or a Mac.
+A RISC OS environment for generic devices.
+
+*RISC OS's components translated to C, running on a Linux kernel, on a 64-bit PC or a Mac.*
 
 ![BOX on a PC, booted from a USB stick](screenshots/box-on-a-pc.png)
 
