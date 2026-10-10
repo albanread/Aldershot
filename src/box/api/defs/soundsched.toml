@@ -1,0 +1,75 @@
+# SoundScheduler: the sound queue, as Sound2 owns it on RISC OS 5
+# (HWSupport/Sound/Sound2, module "SoundScheduler").  BASIC's SOUND
+# statement compiles to Sound_QSchedule -- the 5th, time, parameter is
+# the beat to sound the note at -- and Maestro queues a whole bar ahead
+# each time BASIC's BEAT wraps.  The queue advances on the audio fill,
+# and each event fires as either Sound_Control (control 0) or the SWI
+# named in control &0F000000+number (Maestro's MIDI events).
+#
+# Numbers are facts of the interface (Sound2's Module_SWIDecodeBase);
+# the register roles are Sound2's s/Sound2 and the PRM's.
+
+[module]
+name = "SoundScheduler"
+impl = "native"
+chunk = 0x401C0
+
+# Clear the queue, reset the beat counter and the last-scheduled time.
+[[swi]]
+name = "Sound_QInit"
+number = 0x401C0
+raw = true
+reads = []
+writes = [0]
+
+# R0 = beat (from BEAT 0; negative syncs with the last scheduled),
+# R1 = control (0 sound, &0F000000+SWI a SWI to call), R2/R3 its data.
+# Out R0 = 0 success, negative the queue is full.
+[[swi]]
+name = "Sound_QSchedule"
+number = 0x401C1
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0]
+
+# R0 = the next events to look within; ours just reports none (R0 = -1).
+[[swi]]
+name = "Sound_QRemove"
+number = 0x401C2
+raw = true
+reads = [0]
+writes = [0, 1, 2, 3]
+
+# Out R0 = the slots guaranteed free.
+[[swi]]
+name = "Sound_QFree"
+number = 0x401C3
+raw = true
+reads = []
+writes = [0]
+
+# R0 = the centiseconds to advance by, the fill's own tick.
+[[swi]]
+name = "Sound_QSDispatch"
+number = 0x401C4
+raw = true
+reads = [0]
+writes = []
+
+# R0 = beats per centisecond in 2^19 fixed (Maestro passes
+# BPM*128*4096/6000); 0 reads.  Out R0 = the old tempo.
+[[swi]]
+name = "Sound_QTempo"
+number = 0x401C5
+raw = true
+reads = [0]
+writes = [0]
+
+# R0 = 0 the beat, -1 the bar length, positive sets the bar length,
+# negative otherwise clears it (and the beat).
+[[swi]]
+name = "Sound_QBeat"
+number = 0x401C6
+raw = true
+reads = [0]
+writes = [0]

@@ -1,0 +1,264 @@
+diff --git a/src/dynarmic/backend/arm64/a32_address_space.cpp b/src/dynarmic/backend/arm64/a32_address_space.cpp
+index bbdf925f..54cc665e 100644
+--- a/src/dynarmic/backend/arm64/a32_address_space.cpp
++++ b/src/dynarmic/backend/arm64/a32_address_space.cpp
+@@ -181,7 +181,7 @@ IR::Block A32AddressSpace::GenerateIR(IR::LocationDescriptor descriptor) const {
+     return ir_block;
+ }
+ 
+-void A32AddressSpace::InvalidateCacheRanges(const boost::icl::interval_set<u32>& ranges) {
++void A32AddressSpace::InvalidateCacheRanges(const Backend::RangeSet<u32>& ranges) {
+     InvalidateBasicBlocks(block_ranges.InvalidateRanges(ranges));
+ }
+ 
+diff --git a/src/dynarmic/backend/arm64/a32_address_space.h b/src/dynarmic/backend/arm64/a32_address_space.h
+index 3b9e9fb2..eda48736 100644
+--- a/src/dynarmic/backend/arm64/a32_address_space.h
++++ b/src/dynarmic/backend/arm64/a32_address_space.h
+@@ -19,7 +19,7 @@ public:
+ 
+     IR::Block GenerateIR(IR::LocationDescriptor) const override;
+ 
+-    void InvalidateCacheRanges(const boost::icl::interval_set<u32>& ranges);
++    void InvalidateCacheRanges(const Backend::RangeSet<u32>& ranges);
+ 
+ protected:
+     friend class A32Core;
+diff --git a/src/dynarmic/backend/arm64/a32_interface.cpp b/src/dynarmic/backend/arm64/a32_interface.cpp
+index 6b38c410..74bca318 100644
+--- a/src/dynarmic/backend/arm64/a32_interface.cpp
++++ b/src/dynarmic/backend/arm64/a32_interface.cpp
+@@ -159,7 +159,7 @@ private:
+     volatile u32 halt_reason = 0;
+ 
+     std::mutex invalidation_mutex;
+-    boost::icl::interval_set<u32> invalid_cache_ranges;
++    Backend::RangeSet<u32> invalid_cache_ranges;
+     bool invalidate_entire_cache = false;
+ };
+ 
+diff --git a/src/dynarmic/backend/arm64/a64_address_space.cpp b/src/dynarmic/backend/arm64/a64_address_space.cpp
+index d4fe9a9c..bc17f6b8 100644
+--- a/src/dynarmic/backend/arm64/a64_address_space.cpp
++++ b/src/dynarmic/backend/arm64/a64_address_space.cpp
+@@ -350,7 +350,7 @@ IR::Block A64AddressSpace::GenerateIR(IR::LocationDescriptor descriptor) const {
+     return ir_block;
+ }
+ 
+-void A64AddressSpace::InvalidateCacheRanges(const boost::icl::interval_set<u64>& ranges) {
++void A64AddressSpace::InvalidateCacheRanges(const Backend::RangeSet<u64>& ranges) {
+     InvalidateBasicBlocks(block_ranges.InvalidateRanges(ranges));
+ }
+ 
+diff --git a/src/dynarmic/backend/arm64/a64_address_space.h b/src/dynarmic/backend/arm64/a64_address_space.h
+index 86eae4dd..a11c6a98 100644
+--- a/src/dynarmic/backend/arm64/a64_address_space.h
++++ b/src/dynarmic/backend/arm64/a64_address_space.h
+@@ -19,7 +19,7 @@ public:
+ 
+     IR::Block GenerateIR(IR::LocationDescriptor) const override;
+ 
+-    void InvalidateCacheRanges(const boost::icl::interval_set<u64>& ranges);
++    void InvalidateCacheRanges(const Backend::RangeSet<u64>& ranges);
+ 
+ protected:
+     friend class A64Core;
+diff --git a/src/dynarmic/backend/arm64/a64_interface.cpp b/src/dynarmic/backend/arm64/a64_interface.cpp
+index 7d771678..3e58a689 100644
+--- a/src/dynarmic/backend/arm64/a64_interface.cpp
++++ b/src/dynarmic/backend/arm64/a64_interface.cpp
+@@ -188,7 +188,7 @@ private:
+     volatile u32 halt_reason = 0;
+ 
+     std::mutex invalidation_mutex;
+-    boost::icl::interval_set<u64> invalid_cache_ranges;
++    Backend::RangeSet<u64> invalid_cache_ranges;
+     bool invalidate_entire_cache = false;
+     bool is_executing = false;
+ };
+diff --git a/src/dynarmic/backend/block_range_information.cpp b/src/dynarmic/backend/block_range_information.cpp
+index 47e512f5..42c91cb2 100644
+--- a/src/dynarmic/backend/block_range_information.cpp
++++ b/src/dynarmic/backend/block_range_information.cpp
+@@ -14,26 +14,35 @@ namespace Dynarmic::Backend {
+ 
+ template<typename ProgramCounterType>
+ void BlockRangeInformation<ProgramCounterType>::AddRange(boost::icl::discrete_interval<ProgramCounterType> range, IR::LocationDescriptor location) {
+-    block_ranges.add(std::make_pair(range, std::set<IR::LocationDescriptor>{location}));
++    const ProgramCounterType lo = boost::icl::first(range), hi = boost::icl::last(range);
++    blocks.emplace(lo, std::make_pair(hi, location));
++    if (hi - lo > longest) {
++        longest = hi - lo;
++    }
+ }
+ 
+ template<typename ProgramCounterType>
+ void BlockRangeInformation<ProgramCounterType>::ClearCache() {
+-    block_ranges.clear();
++    blocks.clear();
++    longest = 0;
+ }
+ 
+ template<typename ProgramCounterType>
+-tsl::robin_set<IR::LocationDescriptor> BlockRangeInformation<ProgramCounterType>::InvalidateRanges(const boost::icl::interval_set<ProgramCounterType>& ranges) {
++tsl::robin_set<IR::LocationDescriptor> BlockRangeInformation<ProgramCounterType>::InvalidateRanges(const RangeSet<ProgramCounterType>& ranges) {
+     tsl::robin_set<IR::LocationDescriptor> erase_locations;
+     for (auto invalidate_interval : ranges) {
+-        auto pair = block_ranges.equal_range(invalidate_interval);
+-        for (auto it = pair.first; it != pair.second; ++it) {
+-            for (const auto& descriptor : it->second) {
+-                erase_locations.insert(descriptor);
++        const ProgramCounterType lo = boost::icl::first(invalidate_interval), hi = boost::icl::last(invalidate_interval);
++        // a block overlapping [lo, hi] starts at most `longest` below lo
++        auto it = blocks.lower_bound(lo >= longest ? lo - longest : 0);
++        while (it != blocks.end() && it->first <= hi) {
++            if (it->second.first >= lo) {
++                erase_locations.insert(it->second.second);
++                it = blocks.erase(it);
++            } else {
++                ++it;
+             }
+         }
+     }
+-    // TODO: EFFICIENCY: Remove ranges that are to be erased.
+     return erase_locations;
+ }
+ 
+diff --git a/src/dynarmic/backend/block_range_information.h b/src/dynarmic/backend/block_range_information.h
+index 3402b155..8967912d 100644
+--- a/src/dynarmic/backend/block_range_information.h
++++ b/src/dynarmic/backend/block_range_information.h
+@@ -5,7 +5,10 @@
+ 
+ #pragma once
+ 
++#include <map>
+ #include <set>
++#include <utility>
++#include <vector>
+ 
+ #include <boost/icl/interval_map.hpp>
+ #include <boost/icl/interval_set.hpp>
+@@ -15,15 +18,42 @@
+ 
+ namespace Dynarmic::Backend {
+ 
++// ROSGD (runtime/armrun/patches/0002): the ranges waiting to be
++// invalidated, each kept as given.  Not an icl::interval_set, whose add
++// merges through the same std::map searches (below) and under libc++ can
++// leave a union wrong.  Overlaps are harmless: InvalidateRanges visits each.
++template<typename ProgramCounterType>
++class RangeSet {
++public:
++    using Interval = boost::icl::discrete_interval<ProgramCounterType>;
++    void add(Interval range) { ranges.push_back(range); }
++    void clear() { ranges.clear(); }
++    bool empty() const { return ranges.empty(); }
++    auto begin() const { return ranges.begin(); }
++    auto end() const { return ranges.end(); }
++
++private:
++    std::vector<Interval> ranges;
++};
++
+ template<typename ProgramCounterType>
+ class BlockRangeInformation {
+ public:
+     void AddRange(boost::icl::discrete_interval<ProgramCounterType> range, IR::LocationDescriptor location);
+     void ClearCache();
+-    tsl::robin_set<IR::LocationDescriptor> InvalidateRanges(const boost::icl::interval_set<ProgramCounterType>& ranges);
++    tsl::robin_set<IR::LocationDescriptor> InvalidateRanges(const RangeSet<ProgramCounterType>& ranges);
+ 
+ private:
+-    boost::icl::interval_map<ProgramCounterType, std::set<IR::LocationDescriptor>> block_ranges;
++    // ROSGD (runtime/armrun/patches/0002): each block's first and last
++    // address, by first address.  Not an icl::interval_map: ICL finds the
++    // segments an interval overlaps through std::map's lower_bound and
++    // upper_bound with overlap as equivalence, and libc++ searches a
++    // unique-key map by stopping at the first equivalent node -- one
++    // overlapping block, not the first (so a range over several blocks
++    // invalidated only one).  Searches here are by point, which no
++    // ordering can make ambiguous.
++    std::multimap<ProgramCounterType, std::pair<ProgramCounterType, IR::LocationDescriptor>> blocks;
++    ProgramCounterType longest = 0;     // the most any block's last exceeds its first
+ };
+ 
+ }  // namespace Dynarmic::Backend
+diff --git a/src/dynarmic/backend/x64/a32_emit_x64.cpp b/src/dynarmic/backend/x64/a32_emit_x64.cpp
+index fc8e8bae..9c5bb968 100644
+--- a/src/dynarmic/backend/x64/a32_emit_x64.cpp
++++ b/src/dynarmic/backend/x64/a32_emit_x64.cpp
+@@ -185,7 +185,7 @@ void A32EmitX64::ClearCache() {
+     fastmem_patch_info.clear();
+ }
+ 
+-void A32EmitX64::InvalidateCacheRanges(const boost::icl::interval_set<u32>& ranges) {
++void A32EmitX64::InvalidateCacheRanges(const Backend::RangeSet<u32>& ranges) {
+     InvalidateBasicBlocks(block_ranges.InvalidateRanges(ranges));
+ }
+ 
+diff --git a/src/dynarmic/backend/x64/a32_emit_x64.h b/src/dynarmic/backend/x64/a32_emit_x64.h
+index 3706b30a..87373a0f 100644
+--- a/src/dynarmic/backend/x64/a32_emit_x64.h
++++ b/src/dynarmic/backend/x64/a32_emit_x64.h
+@@ -52,7 +52,7 @@ public:
+ 
+     void ClearCache() override;
+ 
+-    void InvalidateCacheRanges(const boost::icl::interval_set<u32>& ranges);
++    void InvalidateCacheRanges(const Backend::RangeSet<u32>& ranges);
+ 
+ protected:
+     const A32::UserConfig conf;
+diff --git a/src/dynarmic/backend/x64/a32_interface.cpp b/src/dynarmic/backend/x64/a32_interface.cpp
+index d690aada..0eadc5e8 100644
+--- a/src/dynarmic/backend/x64/a32_interface.cpp
++++ b/src/dynarmic/backend/x64/a32_interface.cpp
+@@ -263,7 +263,7 @@ private:
+ 
+     // Requests made during execution to invalidate the cache are queued up here.
+     bool invalidate_entire_cache = false;
+-    boost::icl::interval_set<u32> invalid_cache_ranges;
++    Backend::RangeSet<u32> invalid_cache_ranges;
+     std::mutex invalidation_mutex;
+ };
+ 
+diff --git a/src/dynarmic/backend/x64/a64_emit_x64.cpp b/src/dynarmic/backend/x64/a64_emit_x64.cpp
+index cec78138..ab278af4 100644
+--- a/src/dynarmic/backend/x64/a64_emit_x64.cpp
++++ b/src/dynarmic/backend/x64/a64_emit_x64.cpp
+@@ -156,7 +156,7 @@ void A64EmitX64::ClearCache() {
+     fastmem_patch_info.clear();
+ }
+ 
+-void A64EmitX64::InvalidateCacheRanges(const boost::icl::interval_set<u64>& ranges) {
++void A64EmitX64::InvalidateCacheRanges(const Backend::RangeSet<u64>& ranges) {
+     InvalidateBasicBlocks(block_ranges.InvalidateRanges(ranges));
+ }
+ 
+diff --git a/src/dynarmic/backend/x64/a64_emit_x64.h b/src/dynarmic/backend/x64/a64_emit_x64.h
+index ed493155..b416b832 100644
+--- a/src/dynarmic/backend/x64/a64_emit_x64.h
++++ b/src/dynarmic/backend/x64/a64_emit_x64.h
+@@ -49,7 +49,7 @@ public:
+ 
+     void ClearCache() override;
+ 
+-    void InvalidateCacheRanges(const boost::icl::interval_set<u64>& ranges);
++    void InvalidateCacheRanges(const Backend::RangeSet<u64>& ranges);
+ 
+ protected:
+     const A64::UserConfig conf;
+diff --git a/src/dynarmic/backend/x64/a64_interface.cpp b/src/dynarmic/backend/x64/a64_interface.cpp
+index b9373f79..95969249 100644
+--- a/src/dynarmic/backend/x64/a64_interface.cpp
++++ b/src/dynarmic/backend/x64/a64_interface.cpp
+@@ -322,7 +322,7 @@ private:
+     Optimization::PolyfillOptions polyfill_options;
+ 
+     bool invalidate_entire_cache = false;
+-    boost::icl::interval_set<u64> invalid_cache_ranges;
++    Backend::RangeSet<u64> invalid_cache_ranges;
+     std::mutex invalidation_mutex;
+ };
+ 

@@ -1,0 +1,354 @@
+# The Internet module, as a native module over Linux's sockets: its SWIs, typed.
+#
+# The interface is RISC OS 5's Internet module (Networking/AUN/Internet: its
+# cmhg header, riscos/c/socket_swi, and TCPIPLibs' headers); modules/internet/
+# README.md describes the module.  Names, numbers, register roles, constants and
+# structure layouts are RISC OS's -- 4.4BSD's -- and the module translates each
+# to Linux's.
+#
+# Each SWI is the BSD call of its name, arguments in R0 upwards and the result
+# in R0.  The unsuffixed Accept, Recvfrom, Recvmsg, Sendmsg, Getpeername and
+# Getsockname are 4.3BSD's, with 4.3's sockaddr (a 16-bit family) and msghdr;
+# the _1 forms are 4.4BSD's (length and family bytes).  Errors are
+# &20E00 + the BSD errno.
+#
+# Sockets are small integers, 0 to 255 -- machine-wide, as on RISC OS, where
+# a socket one task opens another may use.
+
+[module]
+name = "Internet"
+impl = "native"
+chunk = 0x41200
+
+[[swi]]
+name = "Socket_Creat"
+number = 0x41200
+params = [
+  { reg = 0, name = "domain", type = "u32" },
+  { reg = 1, name = "type", type = "u32" },
+  { reg = 2, name = "protocol", type = "u32" },
+]
+results = [{ reg = 0, name = "sock", type = "u32" }]
+
+[[swi]]
+name = "Socket_Bind"
+number = 0x41201
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "name", type = "ptr<u8>", const = true },
+  { reg = 2, name = "namelen", type = "u32" },
+]
+
+[[swi]]
+name = "Socket_Listen"
+number = 0x41202
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "backlog", type = "u32" },
+]
+
+[[swi]]
+name = "Socket_Accept"
+number = 0x41203
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "addr", type = "ptr<u8>", null_ok = true },
+  { reg = 2, name = "addrlen", type = "ptr<u32>", null_ok = true },
+]
+results = [{ reg = 0, name = "ns", type = "u32" }]
+
+[[swi]]
+name = "Socket_Connect"
+number = 0x41204
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "name", type = "ptr<u8>", const = true },
+  { reg = 2, name = "namelen", type = "u32" },
+]
+
+[[swi]]
+name = "Socket_Recv"
+number = 0x41205
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "buf", type = "ptr<u8>" },
+  { reg = 2, name = "len", type = "u32" },
+  { reg = 3, name = "flags", type = "u32" },
+]
+results = [{ reg = 0, name = "n", type = "u32" }]
+
+[[swi]]
+name = "Socket_Recvfrom"
+number = 0x41206
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "buf", type = "ptr<u8>" },
+  { reg = 2, name = "len", type = "u32" },
+  { reg = 3, name = "flags", type = "u32" },
+  { reg = 4, name = "from", type = "ptr<u8>", null_ok = true },
+  { reg = 5, name = "fromlen", type = "ptr<u32>", null_ok = true },
+]
+results = [{ reg = 0, name = "n", type = "u32" }]
+
+[[swi]]
+name = "Socket_Recvmsg"
+number = 0x41207
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "msg", type = "ptr<u32>" },     # 4.3's msghdr, six words
+  { reg = 2, name = "flags", type = "u32" },
+]
+results = [{ reg = 0, name = "n", type = "u32" }]
+
+[[swi]]
+name = "Socket_Send"
+number = 0x41208
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "buf", type = "ptr<u8>", const = true },
+  { reg = 2, name = "len", type = "u32" },
+  { reg = 3, name = "flags", type = "u32" },
+]
+results = [{ reg = 0, name = "n", type = "u32" }]
+
+[[swi]]
+name = "Socket_Sendto"
+number = 0x41209
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "buf", type = "ptr<u8>", const = true },
+  { reg = 2, name = "len", type = "u32" },
+  { reg = 3, name = "flags", type = "u32" },
+  { reg = 4, name = "to", type = "ptr<u8>", const = true, null_ok = true },
+  { reg = 5, name = "tolen", type = "u32" },
+]
+results = [{ reg = 0, name = "n", type = "u32" }]
+
+[[swi]]
+name = "Socket_Sendmsg"
+number = 0x4120A
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "msg", type = "ptr<u32>", const = true },   # 4.3's msghdr
+  { reg = 2, name = "flags", type = "u32" },
+]
+results = [{ reg = 0, name = "n", type = "u32" }]
+
+[[swi]]
+name = "Socket_Shutdown"
+number = 0x4120B
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "how", type = "u32" },
+]
+
+[[swi]]
+name = "Socket_Setsockopt"
+number = 0x4120C
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "level", type = "u32" },
+  { reg = 2, name = "optname", type = "u32" },
+  { reg = 3, name = "optval", type = "ptr<u8>", const = true, null_ok = true },
+  { reg = 4, name = "optlen", type = "u32" },
+]
+
+[[swi]]
+name = "Socket_Getsockopt"
+number = 0x4120D
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "level", type = "u32" },
+  { reg = 2, name = "optname", type = "u32" },
+  { reg = 3, name = "optval", type = "ptr<u8>", null_ok = true },
+  { reg = 4, name = "optlen", type = "ptr<u32>", null_ok = true },
+]
+
+[[swi]]
+name = "Socket_Getpeername"
+number = 0x4120E
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "name", type = "ptr<u8>" },
+  { reg = 2, name = "namelen", type = "ptr<u32>" },
+]
+
+[[swi]]
+name = "Socket_Getsockname"
+number = 0x4120F
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "name", type = "ptr<u8>" },
+  { reg = 2, name = "namelen", type = "ptr<u32>" },
+]
+
+[[swi]]
+name = "Socket_Close"
+number = 0x41210
+params = [{ reg = 0, name = "s", type = "u32" }]
+
+# fd_sets of 256 bits; a 4.4BSD timeval of two 32-bit words, NULL to wait.
+[[swi]]
+name = "Socket_Select"
+number = 0x41211
+params = [
+  { reg = 0, name = "nfds", type = "u32" },
+  { reg = 1, name = "readfds", type = "ptr<u32>", null_ok = true },
+  { reg = 2, name = "writefds", type = "ptr<u32>", null_ok = true },
+  { reg = 3, name = "exceptfds", type = "ptr<u32>", null_ok = true },
+  { reg = 4, name = "timeout", type = "ptr<u32>", const = true, null_ok = true },
+]
+results = [{ reg = 0, name = "n", type = "u32" }]
+
+[[swi]]
+name = "Socket_Ioctl"
+number = 0x41212
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "request", type = "u32" },
+  { reg = 2, name = "argp", type = "ptr<u8>", null_ok = true },
+]
+
+[[swi]]
+name = "Socket_Read"
+number = 0x41213
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "buf", type = "ptr<u8>" },
+  { reg = 2, name = "len", type = "u32" },
+]
+results = [{ reg = 0, name = "n", type = "u32" }]
+
+[[swi]]
+name = "Socket_Write"
+number = 0x41214
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "buf", type = "ptr<u8>", const = true },
+  { reg = 2, name = "len", type = "u32" },
+]
+results = [{ reg = 0, name = "n", type = "u32" }]
+
+# struct stat, TCPIPLibs' own: planned until something needs it.
+[[swi]]
+name = "Socket_Stat"
+number = 0x41215
+impl = "planned"
+reads = [0, 1]
+writes = [0]
+
+# iovecs of two 32-bit words: base, length.
+[[swi]]
+name = "Socket_Readv"
+number = 0x41216
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "iov", type = "ptr<u32>", const = true },
+  { reg = 2, name = "iovcnt", type = "u32" },
+]
+results = [{ reg = 0, name = "n", type = "u32" }]
+
+[[swi]]
+name = "Socket_Writev"
+number = 0x41217
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "iov", type = "ptr<u32>", const = true },
+  { reg = 2, name = "iovcnt", type = "u32" },
+]
+results = [{ reg = 0, name = "n", type = "u32" }]
+
+[[swi]]
+name = "Socket_Gettsize"
+number = 0x41218
+results = [{ reg = 0, name = "size", type = "u32" }]
+
+# Two buffers sent as one datagram: s, buf, len, buf1, len1, to.
+[[swi]]
+name = "Socket_Sendtosm"
+number = 0x41219
+impl = "planned"
+reads = [0, 1, 2, 3, 4, 5]
+writes = [0]
+
+# BSD's sysctl: name, namelen, oldp, oldlenp, newp, newlen.
+[[swi]]
+name = "Socket_Sysctl"
+number = 0x4121A
+impl = "planned"
+reads = [0, 1, 2, 3, 4, 5]
+writes = [0]
+
+[[swi]]
+name = "Socket_Accept_1"
+number = 0x4121B
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "addr", type = "ptr<u8>", null_ok = true },
+  { reg = 2, name = "addrlen", type = "ptr<u32>", null_ok = true },
+]
+results = [{ reg = 0, name = "ns", type = "u32" }]
+
+[[swi]]
+name = "Socket_Recvfrom_1"
+number = 0x4121C
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "buf", type = "ptr<u8>" },
+  { reg = 2, name = "len", type = "u32" },
+  { reg = 3, name = "flags", type = "u32" },
+  { reg = 4, name = "from", type = "ptr<u8>", null_ok = true },
+  { reg = 5, name = "fromlen", type = "ptr<u32>", null_ok = true },
+]
+results = [{ reg = 0, name = "n", type = "u32" }]
+
+[[swi]]
+name = "Socket_Recvmsg_1"
+number = 0x4121D
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "msg", type = "ptr<u32>" },     # 4.4's msghdr, seven words
+  { reg = 2, name = "flags", type = "u32" },
+]
+results = [{ reg = 0, name = "n", type = "u32" }]
+
+[[swi]]
+name = "Socket_Sendmsg_1"
+number = 0x4121E
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "msg", type = "ptr<u32>", const = true },
+  { reg = 2, name = "flags", type = "u32" },
+]
+results = [{ reg = 0, name = "n", type = "u32" }]
+
+[[swi]]
+name = "Socket_Getpeername_1"
+number = 0x4121F
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "name", type = "ptr<u8>" },
+  { reg = 2, name = "namelen", type = "ptr<u32>" },
+]
+
+[[swi]]
+name = "Socket_Getsockname_1"
+number = 0x41220
+params = [
+  { reg = 0, name = "s", type = "u32" },
+  { reg = 1, name = "name", type = "ptr<u8>" },
+  { reg = 2, name = "namelen", type = "ptr<u32>" },
+]
+
+# The kernel's symbol table, for InetStat: nothing here has one.
+[[swi]]
+name = "Socket_InternalLookup"
+number = 0x41221
+impl = "planned"
+reads = [0]
+writes = [0]
+
+[[swi]]
+name = "Socket_Version"
+number = 0x41222
+results = [{ reg = 0, name = "version", type = "u32" }]

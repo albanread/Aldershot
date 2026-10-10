@@ -1,0 +1,84 @@
+# FPEmulator, as a native stub module (modules/fpemulator): its title,
+# version and SWIs as RISC OS 5.30's ROM FPEmulator 4.39 has them, so that
+# stock !Run files' "RMEnsure FPEmulator <version> ..." pass (#114).  It
+# emulates nothing: the box's compilers turn FPA instructions into the
+# host's own floating point.
+#
+# Names, numbers and the chunk are facts of RISC OS 5's interface
+# (HWSupport/FPASC's FPEmulator, the PRM); the comments are ours.  Every SWI
+# is register-level: each keeps what it does not write.
+
+[module]
+name = "FPEmulator"
+impl = "native"
+chunk = 0x40480
+
+[[swi]]
+name = "FPEmulator_Version"
+number = 0x40480
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "FPEmulator_DeactivateContext"
+number = 0x40481
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "FPEmulator_ActivateContext"
+number = 0x40482
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "FPEmulator_ChangeContext"
+number = 0x40483
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "FPEmulator_ContextLength"
+number = 0x40484
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "FPEmulator_InitContext"
+number = 0x40485
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "FPEmulator_ExceptionDump"
+number = 0x40486
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "FPEmulator_Abort"
+number = 0x40487
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "FPEmulator_LoadContext"
+number = 0x40488
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "FPEmulator_SaveContext"
+number = 0x40489
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]

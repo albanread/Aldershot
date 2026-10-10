@@ -1,0 +1,47 @@
+# CompressJPEG, as a native module (modules/compressjpeg; README.md there
+# describes it), over libjpeg-turbo.
+#
+# Names, numbers and registers are facts of RISC OS's interface (PRM 5a-617
+# to 5a-623, and Video/Render/JCompMod 0.08's c/jcompmod, which adds
+# Comment), checked against RISC OS 5.30 on the farm
+# (tests/desktop/compress); the comments are ours.
+
+[module]
+name = "CompressJPEG"
+impl = "native"
+chunk = 0x4A500
+
+# R0 -> buffer, R1 its size, R2 -> parameters (width, height, quality,
+# components 1 or 3, x dpi, y dpi), R3 -> workspace or 0, R4 its size.
+# Out R0 the tag.
+[[swi]]
+name = "CompressJPEG_Start"
+number = 0x4A500
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = [0]
+
+# R0 the tag, R1 -> a row (RGB bytes, or grey); registers kept.
+[[swi]]
+name = "CompressJPEG_WriteLine"
+number = 0x4A501
+raw = true
+reads = [0, 1]
+writes = [0]
+
+# R0 the tag; out R0 the JPEG's length.
+[[swi]]
+name = "CompressJPEG_Finish"
+number = 0x4A502
+raw = true
+reads = [0]
+writes = [0]
+
+# R0 the tag, R1 flags (bit 0: R2 -> a control-terminated string; clear:
+# R2 -> data, R3 its length); a COM marker, before the first row.
+[[swi]]
+name = "CompressJPEG_Comment"
+number = 0x4A503
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0]

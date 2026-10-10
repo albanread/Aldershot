@@ -1,0 +1,42 @@
+# CFSI, the box's native helper for ChangeFSI (ports/changefsi; README.md
+# there describes it): the readers RISC OS's ChangeFSI loads as ARM code
+# (CFSIjpeg, CFSIpng), over libjpeg-turbo and libpng, and the pixel
+# routines its BASIC assembles at run time, as native entries the BASIC
+# CALLs.  RISC OS has no such module; the chunk is ROSGD's own, in the
+# application range after Unix's &C0100.
+
+[module]
+name = "CFSI"
+impl = "native"
+chunk = 0xC0140
+
+# Out R0 -> CFSIjpeg's four entries (setup 32bpp, a line, the dimensions,
+# setup 16bpp), R1 -> CFSIpng's (init, a line, two that do nothing), each
+# four bytes apart as the files' branch tables were; R2 -> StoreSP (stores
+# R13 at A%).
+[[swi]]
+name = "CFSI_Readers"
+number = 0xC0140
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+# R0 -> palette (256 words, 0BGR), R1 -> ict, R2 -> scratch for the lists,
+# R3 its size, R4 k%, R5 ncol%, R6 -> 2K for the distances: ChangeFSI's
+# make% ("devious" tables).  Out R0 -> the end of the lists.
+[[swi]]
+name = "CFSI_Devious"
+number = 0xC0141
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6]
+writes = [0]
+
+# R0 -> the block (code%): its first 48 words what ChangeFSI's assembly
+# read; the routines' entries written at +256, the code's data words at
+# +384, ltable at +448.
+[[swi]]
+name = "CFSI_Generate"
+number = 0xC0142
+raw = true
+reads = [0]
+writes = [0]

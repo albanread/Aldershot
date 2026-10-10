@@ -1,0 +1,37 @@
+path,kind,source,licence,evidence
+rosgd/boot/hfstest.c,own,BOX,MIT,port of the project team's own guest/hfstest.c (bigmacfarm tests/hostfs/guest); no third-party notice in either
+rosgd/boot/main.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/rom_contents.c,own,BOX,MIT,table of ROM modules; names ROOL modules but contains no ROOL text
+rosgd/boot/selftest.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest.h,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_acornssl.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_amb.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_args.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_armrun.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_background.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_basicvfp.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_bootcmds.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_boxtools.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_buffers.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_callback.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_capps.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_cmos.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_compressjpeg.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_compresspng.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_convert.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_deskclock.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_deskmeter.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_desktop.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_display.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_drag.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_dynarea.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_environment.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_fetch.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_filer.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_files.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_filterhourglass.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_fp.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_gdraw.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_graphicsv.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_hostfsfiler.c,own,BOX,MIT,no third-party notice in file; written new for BOX
+rosgd/boot/selftest_imagefs.c,own,BOX,MIT,no third-party notice in file; written new for BOX

@@ -1,0 +1,38 @@
+# ScreenModes, as a native module: the monitor's face (Video/UserI/ScrModes).
+#
+# ROSGD folds ScreenModes' work into the runtime -- OS_ScreenMode's
+# enumeration and mode taking (runtime/vdu/modes.c), which ScreenModes owns
+# as services on RISC OS.  What is left here is the module's own SWI chunk,
+# which the Display Manager asks for the monitor's name: the display's
+# (platform.h), in the DRM connector's name.  Names, numbers and register
+# roles are facts of RISC OS 5's interface.
+
+[module]
+name = "ScreenModes"
+impl = "native"
+chunk = 0x487C0
+
+# R0 = the item: 0 the monitor's name (out R0 -> it), 1 the DPMS state,
+# 2 the speaker mask (out R0 the mask, R1 each bit's validity).
+[[swi]]
+name = "ScreenModes_ReadInfo"
+number = 0x487C0
+raw = true
+reads = [0]
+writes = [0, 1]
+
+# R0 = flags, R1 = the format code to start from, R2 = its index; out R1 and
+# R2 the entry's, R3-R5 the entry, or -1 in R1 when there are no more.
+[[swi]]
+name = "ScreenModes_EnumerateAudioFormats"
+number = 0x487C1
+raw = true
+reads = [0, 1, 2]
+writes = [1, 2, 3, 4, 5]
+
+[[swi]]
+name = "ScreenModes_Features"
+number = 0x487C2
+results = [
+  { reg = 0, name = "features", type = "u32" },
+]

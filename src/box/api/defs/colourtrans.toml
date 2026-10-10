@@ -1,0 +1,263 @@
+# ColourTrans, as a native module (modules/colourtrans): every SWI is
+# register-level, raw, and goes through ColourV as in RISC OS 5.
+#
+# Names, numbers and registers are facts of RISC OS 5's interface
+# (Video/Render/Colours); the comments are ours.  reads and writes are
+# widened to R0-R7, which covers every SWI's registers.
+
+[module]
+name = "ColourTrans"
+impl = "native"
+chunk = 0x40740
+
+[[swi]]
+name = "ColourTrans_SelectTable"
+number = 0x40740
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_SelectGCOLTable"
+number = 0x40741
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ReturnGCOL"
+number = 0x40742
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_SetGCOL"
+number = 0x40743
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ReturnColourNumber"
+number = 0x40744
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ReturnGCOLForMode"
+number = 0x40745
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ReturnColourNumberForMode"
+number = 0x40746
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ReturnOppGCOL"
+number = 0x40747
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_SetOppGCOL"
+number = 0x40748
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ReturnOppColourNumber"
+number = 0x40749
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ReturnOppGCOLForMode"
+number = 0x4074A
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ReturnOppColourNumberForMode"
+number = 0x4074B
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_GCOLToColourNumber"
+number = 0x4074C
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ColourNumberToGCOL"
+number = 0x4074D
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ReturnFontColours"
+number = 0x4074E
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_SetFontColours"
+number = 0x4074F
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_InvalidateCache"
+number = 0x40750
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_SetCalibration"
+number = 0x40751
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ReadCalibration"
+number = 0x40752
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ConvertDeviceColour"
+number = 0x40753
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ConvertDevicePalette"
+number = 0x40754
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ConvertRGBToCIE"
+number = 0x40755
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ConvertCIEToRGB"
+number = 0x40756
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_WriteCalibrationToFile"
+number = 0x40757
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ConvertRGBToHSV"
+number = 0x40758
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ConvertHSVToRGB"
+number = 0x40759
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ConvertRGBToCMYK"
+number = 0x4075A
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ConvertCMYKToRGB"
+number = 0x4075B
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_ReadPalette"
+number = 0x4075C
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_WritePalette"
+number = 0x4075D
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_SetColour"
+number = 0x4075E
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_MiscOp"
+number = 0x4075F
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_WriteLoadingsToFile"
+number = 0x40760
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_SetTextColour"
+number = 0x40761
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_SetOppTextColour"
+number = 0x40762
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "ColourTrans_GenerateTable"
+number = 0x40763
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]

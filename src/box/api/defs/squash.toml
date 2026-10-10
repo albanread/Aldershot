@@ -1,0 +1,35 @@
+# Squash, as a native module (modules/squash; README.md there lists the
+# flags and the errors).
+#
+# Names, numbers and registers are facts of RISC OS 5's interface
+# (Programmer/Squash, Doc/interface and c/compress); the comments are ours.
+# Both SWIs are register-level, raw: R0's bit 3 changes what R1 is and
+# what comes back, the registers not written are kept, and the order of
+# the checks is part of what a caller sees.  Native code has typed calls
+# with ordinary pointers in modules/squash/squash.h.
+
+[module]
+name = "Squash"
+impl = "native"
+chunk = 0x42700
+
+# R0 flags: bit 0 continue, bit 1 more input to come, bit 3 (alone) the
+# sizes.  With bit 3: R1 the input's size or -1; out, R0 the workspace
+# size, R1 the most output (-1 kept).  Otherwise R1 -> workspace, R2 ->
+# input, R3 its size, R4 -> output, R5 its size; out, R0 the status (0
+# done, 1 input used up, 2 output full), R2-R5 past what was used.
+[[swi]]
+name = "Squash_Compress"
+number = 0x42700
+raw = true
+reads = [0, 1, 2, 3, 4, 5]
+writes = [0, 1, 2, 3, 4, 5]
+
+# As Squash_Compress; R0 bit 2: the output will all fit (the fast
+# algorithm, whatever bits 0 and 1 say).  Bit 3's R1 comes back -1.
+[[swi]]
+name = "Squash_Decompress"
+number = 0x42701
+raw = true
+reads = [0, 1, 2, 3, 4, 5]
+writes = [0, 1, 2, 3, 4, 5]

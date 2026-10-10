@@ -1,0 +1,66 @@
+# SoundDMA: the sound system's scheduler faces, the &40140 chunk.  On
+# RISC OS 5 these are the hardware-facing SWIs (Configure's channel
+# count, Enable, Stereo's pans); the voice system's own SWIs are the
+# next chunk, sound1.toml's -- a module's SWI chunk is 64 entries, so
+# Sound1's &40180+ range is another module's, as it is there.
+#
+# Names and numbers are facts of RISC OS 5's interface (OSLib's
+# Hdr/Sound); the register roles are the PRM's and Sound1's own code.
+
+[module]
+name = "SoundDMA"
+impl = "native"
+chunk = 0x40140
+
+# R0 = channels (or -1 to read), R1 = sample size, R2 = period; out same.
+[[swi]]
+name = "Sound_Configure"
+number = 0x40140
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = [0, 1, 2, 3, 4]
+
+# R0 = 0 read, 1 off, 2 on (BASIC's SOUND OFF passes 1, ON 2).
+[[swi]]
+name = "Sound_Enable"
+number = 0x40141
+raw = true
+reads = [0]
+writes = [0]
+
+# R0 = channel 1-8, R1 = position -127..127 (0 centre); negative reads.
+[[swi]]
+name = "Sound_Stereo"
+number = 0x40142
+raw = true
+reads = [0, 1]
+writes = [1]
+
+# R0 = 0 off, 1 on, -1 to read.
+[[swi]]
+name = "Sound_Speaker"
+number = 0x40143
+raw = true
+reads = [0]
+writes = [0]
+
+[[swi]]
+name = "Sound_Mode"
+number = 0x40144
+raw = true
+reads = [0, 1]
+writes = [0, 1]
+
+[[swi]]
+name = "Sound_LinearHandler"
+number = 0x40145
+raw = true
+reads = [0, 1, 2]
+writes = [1, 2]
+
+[[swi]]
+name = "Sound_SampleRate"
+number = 0x40146
+raw = true
+reads = [0, 1]
+writes = [1, 2]

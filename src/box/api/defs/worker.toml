@@ -1,0 +1,110 @@
+# Worker, a native module (modules/worker; README.md there lists the
+# SWIs): computation jobs run by a pool of Linux threads on the cores
+# the tasks do not use, outside the baton and the personality lock.
+#
+# ROSGD's own interface, in the application range beside PTY (&C00C0),
+# Unix (&C0100) and CFSI (&C0140); its errors are &C0180 up, as PTY's are
+# its chunk's.  Every SWI is raw: the registers not written are kept.
+
+[module]
+name = "Worker"
+impl = "native"
+chunk = 0xC0180
+
+# R0 flags (0), R1 the kernel (1 mandel_row), R2 -> the argument words
+# (copied: any memory), R3 how many (at most 16), R4 -> the pollword (0 for
+# none; RMA, a dynamic area or a shared window, word aligned), R5 the caller's tag.  Out R0
+# the job's handle: its record in the RMA.
+[[swi]]
+name = "Worker_Submit"
+number = 0xC0180
+raw = true
+reads = [0, 1, 2, 3, 4, 5]
+writes = [0]
+
+# R0 the job.  Out R0 its status (0 queued, 1 running, 2 done, 3 failed,
+# 4 cancelled), R1 its tag, R2 its kernel.
+[[swi]]
+name = "Worker_Status"
+number = 0xC0181
+raw = true
+reads = [0]
+writes = [0, 1, 2]
+
+# R0 the job, R1 flags (bit 0: keep the job).  Out R0 its tag, R1-R8 its
+# eight result words; the job is gone unless kept.  A failed or cancelled
+# job's error (and the job gone); a job not finished, an error and kept.
+[[swi]]
+name = "Worker_Result"
+number = 0xC0182
+raw = true
+reads = [0, 1]
+writes = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+
+# R0 the job: taken off the queue, or stopped and waited for if running,
+# and gone -- its buffers the caller's again.
+[[swi]]
+name = "Worker_Cancel"
+number = 0xC0183
+raw = true
+reads = [0]
+writes = [0]
+
+# R0 reason: 0 read, 1 set the limit to R1 (0: every thread).  Out R0 the
+# pool's threads (once started, else what it will start), R1 the limit,
+# R2 jobs queued, R3 jobs running, R4 the module's version (300), R5 the
+# machine application kernels are for (the ELF machine: 62 x86-64, 183
+# AArch64).
+[[swi]]
+name = "Worker_Info"
+number = 0xC0184
+raw = true
+reads = [0, 1]
+writes = [0, 1, 2, 3, 4, 5]
+
+# R0 the pollword (0: any of the caller's jobs).  Out R0 the next finished
+# job (done, failed or cancelled) not yet returned by this call, in the
+# order submitted, or 0.  The handle stays the caller's until
+# Worker_Result or Worker_Cancel.
+[[swi]]
+name = "Worker_Completed"
+number = 0xC0185
+raw = true
+reads = [0]
+writes = [0]
+
+# A window onto the caller's own memory.  R0 the
+# reason: 0 share R2 bytes from R1 in the caller's slot (any alignment;
+# whole pages are mapped) -- out R0 the window's address of R1, R1 the
+# window's start, R2 its length; 1 unshare the window R1 is in (its jobs
+# cancelled first); 2 unshare all the caller's windows.
+[[swi]]
+name = "Worker_ShareMemory"
+number = 0xC0186
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+# An application's own kernel.  R0 flags: bit 0, R1 ->
+# a kernel file (roscc link --kernel); else R1 -> raw code.  R2 the
+# length; raw code: R3 the entry's offset, R6 the code's length (0: all;
+# the rest is read-only data).  R4, R5 the buffers its arguments name, two
+# halfwords each (bit 15 present, bits 0-3 the address's argument, 4-7 the
+# size's, 8-9 log2 of the unit).  The code is checked (no system calls,
+# system registers, x18, indirect branches or references outside it) and
+# loaded into the RMA, read-only.  Out R0 the kernel, for Worker_Submit's
+# R1.  It is the caller's: gone at its CloseDown or end.
+[[swi]]
+name = "Worker_LoadKernel"
+number = 0xC0187
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6]
+writes = [0]
+
+# R0 the kernel: its jobs cancelled (and kept for collecting), then gone.
+[[swi]]
+name = "Worker_UnloadKernel"
+number = 0xC0188
+raw = true
+reads = [0]
+writes = [0]

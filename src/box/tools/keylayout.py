@@ -1,0 +1,264 @@
+#!/usr/bin/env python3
+"""The International Keyboard module's tables, as C.
+
+    keylayout.py keygen-src <IntKey dir> <UnicodeLib h dir> <hdr/Keyboard> <out dir>
+    keylayout.py tables <IntKey dir> <hdr/Keyboard> <out.c>
+    keylayout.py layout <keygen output .s> <hdr/Keyboard> <name> <country> <out.c>
+
+keygen-src writes keygen's sources out to build for this machine: its C,
+hdr/Keyboard as the Global/Keyboard.h a RISC OS build exports, UnicodeLib's
+headers, and its getline renamed (POSIX has one).
+
+RISC OS's keyboard layouts are text files (IntKey's layout/*) that its host
+tool keygen turns into ObjAsm tables: the key translation table, the list
+of special keys with their keypad and Unicode sub-tables.  The tables every
+layout shares -- INKEY(-n)'s key map, the shifting keys, the keypad strings,
+the dead accents -- are in IntKey's Source/IntKeyBody and Source/Accents.
+This reads both and writes them as C data for modules/intkey, so that the
+layouts are RISC OS's own, byte for byte: nothing is retyped.
+
+The C is derived from RISC OS sources (Apache 2.0); it goes to the build
+tree, not the repository.
+"""
+import re
+import sys
+
+
+def keynos(path):
+    """KeyNo_* and friends from hdr/Keyboard"""
+    names = {}
+    for line in open(path, encoding="latin-1"):
+        m = re.match(r"^([A-Za-z_][A-Za-z0-9_]*)\s+\*\s+([^;]+?)\s*(;.*)?$", line.rstrip())
+        if m:
+            try:
+                names[m.group(1)] = value(m.group(2), names)
+            except (KeyError, ValueError):
+                pass
+    return names
+
+
+def value(expr, names):
+    expr = expr.strip()
+    if expr.startswith("&"):
+        return int(expr[1:], 16)
+    if expr.isdigit():
+        return int(expr)
+    if expr in names:
+        return names[expr]
+    m = re.match(r"^(\S+)\s*:OR:\s*(\S+)$", expr)
+    if m:
+        return value(m.group(1), names) | value(m.group(2), names)
+    raise KeyError(expr)
+
+
+def operands(text):
+    """Comma-separated operands, strings kept whole"""
+    out, cur, q = [], "", False
+    for c in text:
+        if c == '"':
+            q = not q
+            cur += c
+        elif c == "," and not q:
+            out.append(cur.strip())
+            cur = ""
+        elif c == ";" and not q:
+            break
+        else:
+            cur += c
+    if cur.strip():
+        out.append(cur.strip())
+    return out
+
+
+def lines_of(path):
+    """(label, directive, operands) for each line"""
+    for raw in open(path, encoding="latin-1"):
+        line = raw.rstrip("\n").replace("\t", " ")
+        if not line.strip() or line.lstrip().startswith(";"):
+            continue
+        label = None
+        if not line.startswith(" "):
+            label, _, line = line.partition(" ")
+        parts = line.split(None, 1)
+        directive = parts[0] if parts else ""
+        yield label, directive, operands(parts[1]) if len(parts) > 1 else []
+
+
+def blocks(path):
+    """label -> list of (directive, operands) up to the next label"""
+    out, cur = {}, None
+    for label, directive, ops in lines_of(path):
+        if label:
+            cur = out.setdefault(label, [])
+        if cur is not None and directive:
+            cur.append((directive, ops))
+    return out
+
+
+def bytes_of(ops, names):
+    b = []
+    for o in ops:
+        if o.startswith('"'):
+            b += [ord(c) for c in o.strip('"')]
+        else:
+            b.append(value(o, names) & 0xFF)
+    return b
+
+
+def c_bytes(name, data, kind="uint8_t"):
+    body = ",\n    ".join(", ".join("0x%02X" % v for v in data[i:i + 16]) for i in range(0, len(data), 16))
+    return "const %s %s[%d] = {\n    %s\n};\n" % (kind, name, len(data), body)
+
+
+def c_words(name, data, kind="uint32_t"):
+    body = ",\n    ".join(", ".join("0x%08X" % v for v in data[i:i + 6]) for i in range(0, len(data), 6))
+    return "const %s %s[%d] = {\n    %s\n};\n" % (kind, name, len(data), body)
+
+
+def tables(intkey, hdr, out):
+    names = keynos(hdr)
+    body = blocks(intkey + "/Source/IntKeyBody")
+    # InkeyTranPC: the IKT macro fills each word's unused bytes with &FF
+    inkey = []
+    for directive, ops in body["InkeyTranPC"]:
+        if directive != "IKT":
+            break
+        for o in ops:
+            t = value(o, names)
+            for mask in (0xFF00, 0xFF0000, 0xFF000000):
+                if t & mask == 0:
+                    t |= mask
+            inkey.append(t)
+    assert len(inkey) == 128, len(inkey)
+    shifting = []
+    for directive, ops in body["ShiftingKeyList"]:
+        if directive == "=":
+            shifting += [value(o, names) for o in ops if not o.startswith("Shifting")]
+    pad_num = bytes_of(body["PadKNumTran"][0][1], names)
+    pad_cur = bytes_of(body["PadKCurTran"][0][1], names)
+    accents = blocks(intkey + "/Source/Accents")
+    order = [ops[0].split("-")[0] for d, ops in accents["AccentTable"] if ops[0] != "0"]
+    out_c = ["/* IntKey's shared tables, generated by tools/keylayout.py from the RISC OS",
+             " * sources (Internat/IntKey/Source/IntKeyBody, Accents):",
+             " * do not edit. */",
+             '#include "keylayout.h"', ""]
+    out_c.append(c_words("ros_intkey_inkeytran", inkey))
+    out_c.append(c_bytes("ros_intkey_shifting", [len(shifting)] + shifting))
+    out_c.append(c_bytes("ros_intkey_pad_num", pad_num))
+    out_c.append(c_bytes("ros_intkey_pad_cur", pad_cur))
+    lists = []
+    for i, label in enumerate(order):
+        words = []
+        for directive, ops in accents[label]:
+            if directive == "&":
+                words += [value(o, names) for o in ops]
+        lists.append(words)
+        out_c.append("static " + c_words("accent_%d" % (i + 1), words))
+    out_c.append("const uint32_t *const ros_intkey_accents[%d] = {\n    0, %s\n};\n"
+                 % (len(order) + 1, ", ".join("accent_%d" % (i + 1) for i in range(len(order)))))
+    open(out, "w").write("\n".join(out_c))
+
+
+def layout(src, hdr, name, country, out):
+    names = keynos(hdr)
+    b = blocks(src)
+    labels = list(b.keys())
+    struct = [x for x in labels if x.startswith("KeyStruct")][0]
+    header = [ops[0] for d, ops in b[struct] if d == "&"]
+    wide = '"DCW"' in b["LLK"][0][1][0]
+    keytran = []
+    for directive, ops in b[header[0].split("-")[0]]:
+        if directive == "$LLK":
+            keytran += [value(o, names) for o in ops]
+    # the special list: the count, then the keys; the Pad and UCS labels
+    # mark where the keypad keys and the Unicode keys start
+    special_label = header[4].split("-")[0]
+    special, starts = [], {}
+    for label in labels[labels.index(special_label):]:
+        if label.endswith("End"):
+            break
+        starts[label[len(special_label):]] = len(special) + 1      # 1-based
+        for directive, ops in b[label]:
+            if directive == "$LLK":
+                special += [value(o, names) for o in ops if "SHR" not in o]
+
+    def words(label):
+        w = []
+        for directive, ops in b.get(label, []):
+            if directive == "&":
+                w += [value(o, names) for o in ops]
+        return w
+
+    def pad(entry):
+        label = header[entry].split("-")[0]
+        if label not in b:
+            return None                             # IntKeyBody's own
+        return bytes_of(b[label][0][1], names)
+
+    ucs0, ucs1 = words(header[12].split("-")[0]), words(header[13].split("-")[0])
+    pad_num, pad_cur = pad(9), pad(10)
+    kind = "uint16_t" if wide else "uint8_t"
+    c = ["/* The %s keyboard, generated by tools/keylayout.py from keygen's tables" % name,
+         " * (Internat/IntKey/layout): do not edit. */",
+         '#include "keylayout.h"', ""]
+    c.append("static " + c_bytes("keytran", keytran, kind))
+    c.append("static " + c_bytes("special", special, "uint16_t"))
+    c.append("static " + c_words("ucs0", ucs0))
+    c.append("static " + c_words("ucs1", ucs1 or ucs0))
+    for n, t in (("pad_num", pad_num), ("pad_cur", pad_cur)):
+        if t:
+            c.append("static " + c_bytes(n, t))
+    fields = [
+        (".country", str(country)),
+        (".wide", "1" if wide else "0"),
+        (".keytran_w" if wide else ".keytran", "keytran"),
+        (".keytran_size", str(len(keytran) // 4)),
+        (".special", "special"),
+        (".nspecial", str(len(special))),
+        (".pad_first", str(starts.get("Pad", 0))),
+        (".ucs_first", str(starts.get("UCS", 0))),
+        (".ucs0", "ucs0"),
+        (".ucs1", "ucs1"),
+        (".pad_num", "pad_num" if pad_num else "0"),
+        (".pad_cur", "pad_cur" if pad_cur else "0"),
+    ]
+    assert header[11] == "0", "an FN table: not yet carried"
+    c.append("const struct ros_keylayout ros_keylayout_%s = {\n%s\n};\n"
+             % (name, "\n".join("    %s = %s," % f for f in fields)))
+    open(out, "w").write("\n".join(c))
+
+
+def keygen_src(intkey, unicodelib, hdr, out):
+    import os
+    import re as _re
+    os.makedirs(out + "/inc/Global", exist_ok=True)
+    os.makedirs(out + "/inc/Unicode", exist_ok=True)
+    defs = ["/* hdr/Keyboard, for keygen: generated by tools/keylayout.py */",
+            "#ifndef GLOBAL_KEYBOARD_H", "#define GLOBAL_KEYBOARD_H"]
+    for line in open(hdr, encoding="latin-1"):
+        m = _re.match(r"^([A-Za-z_][A-Za-z0-9_]*)\s+\*\s+([^;]+?)\s*(;.*)?$", line.rstrip())
+        if m:
+            v = m.group(2).replace("&", "0x").replace(":SHL:", "<<").replace(":OR:", "|")
+            defs.append("#define %s (%s)" % (m.group(1), v))
+    defs.append("#endif")
+    open(out + "/inc/Global/Keyboard.h", "w").write("\n".join(defs) + "\n")
+    for h in ("iso10646", "utf8"):
+        open(out + "/inc/Unicode/%s.h" % h, "wb").write(open(unicodelib + "/" + h, "rb").read())
+    for f in ("keygen", "unicdata", "throwback"):
+        text = open(intkey + "/c/" + f, encoding="latin-1").read()
+        if f == "keygen":
+            text = _re.sub(r"\bgetline\(", "kg_getline(", text)
+        open(out + "/%s.c" % f, "w", encoding="latin-1").write(text)
+    for f in ("structures", "unicdata", "throwback"):
+        open(out + "/%s.h" % f, "wb").write(open(intkey + "/h/" + f, "rb").read())
+
+
+if __name__ == "__main__":
+    if len(sys.argv) >= 2 and sys.argv[1] == "keygen-src" and len(sys.argv) == 6:
+        keygen_src(*sys.argv[2:])
+    elif len(sys.argv) >= 2 and sys.argv[1] == "tables" and len(sys.argv) == 5:
+        tables(*sys.argv[2:])
+    elif len(sys.argv) >= 2 and sys.argv[1] == "layout" and len(sys.argv) == 7:
+        layout(sys.argv[2], sys.argv[3], sys.argv[4], int(sys.argv[5]), sys.argv[6])
+    else:
+        sys.exit(__doc__)

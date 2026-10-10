@@ -1,0 +1,250 @@
+# PDriver, a native module (modules/pdriver):
+# RISC OS's printer driver interface, whose pages come out as PDF.
+#
+# RISC OS's own interface, PRM3 from 3-611, chunk &80140.  The sharer and
+# the driver are one module here, so every SWI the PRM
+# documents is in this chunk and answered by us.
+#
+# Every SWI is raw: an application's registers are kept where the PRM says
+# "preserved", and the module writes the rest.
+
+[module]
+name = "PDriver"
+impl = "native"
+chunk = 0x80140
+
+# Out R0 = version and type, R1/R2 the resolution in dpi, R3 the features
+# word, R4 -> the printer's name, R5/R6 the halftone resolution, R7 the
+# configured printer.
+[[swi]]
+name = "PDriver_Info"
+number = 0x80140
+raw = true
+reads = []
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+# R1/R2 dpi, R3 features, R4 -> name, R5/R6 halftone, R7 the printer.
+[[swi]]
+name = "PDriver_SetInfo"
+number = 0x80141
+raw = true
+reads = [1, 2, 3, 4, 5, 6, 7]
+writes = []
+
+# R0 the mask, R1 the wanted value: an error if the features differ.
+[[swi]]
+name = "PDriver_CheckFeatures"
+number = 0x80142
+raw = true
+reads = [0, 1]
+writes = []
+
+# Out R1/R2 the paper, R3-R6 the printable area, all in millipoints.
+[[swi]]
+name = "PDriver_PageSize"
+number = 0x80143
+raw = true
+reads = []
+writes = [1, 2, 3, 4, 5, 6]
+
+[[swi]]
+name = "PDriver_SetPageSize"
+number = 0x80144
+raw = true
+reads = [1, 2, 3, 4, 5, 6]
+writes = []
+
+# R0 the job's file handle (0 suspends), R1 -> its title or 0.  Out R0 the
+# handle that was current, or 0.
+[[swi]]
+name = "PDriver_SelectJob"
+number = 0x80145
+raw = true
+reads = [0, 1]
+writes = [0]
+
+[[swi]]
+name = "PDriver_CurrentJob"
+number = 0x80146
+raw = true
+reads = []
+writes = [0]
+
+# The font system's private entry.
+[[swi]]
+name = "PDriver_FontSWI"
+number = 0x80147
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "PDriver_EndJob"
+number = 0x80148
+raw = true
+reads = [0]
+writes = []
+
+[[swi]]
+name = "PDriver_AbortJob"
+number = 0x80149
+raw = true
+reads = [0]
+writes = []
+
+[[swi]]
+name = "PDriver_Reset"
+number = 0x8014A
+raw = true
+reads = []
+writes = []
+
+# R0 the identification word, R1 -> the rectangle (OS units), R2 -> the
+# transformation (16.16), R3 -> the position (millipoints), R4 the
+# background colour &BBGGRR00.
+[[swi]]
+name = "PDriver_GiveRectangle"
+number = 0x8014B
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = []
+
+# R0 copies, R1 -> four words for the rectangle, R2 the page's number in
+# the document, R3 -> its page number string.  Out R0 non-zero if there is
+# a rectangle, R2 its identification word.
+[[swi]]
+name = "PDriver_DrawPage"
+number = 0x8014C
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 2]
+
+[[swi]]
+name = "PDriver_GetRectangle"
+number = 0x8014D
+raw = true
+reads = [1]
+writes = [0, 2]
+
+[[swi]]
+name = "PDriver_CancelJob"
+number = 0x8014E
+raw = true
+reads = [0]
+writes = []
+
+[[swi]]
+name = "PDriver_ScreenDump"
+number = 0x8014F
+raw = true
+reads = [0]
+writes = []
+
+# R0 0 for the first job, else a handle.  Out R0 the next, or 0.
+[[swi]]
+name = "PDriver_EnumerateJobs"
+number = 0x80150
+raw = true
+reads = [0]
+writes = [0]
+
+# A driver's private entry (the Printers application's).
+[[swi]]
+name = "PDriver_SetPrinter"
+number = 0x80151
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+# R0 the handle, R1 -> the error block the job's further output gives.
+[[swi]]
+name = "PDriver_CancelJobWithError"
+number = 0x80152
+raw = true
+reads = [0, 1]
+writes = []
+
+[[swi]]
+name = "PDriver_SelectIllustration"
+number = 0x80153
+raw = true
+reads = [0, 1]
+writes = [0]
+
+[[swi]]
+name = "PDriver_InsertIllustration"
+number = 0x80154
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = []
+
+# R0 the font's handle or 0 (the last), R1 -> its name, R2 flags.
+[[swi]]
+name = "PDriver_DeclareFont"
+number = 0x80155
+raw = true
+reads = [0, 1, 2]
+writes = []
+
+# R0 -> the driver's handler, R1 -> its private word, R2 its type.
+[[swi]]
+name = "PDriver_DeclareDriver"
+number = 0x80156
+raw = true
+reads = [0, 1, 2]
+writes = []
+
+[[swi]]
+name = "PDriver_RemoveDriver"
+number = 0x80157
+raw = true
+reads = [0]
+writes = []
+
+# R0 the type, -1 for none, -2 to read.  Out R0 the one that was selected.
+[[swi]]
+name = "PDriver_SelectDriver"
+number = 0x80158
+raw = true
+reads = [0]
+writes = [0]
+
+# R0 0 for the first, else the handle from the last call.  Out R0 the next
+# handle or 0, R1 the driver's type.
+[[swi]]
+name = "PDriver_EnumerateDrivers"
+number = 0x80159
+raw = true
+reads = [0]
+writes = [0, 1]
+
+# R0 the reason code; the rest are the reason's.
+[[swi]]
+name = "PDriver_MiscOp"
+number = 0x8015A
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "PDriver_MiscOpForDriver"
+number = 0x8015B
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "PDriver_SetDriver"
+number = 0x8015C
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+# SpriteExtend's JPEG plots, when JPEG_PDriverIntercept's bit 0 is set:
+# R8 the JPEG SWI's number modulo 64, the rest the JPEG call's.
+[[swi]]
+name = "PDriver_JPEGSWI"
+number = 0x8015D
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+writes = [8]

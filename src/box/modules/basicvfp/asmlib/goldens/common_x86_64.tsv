@@ -1,0 +1,189 @@
+# common_x86_64.txt, as LLVM MC encodes it (gen_common.py, Xcode's clang)
+ret	c3
+push rbx	53
+pop r12	415c
+mov eax, 61	b83d000000
+add al, 1	0401
+add eax, 1	83c001
+add rax, 1	4883c001
+sub rsp, 8	4883ec08
+add rsp, 128	4881c480000000
+mov rax, qword ptr [rdi + 8]	488b4708
+mov qword ptr [rdi + 8], rax	48894708
+mov dword ptr [rdi], eax	8907
+mov eax, dword ptr [rdi + rcx*4]	8b048f
+mov eax, dword ptr [rdi + rcx*4 + 1000]	8b848fe8030000
+lea rax, [rdi + 8]	488d4708
+lea rax, [rdi + rsi*2 - 4]	488d4477fc
+movzx eax, byte ptr [rdi + 1]	0fb64701
+movsx rax, word ptr [rsi]	480fbf06
+movsxd rax, dword ptr [rsi]	486306
+cmp rax, 10	4883f80a
+cmp eax, 1000	3de8030000
+test eax, eax	85c0
+test al, 1	a801
+xor eax, eax	31c0
+and ecx, 255	81e1ff000000
+or rdx, rax	4809c2
+shl rax, 4	48c1e004
+shr eax, 1	d1e8
+sar ecx, cl	d3f9
+imul eax, ecx	0fafc1
+imul eax, ecx, 5	6bc105
+imul rax, rdx, 1000	4869c2e8030000
+idiv ecx	f7f9
+mul rcx	48f7e1
+neg rax	48f7d8
+not eax	f7d0
+inc eax	ffc0
+dec qword ptr [rdi]	48ff0f
+cdq	99
+cqo	4899
+mov rax, 0x123456789	48b88967452301000000
+movabs rax, 0x1234	48b83412000000000000
+mov r8d, 1	41b801000000
+mov r15, rsp	4989e7
+xchg rax, rbx	4893
+cmove eax, ecx	0f44c1
+sete al	0f94c0
+nop	90
+int3	cc
+syscall	0f05
+leave	c9
+movsd xmm0, qword ptr [rdi]	f20f1007
+movsd qword ptr [rdi + 8], xmm1	f20f114f08
+addsd xmm0, xmm1	f20f58c1
+mulsd xmm0, qword ptr [rsi]	f20f5906
+cvtsi2sd xmm0, eax	f20f2ac0
+cvttsd2si eax, xmm0	f20f2cc0
+sqrtsd xmm0, xmm0	f20f51c0
+ucomisd xmm0, xmm1	660f2ec1
+movaps xmm1, xmm2	0f28ca
+xorps xmm0, xmm0	0f57c0
+movdqu xmm0, xmmword ptr [rdi]	f30f6f07
+paddd xmm0, xmm1	660ffec1
+vaddps ymm0, ymm1, ymm2	c5f458c2
+call rax	ffd0
+jmp qword ptr [rax]	ff20
+mov byte ptr [rdi], 65	c60741
+mov word ptr [rdi], 1	66c7070100
+mov qword ptr [rdi], -1	48c707ffffffff
+add dword ptr [rdi + 4], 1	83470401
+lock xadd dword ptr [rdi], eax	f00fc107
+rep movsb	f3a4
+add ax, 1000	6605e803
+add ax, 1	6683c001
+add al, 200	04c8
+cmp al, 1	3c01
+and al, 0x7f	247f
+test eax, 0x100	a900010000
+xchg eax, ecx	91
+xchg rax, r9	4991
+mov sil, 5	40b605
+mov r12b, 7	41b407
+mov r9, 1	49c7c101000000
+lock add dword ptr [rdi], eax	f00107
+lock inc qword ptr [rdi]	f048ff07
+lock cmpxchg qword ptr [rsi], rcx	f0480fb10e
+mov eax, dword ptr [0x1000]	8b042500100000
+mov rax, qword ptr [rsp + 8]	488b442408
+mov qword ptr [r12], rax	49890424
+mov eax, dword ptr [r13]	418b4500
+push 5	6a05
+push 1000	68e8030000
+jmp rax	ffe0
+int 3	cc
+int 0x80	cd80
+call rax	ffd0
+lea rax, [rip]	488d0500000000
+mov ah, 1	b401
+mov bh, 0x7f	b77f
+add ah, 1	80c401
+or ah, 1	80cc01
+cmp ah, 5	80fc05
+xor ah, ah	30e4
+mov ah, al	88c4
+mov al, ah	88e0
+mov ah, byte ptr [rax]	8a20
+mov byte ptr [rax], ah	8820
+movzx eax, ah	0fb6c4
+movsx ecx, bh	0fbecf
+xchg ah, al	86e0
+xchg al, cl	86c1
+xchg cl, al	86c8
+xchg al, al	86c0
+test ah, al	84c4
+test al, ah	84e0
+test ah, 1	f6c401
+test bh, 0x80	f6c780
+sete ah	0f94c4
+inc ah	fec4
+dec bh	fecf
+neg ah	f6dc
+not dh	f6d6
+shl ah, 1	d0e4
+shl ah, cl	d2e4
+shr bh, 3	c0ef03
+mul ah	f6e4
+cmp ah, byte ptr [rbx]	3a23
+mov dil, byte ptr [rsi]	408a3e
+mov byte ptr [rsi], dil	40883e
+add bl, sil	4000f3
+mov sil, dil	4088fe
+cmp spl, bpl	4038ec
+add sil, 5	4080c605
+imul ax, bx, 1000	6669c3e803
+imul ax, bx, 10	666bc30a
+imul ax, word ptr [rax], 300	6669002c01
+mov eax, dword ptr [rbp*4]	8b04ad00000000
+mov eax, dword ptr [rax*1 + 8]	8b040508000000
+mov eax, dword ptr [rcx*8 + 0x1000]	8b04cd00100000
+lea rax, [rcx*2]	488d044d00000000
+lea rax, [rcx*2 + 5]	488d044d05000000
+mov eax, dword ptr [rax + rsp]	8b0404
+mov eax, dword ptr [rsp + rax]	8b0404
+mov eax, dword ptr [r12*4]	428b04a500000000
+mov eax, dword ptr [rax + r12]	428b0420
+mov eax, dword ptr [r13*2 + 16]	428b046d10000000
+mov eax, dword ptr [rbp + rax*4]	8b448500
+mov eax, dword ptr [-8]	8b0425f8ffffff
+add eax, 0xffffffff	83c0ff
+add ax, 0xffff	6683c0ff
+imul eax, ebx, 0xffffffff	6bc3ff
+and ecx, 0xfffffff0	83e1f0
+cmp ecx, 0x80000000	81f900000080
+test eax, 0xffffffff	a9ffffffff
+mov dword ptr [rax], 0xffffffff	c700ffffffff
+mov rax, 0x7fffffff	48c7c0ffffff7f
+mov rax, -0x80000000	48c7c000000080
+mov rax, 0x80000000	48b80000008000000000
+mov rax, 0xffffffff	48b8ffffffff00000000
+mov rax, -1	48c7c0ffffffff
+push 0x7fffffff	68ffffff7f
+push -1	6aff
+push 127	6a7f
+push 128	6880000000
+ret 65535	c2ffff
+int 255	cdff
+shl eax, 31	c1e01f
+sar rax, 63	48c1f83f
+bt eax, 31	0fbae01f
+bts rax, 63	480fbae83f
+lea rax, [rip + 16]	488d0510000000
+lea rax, [rip - 8]	488d05f8ffffff
+mov eax, dword ptr [rip + 0x100]	8b0500010000
+jmp qword ptr [rip + 0]	ff2500000000
+lock add qword ptr [rip + 16], 1	f04883051000000001
+ud2	0f0b
+mfence	0faef0
+lfence	0faee8
+sfence	0faef8
+movsd	a5
+rep movsd	f3a5
+repne movsd	f2a5
+rep movsq	f348a5
+push fs	660fa0
+push gs	660fa8
+mov fs, eax	8ee0
+mov gs, eax	8ee8
+mov eax, fs	8ce0

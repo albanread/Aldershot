@@ -1,0 +1,20 @@
+# FPTest: floating point for the ObjAsm compiler to lift (modules/fptest).
+# Our own module; its SWIs are typed so the self-test can call them.
+
+[module]
+name = "FPTest"
+impl = "module:FPTest"
+
+# R0 -> a block: inputs a, b, c as FPA doubles (high word first) at 0, 8, 16.
+[[swi]]
+name = "FPTest_FPA"
+number = 0xC0080
+params = [{ reg = 0, name = "block", type = "ptr<u8>" }]
+results = [{ reg = 0, name = "result", type = "u32" }]
+
+# The same in VFP, the doubles little-endian.
+[[swi]]
+name = "FPTest_VFP"
+number = 0xC0081
+params = [{ reg = 0, name = "block", type = "ptr<u8>" }]
+results = [{ reg = 0, name = "result", type = "u32" }]

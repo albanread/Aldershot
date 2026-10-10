@@ -1,0 +1,75 @@
+# SpriteExtend's own SWIs, the JPEG ones, as a native module
+# (modules/spriteextend; README.md there describes it).  SpriteExtend
+# does its sprite work on SpriteV; these are its SWI chunk.
+#
+# Names, numbers and registers are facts of RISC OS's interface (PRM 5a-149
+# to 5a-161, and Video/Render/SprExtend 1.86's Sources/SWIs and
+# hdr/SprExtend), checked against RISC OS 5.30 on the farm
+# (tests/desktop/jpegplot); the comments are ours.
+
+[module]
+name = "SpriteExtend"
+impl = "native"
+chunk = 0x49980
+
+# R0 flags (bit 0 dimensions, bit 1 SOF type), R1 -> JPEG, R2 its length.
+# Out R0 flags, R2 width, R3 height, R4/R5 density, R6 extra workspace.
+[[swi]]
+name = "JPEG_Info"
+number = 0x49980
+raw = true
+reads = [0, 1, 2]
+writes = [0, 2, 3, 4, 5, 6]
+
+# R0 flags, R1 -> filename; out as JPEG_Info.
+[[swi]]
+name = "JPEG_FileInfo"
+number = 0x49981
+raw = true
+reads = [0, 1]
+writes = [0, 2, 3, 4, 5, 6]
+
+# R0 -> JPEG, R1/R2 x/y, R3 -> scale factors or 0, R4 length, R5 flags,
+# R6 -> colour mapping descriptor.
+[[swi]]
+name = "JPEG_PlotScaled"
+number = 0x49982
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6]
+writes = []
+
+# R0 -> filename, R1/R2 x/y, R3 -> scale factors or 0, R4 flags, R5 -> colour
+# mapping descriptor.
+[[swi]]
+name = "JPEG_PlotFileScaled"
+number = 0x49983
+raw = true
+reads = [0, 1, 2, 3, 4, 5]
+writes = []
+
+# R0 -> JPEG, R1 flags, R2 -> matrix or coordinate block, R3 length, R4 ->
+# colour mapping descriptor.
+[[swi]]
+name = "JPEG_PlotTransformed"
+number = 0x49984
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = []
+
+# R0 -> filename, R1 flags, R2 -> matrix or coordinate block, R3 -> colour
+# mapping descriptor.
+[[swi]]
+name = "JPEG_PlotFileTransformed"
+number = 0x49985
+raw = true
+reads = [0, 1, 2, 3]
+writes = []
+
+# R0 flags (bit 0 intercept, bit 1 use the translation table); out R0 the
+# old flags.
+[[swi]]
+name = "JPEG_PDriverIntercept"
+number = 0x49986
+raw = true
+reads = [0]
+writes = [0]

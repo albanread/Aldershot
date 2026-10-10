@@ -1,0 +1,119 @@
+# The Buffer Manager, as a native module: its SWIs, typed.
+#
+# The interface is the Buffer Manager's own (HWSupport/Buffers, Doc/BufferMan
+# and the source's entry comments); modules/buffers/README.md summarises it.
+# Names, numbers and register roles are facts from RISC OS 5's sources.
+#
+# Buffers live in the RMA -- shared, at one address in every task -- and
+# their addresses are part of the interface: GetInfo hands them out, and
+# Register takes a client's own memory.  So start and end are pointers.
+
+[module]
+name = "BufferManager"
+impl = "native"
+chunk = 0x42940
+
+[[swi]]
+name = "Buffer_Create"
+number = 0x42940
+params = [
+  { reg = 0, name = "flags", type = "u32" },
+  { reg = 1, name = "size", type = "u32" },
+  { reg = 2, name = "handle", type = "u32" },   # -1: the manager chooses
+]
+results = [{ reg = 0, name = "handle_out", type = "u32" }]
+
+[[swi]]
+name = "Buffer_Remove"
+number = 0x42941
+params = [{ reg = 0, name = "handle", type = "u32" }]
+
+[[swi]]
+name = "Buffer_Register"
+number = 0x42942
+params = [
+  { reg = 0, name = "flags", type = "u32" },
+  { reg = 1, name = "start", type = "ptr<u8>" },
+  { reg = 2, name = "end", type = "ptr<u8>" },   # one past the last byte
+  { reg = 3, name = "handle", type = "u32" },     # -1: the manager chooses
+]
+results = [{ reg = 0, name = "handle_out", type = "u32" }]
+
+[[swi]]
+name = "Buffer_Deregister"
+number = 0x42943
+params = [{ reg = 0, name = "handle", type = "u32" }]
+
+# new = (old AND and_mask) EOR eor_mask
+[[swi]]
+name = "Buffer_ModifyFlags"
+number = 0x42944
+params = [
+  { reg = 0, name = "handle", type = "u32" },
+  { reg = 1, name = "eor_mask", type = "u32" },
+  { reg = 2, name = "and_mask", type = "u32" },
+]
+results = [
+  { reg = 1, name = "old_flags", type = "u32" },
+  { reg = 2, name = "new_flags", type = "u32" },
+]
+
+# The owner's routines are called with R0 = handle, R8 = private, R12 = workspace.
+[[swi]]
+name = "Buffer_LinkDevice"
+number = 0x42945
+params = [
+  { reg = 0, name = "handle", type = "u32" },
+  { reg = 1, name = "wake_up", type = "code" },   # 0: none
+  { reg = 2, name = "detach", type = "code" },    # 0: refuses to be detached
+  { reg = 3, name = "private", type = "u32" },
+  { reg = 4, name = "workspace", type = "addr" },
+]
+
+[[swi]]
+name = "Buffer_UnlinkDevice"
+number = 0x42946
+params = [{ reg = 0, name = "handle", type = "u32" }]
+
+[[swi]]
+name = "Buffer_GetInfo"
+number = 0x42947
+params = [{ reg = 0, name = "handle", type = "u32" }]
+results = [
+  { reg = 0, name = "flags", type = "u32" },
+  { reg = 1, name = "start", type = "ptr<u8>" },
+  { reg = 2, name = "end", type = "ptr<u8>" },
+  { reg = 3, name = "insert", type = "u32" },
+  { reg = 4, name = "remove", type = "u32" },
+  { reg = 5, name = "free_space", type = "u32" },
+  { reg = 6, name = "used", type = "u32" },
+]
+
+# threshold: 0 none, -1 read only
+[[swi]]
+name = "Buffer_Threshold"
+number = 0x42948
+params = [
+  { reg = 0, name = "handle", type = "u32" },
+  { reg = 1, name = "threshold", type = "u32" },
+]
+results = [{ reg = 1, name = "previous", type = "u32" }]
+
+# The direct-call interface: call routine with R0 = reason, R1 = id,
+# R12 = workspace.  It returns with C as the reason's result.  The reasons
+# are 0 InsertByte (R2 byte), 1 InsertBlock (R2 -> data, R3 count; R2 and R3
+# out, as InsV), 2 RemoveByte and 4 ExamineByte (R2 byte out), 3 RemoveBlock
+# and 5 ExamineBlock (R2 -> destination, R3 count; R2 and R3 out), 6 UsedSpace
+# and 7 FreeSpace (R2 out), 8 PurgeBuffer, and 9 NextBlock (R3 bytes to
+# discard first; R2 -> the next byte and R3 the contiguous bytes out, C set
+# if there are none).  Any other reason, or an id the manager does not know,
+# gives "Bad parameters".
+[[swi]]
+name = "Buffer_InternalInfo"
+number = 0x42949
+params = [{ reg = 0, name = "handle", type = "u32" }]
+results = [
+  { reg = 0, name = "id", type = "u32" },
+  { reg = 1, name = "routine", type = "code" },
+  { reg = 2, name = "workspace", type = "addr" },
+]

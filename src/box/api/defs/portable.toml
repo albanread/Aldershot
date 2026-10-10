@@ -1,0 +1,144 @@
+# Portable, as a native module (modules/portable): PortableHAL 0.81, the Pi
+# ROM's, on a machine with no CPU clock device and no battery -- the box.
+#
+# Names, numbers and the chunk are facts of RISC OS 5's interface
+# (HWSupport/PortableHAL, s/StPortable); the comments are ours.  Every SWI
+# is register-level: each keeps what it does not write.
+
+[module]
+name = "Portable"
+impl = "native"
+chunk = 0x42FC0
+
+[[swi]]
+name = "Portable_Speed"
+number = 0x42FC0
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "Portable_Control"
+number = 0x42FC1
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "Portable_ReadBMUVariable"
+number = 0x42FC2
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "Portable_WriteBMUVariable"
+number = 0x42FC3
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "Portable_CommandBMU"
+number = 0x42FC4
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "Portable_ReadFeatures"
+number = 0x42FC5
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "Portable_Idle"
+number = 0x42FC6
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "Portable_Stop"
+number = 0x42FC7
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "Portable_Status"
+number = 0x42FC8
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "Portable_Contrast"
+number = 0x42FC9
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "Portable_Refresh"
+number = 0x42FCA
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "Portable_Halt"
+number = 0x42FCB
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "Portable_SleepTime"
+number = 0x42FCC
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "Portable_SMBusOp"
+number = 0x42FCD
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "Portable_Speed2"
+number = 0x42FCE
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "Portable_WakeTime"
+number = 0x42FCF
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "Portable_EnumerateBMU"
+number = 0x42FD0
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "Portable_ReadBMUVariables"
+number = 0x42FD1
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "Portable_ReadSensor"
+number = 0x42FD2
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]

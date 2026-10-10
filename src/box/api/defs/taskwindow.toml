@@ -1,0 +1,20 @@
+# TaskWindow, as a native module: its SWI, typed.
+#
+# The interface is TaskWindow's own (Desktop/TaskWindow, s/Taskman and
+# hdr/TaskWindow); modules/taskwindow/README.md lists the commands, the
+# message protocol with the parent and how a task window yields.  Names, numbers and register roles are facts from RISC OS 5's
+# sources.
+
+[module]
+name = "TaskWindow"
+impl = "native"
+chunk = 0x43380
+
+# R0 = 0 on entry (an index: 0 asks whether the caller is in a task
+# window); out R0 non-zero if it is -- the task window's own token, which
+# callers only test -- else 0.
+[[swi]]
+name = "TaskWindow_TaskInfo"
+number = 0x43380
+params = [{ reg = 0, name = "index", type = "u32" }]
+results = [{ reg = 0, name = "value", type = "u32" }]

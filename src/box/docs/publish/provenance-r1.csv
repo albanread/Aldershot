@@ -1,0 +1,44 @@
+path,kind,source,licence,evidence
+runtime/amb.c,ROOL,Kernel s.AMBControl.*,Apache-2.0,header says 'Written from the kernel's ...' / reimplemented; follows its algorithms and quirks closely
+runtime/arena.c,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/background.c,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/callback.c,unclear,,,"old-style CallBack semantics follow s.Super1 behaviour; header describes behaviour, not a translation"
+runtime/capp.c,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/capp_trap.c,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/cmos.c,unclear,,,"header says the rules are the kernel's (s.PMF.i2cutils, osbyte) and the file format is the team emulator's; own logic, kernel-derived rules"
+runtime/convert.c,ROOL,"Kernel s.Convrsions, s.ArthurSWIs",Apache-2.0,header says 'Written from the kernel's ...' / reimplemented; follows its algorithms and quirks closely
+runtime/dispatch.c,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/dynarea.c,ROOL,"Kernel s.ChangeDyn, s.NewReset, s.MemInfo",Apache-2.0,header says 'Written from the kernel's ...' / reimplemented; follows its algorithms and quirks closely
+runtime/environment.c,ROOL,"Kernel s.Middle, s.Kernel, hdr.KernelWS",Apache-2.0,header says 'Written from the kernel's ...' / reimplemented; follows its algorithms and quirks closely
+runtime/error.c,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/expr.c,ROOL,Kernel s.Arthur3,Apache-2.0,header says 'Written from the kernel's ...' / reimplemented; follows its algorithms and quirks closely
+runtime/fault.c,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/filecmds.c,ROOL,Kernel s.SysComms,Apache-2.0,header says 'Written from the kernel's ...' / reimplemented; follows its algorithms and quirks closely
+runtime/files.c,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/fp.c,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/hardware.c,ROOL,"Kernel s.HAL, hdr.HALEntries, hdr.HALDevice",Apache-2.0,header says 'Written from the kernel's ...' / reimplemented; follows its algorithms and quirks closely
+runtime/heap.c,ROOL,Kernel s.HeapMan,Apache-2.0,header says 'Written from the kernel's ...' / reimplemented; follows its algorithms and quirks closely
+runtime/heapsort.c,ROOL,"Kernel s.HeapSort, s.MoreSWIs",Apache-2.0,header says 'Written from the kernel's ...' / reimplemented; follows its algorithms and quirks closely
+runtime/keyboard.c,ROOL,"Kernel s.PMF.key, Buffer, osbyte, osinit",Apache-2.0,header says 'Written from the kernel's ...' / reimplemented; follows its algorithms and quirks closely
+runtime/meter.c,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/module.c,ROOL,"Kernel s.ModHand, s.UnSqueeze",Apache-2.0,header says 'Written from the kernel's ...' / reimplemented; follows its algorithms and quirks closely
+runtime/os_native.c,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/osbyte.c,unclear,,,"OS_Byte/OS_Word reasons the runtime implements; header says the default owner is the kernel (s.PMF.osbyte, osword) but does not say it was written from it"
+runtime/oscli.c,ROOL,"Kernel s.Oscli, Utility, MoreComms, SysComms",Apache-2.0,header says 'Written from the kernel's ...' / reimplemented; follows its algorithms and quirks closely
+runtime/arch/aarch64/capp.c.inc,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/arch/aarch64/capp_jit.c.inc,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/arch/aarch64/fault.c.inc,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/arch/aarch64/fault.h.inc,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/arch/aarch64/faultblock.c.inc,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/arch/x86_64/capp.c.inc,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/arch/x86_64/fault.c.inc,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/arch/x86_64/fault.h.inc,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/arch/x86_64/faultblock.c.inc,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/armrun/armrun.cpp,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/armrun/armrun.h,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/armrun/box.c,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/armrun/bridge.c,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/armrun/bridge.h,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/armrun/fpa.c,own,FPA behaviour from the PRM and FPEmulator tests,MIT,header: native FPA written for the ARM container
+runtime/armrun/fpa.h,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited
+runtime/armrun/tools/armscan.cpp,own,written new for BOX,MIT,header comment describes behaviour; no ROOL source cited

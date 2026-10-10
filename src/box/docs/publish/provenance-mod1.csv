@@ -1,0 +1,35 @@
+path,kind,source,licence,evidence
+modules/sound/sound.c,ROOL,"HWSupport/Sound: Sound1 s.Sound1, Sound0HAL s.Sound0, s.Sound0ARM",Apache-2.0,"header: ported from ROOL's Sound1 channel model and Sound0ARM conversion; copyrights Acorn 1996, Castle 2010, Castle 2012 read from the sources"
+modules/sound/voices.c,ROOL,"HWSupport/Sound/Voices: WaveSynth, StringLib, Percussion",Apache-2.0,header: ported entry for entry; sources carry Copyright 1996 Acorn Computers Ltd
+modules/sound/sound.h,own,,MIT,declarations of the module structs only
+modules/display/display.c,ROOL,Video/UserI/Display s.*,Apache-2.0,"header: hand-converted from RISC OS 5.31 Display, every routine of the nine ObjAsm sources; sources carry Copyright 1996 Acorn Computers Ltd"
+modules/display/display.h,own,,MIT,declarations only
+modules/worker/worker.c,own,,MIT,new module with no counterpart in RISC OS; kcheck decodes instructions from the Arm ARM and x86 manuals; no ROOL source referenced
+modules/worker/worker.h,own,,MIT,new module with no counterpart in RISC OS; kcheck decodes instructions from the Arm ARM and x86 manuals; no ROOL source referenced
+modules/worker/kcheck.c,own,,MIT,new module with no counterpart in RISC OS; kcheck decodes instructions from the Arm ARM and x86 manuals; no ROOL source referenced
+modules/worker/kcheck.h,own,,MIT,new module with no counterpart in RISC OS; kcheck decodes instructions from the Arm ARM and x86 manuals; no ROOL source referenced
+modules/vfpsupport/elementary.c,ROOL,"HWSupport/VFPSupport s.Trig64, s.ArcTrig64, s.Power64, s.CMath (translations of AMD aocl-libm-ose and openlibm)","BSD-2-Clause (ROOL) with BSD-3-Clause/MIT (AMD), Sun fdlibm notice, Apache-2.0 (CMath)","header: transliterated an instruction at a time; third-party notices copied from ROOL's comments; ROOL's Licences file: Everything else - ROOL BSD licence, CSupport Apache"
+modules/vfpsupport/elementary.h,ROOL,same,same as elementary.c,header: constants taken from the sources by label
+modules/vfpsupport/vfpmath.h,own,,MIT,prototypes only
+modules/vfpsupport/vfpsupport.h,own,,MIT,declaration only
+modules/vfpsupport/vfpsupport.c,unclear,HWSupport/VFPSupport s.Module probably,BSD-2-Clause (ROOL) if ROOL,"reimplemented over the runtime's FP state and keeps the original's context layout, error numbers and tables; no header added, lead to decide"
+modules/zlibmod/zlibmod.c,unclear,"Programmer/ZLibMod (c/cmodule, c/task, hdr/ZLib) on ROOL's GitLab; zlib 1.2.13 gzio behaviour",ROOL (README says BSD); not verified,"README says written from ZLibMod's sources; those are not in riscos-src and gitlab.riscosopen.org refused automated access, so ROOL's copyright lines could not be read; no header added"
+modules/zlibmod/gz.c,unclear,"Programmer/ZLibMod (c/cmodule, c/task, hdr/ZLib) on ROOL's GitLab; zlib 1.2.13 gzio behaviour",ROOL (README says BSD); not verified,"README says written from ZLibMod's sources; those are not in riscos-src and gitlab.riscosopen.org refused automated access, so ROOL's copyright lines could not be read; no header added"
+modules/zlibmod/zlibmod.h,unclear,"Programmer/ZLibMod (c/cmodule, c/task, hdr/ZLib) on ROOL's GitLab; zlib 1.2.13 gzio behaviour",ROOL (README says BSD); not verified,"README says written from ZLibMod's sources; those are not in riscos-src and gitlab.riscosopen.org refused automated access, so ROOL's copyright lines could not be read; no header added"
+modules/basicvfp/asmlib/asm.h,own,,MIT,the author's own assembler code
+modules/basicvfp/asmlib/asma64.c,own,,MIT,the author's own assembler code
+modules/basicvfp/asmlib/asma64.h,own,,MIT,the author's own assembler code
+modules/basicvfp/asmlib/asma64_int.h,own,,MIT,the author's own assembler code
+modules/basicvfp/asmlib/asma64_mv.c,own,,MIT,the author's own assembler code
+modules/basicvfp/asmlib/asma64_tab.c,own,,MIT,"the author's encoders (MRASM, JASM, WRASM), gated by LLVM MC golden output; asma64_tab.c is generated from that corpus"
+modules/basicvfp/asmlib/asmeval.c,own,,MIT,the author's own assembler code
+modules/basicvfp/asmlib/asmtest.c,own,,MIT,the author's own assembler code
+modules/basicvfp/asmlib/asmx64.c,own,,MIT,the author's own assembler code
+modules/basicvfp/asmlib/asmx64.h,own,,MIT,the author's own assembler code
+modules/basicvfp/asmlib/basicasm.c,own,,MIT,the author's own assembler code
+modules/basicvfp/asmlib/basicasm.h,own,,MIT,the author's own assembler code
+modules/basicvfp/asmlib/tab_immval.py,own,,MIT,the author's own assembler code
+modules/basicvfp/asmlib/goldens/gen_common.py,own,,MIT,the author's own assembler code
+modules/basicvfp/asmlib/goldens/gen_pcrel.py,own,,MIT,the author's own assembler code
+modules/basicvfp/build.py,own,,MIT,build tool; processes ROOL's source without containing it
+modules/basicvfp/patch-basicasm.py,own,,MIT,build tool; processes ROOL's source without containing it

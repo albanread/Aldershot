@@ -1,0 +1,121 @@
+# Sound1: the old 8-bit voice system's SWIs, the &40180 chunk, as
+# Sound1 owns them on RISC OS 5 (HWSupport/Sound/Sound1).  Here the
+# native module (modules/sound) owns the chunk, synthesizes the voices
+# and mixes into the platform's stream under SharedSound; the queue
+# (modules/soundsched) drives it, which is what BASIC's SOUND statement
+# -- Maestro's playback -- compiles to.
+#
+# Register roles are Sound1's own code and the PRM's.
+
+[module]
+name = "Sound1"
+impl = "native"
+chunk = 0x40180
+
+# R0 = volume 1-127 (MOD 128; 0 reads).
+[[swi]]
+name = "Sound_Volume"
+number = 0x40180
+raw = true
+reads = [0]
+writes = [0]
+
+# R0 = linear amplitude; out R0 the log-encoded value.
+[[swi]]
+name = "Sound_SoundLog"
+number = 0x40181
+raw = true
+reads = [0]
+writes = [0]
+
+# R0 = log value; out R0 the linear amplitude.
+[[swi]]
+name = "Sound_LogScale"
+number = 0x40182
+raw = true
+reads = [0]
+writes = [0]
+
+# R0 = 0 read a name (R0 out -> it, or 0), R1 = voice slot; 1 install a
+# generator (R2), R3 its local name; 2 read both names; R0=R1=0 finds the
+# first free slot in R1 -- Maestro's voice-count trick (SYS Install 0,0).
+[[swi]]
+name = "Sound_InstallVoice"
+number = 0x40183
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "Sound_RemoveVoice"
+number = 0x40184
+raw = true
+reads = [0, 1]
+writes = [1]
+
+# R0 = channel 1-8, R1 = voice (0 detaches, returning the old in R1).
+[[swi]]
+name = "Sound_AttachVoice"
+number = 0x40185
+raw = true
+reads = [0, 1]
+writes = [0, 1]
+
+# R0 = channel 1-7 in bits 0-7 + amplitude in bits 16-23 (bit 24 the
+# gate), R1 = pitch in bits 0-15 + duration in bits 16-31.
+[[swi]]
+name = "Sound_ControlPacked"
+number = 0x40186
+raw = true
+reads = [0, 1]
+writes = []
+
+# R0 = tuning; out R0 the old.
+[[swi]]
+name = "Sound_Tuning"
+number = 0x40187
+raw = true
+reads = [0]
+writes = [0]
+
+# R0 = pitch (octave in the top, 1/4096 octave in the low 12 bits,
+# &4000 middle C); out R0 the phase accumulator's step.
+[[swi]]
+name = "Sound_Pitch"
+number = 0x40188
+raw = true
+reads = [0]
+writes = [0]
+
+# R0 = channel 1-8, R1 = amplitude with the gate in bit 8
+# (&101-&17F gate on), R2 = pitch, R3 = duration (centiseconds).
+[[swi]]
+name = "Sound_Control"
+number = 0x40189
+raw = true
+reads = [0, 1, 2, 3]
+writes = []
+
+# R0 = channel 1-8, R1 -> voice name; out R1 the number attached.
+[[swi]]
+name = "Sound_AttachNamedVoice"
+number = 0x4018A
+raw = true
+reads = [0, 1]
+writes = [0, 1]
+
+# R0 = channel 1-8, R1 = word offset into its control block.
+[[swi]]
+name = "Sound_ReadControlBlock"
+number = 0x4018B
+raw = true
+reads = [0, 1]
+writes = [0, 2]
+
+# R0 = channel 1-8, R1 = word offset, R2 = the word.
+[[swi]]
+name = "Sound_WriteControlBlock"
+number = 0x4018C
+raw = true
+reads = [0, 1, 2]
+writes = [2]

@@ -1,0 +1,42 @@
+# x86-64 instructions the encoder must refuse (asmtest's "-"): values their
+# fields do not hold -- which LLVM MC truncates without a word, or refuses
+# too -- and registers no encoding has.  In BASIC each is an error: "Bad
+# immediate constant", "Bad address offset", "Bad shift", "Bad register"
+mov al, 300	-
+mov al, -129	-
+add al, -200	-
+test al, 256	-
+mov byte ptr [rax], 256	-
+mov ax, 70000	-
+cmp ax, 0x12345	-
+ret 70000	-
+mov eax, 0x200000000	-
+add eax, 0x200000000	-
+and ecx, 0x1ffffffff	-
+imul eax, ebx, 0x10000000000	-
+add rax, 0xffffffff	-
+push 0x80000000	-
+push 0x800000000	-
+mov qword ptr [rax], 0xffffffff	-
+mov qword ptr [rax], 0x10000000000	-
+int 256	-
+shl eax, 256	-
+shl eax, -1	-
+bt eax, 300	-
+pshufd xmm0, xmm1, 300	-
+mov eax, dword ptr [rax + 0x10000000000]	-
+mov eax, dword ptr [rax + 0x80000000]	-
+mov eax, dword ptr [0x80000000]	-
+mov rax, 0x10000000000000000	-
+mov eax, dword ptr [rsp*2]	-
+mov eax, dword ptr [rax + rsp*2]	-
+mov ah, sil	-
+mov ah, r8b	-
+movzx r8d, ah	-
+add byte ptr [r8], ah	-
+mov byte ptr [r8], ah	-
+jmp 0x90000100	-	@100
+call 0x90000100	-	@100
+mov rax, [rbx+rcx*4294967297]	-
+push es	-
+push ds	-

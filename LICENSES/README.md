@@ -76,6 +76,7 @@ files are on every BOX's disc, in `Documents.Licences`.
 | [libjpeg-turbo](box/libjpeg-turbo.txt) | 3.2.0 | IJG licence, Modified (3-clause) BSD, zlib | /init (CompressJPEG, SpriteExtend's JPEG, ChangeFSI's CFSI), !NetSurf |
 | [libnl](box/libnl.txt) | 3.12.0 | GNU LGPL 2.1 | ksmbd.tools |
 | [libpng](box/libpng.txt) | 1.6.50 | libpng licence (PNG Reference Library License 2) | /init (CompressPNG, SpriteExtend's PNG, ChangeFSI's CFSI), !NetSurf |
+| [libsmb2](box/libsmb2.txt) | commit fc710a3ebd | GNU LGPL 2.1 or later | LanManFS (*LMConnect), linked statically into /init |
 | [Linux](box/Linux.txt) | 6.18.54 | GNU GPL 2, with the Linux syscall note | the kernel BOX runs on (both machines, and the PC image) |
 | [LLVM](box/LLVM.txt) | 22.1.2 | Apache License 2.0 with LLVM Exceptions | both boxes' clang and ld.lld (*CC, *RosBas), compiler-rt's builtins; libc++, libc++abi and libunwind in /init (by zig) |
 | [lwIP](box/lwIP.txt) | 2.2.1 | BSD 3-clause | [HybrisOS](../HybrisOS/README.md), the HAL: its TCP/IP stack, compiled into the HAL edition's kernel image; not in the current releases |

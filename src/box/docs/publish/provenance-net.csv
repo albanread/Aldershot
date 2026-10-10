@@ -1,0 +1,77 @@
+path,kind,source,licence,evidence
+rosgd/include/rosgd/arena.h,own,-,MIT,"ROSGD C interface; its few constants (key status bits, zero-page offsets, error numbers) are RISC OS interface facts named in ROSGD's own terms"
+rosgd/include/rosgd/armbox.h,own,-,MIT,New code written for ROSGD
+rosgd/include/rosgd/background.h,own,-,MIT,New code written for ROSGD
+rosgd/include/rosgd/callback.h,own,-,MIT,New code written for ROSGD
+rosgd/include/rosgd/capp.h,own,-,MIT,"ROSGD C interface; its few constants (key status bits, zero-page offsets, error numbers) are RISC OS interface facts named in ROSGD's own terms"
+rosgd/include/rosgd/clibimage.h,own,-,MIT,New code written for ROSGD
+rosgd/include/rosgd/cmos.h,own,-,MIT,New code written for ROSGD
+rosgd/include/rosgd/cpu.h,own,-,MIT,New code written for ROSGD
+rosgd/include/rosgd/dynarea.h,own,-,MIT,New code written for ROSGD
+rosgd/include/rosgd/environment.h,own,-,MIT,"ROSGD C interface; its few constants (key status bits, zero-page offsets, error numbers) are RISC OS interface facts named in ROSGD's own terms"
+rosgd/include/rosgd/error.h,own,-,MIT,"ROSGD C interface; its few constants (key status bits, zero-page offsets, error numbers) are RISC OS interface facts named in ROSGD's own terms"
+rosgd/include/rosgd/fault.h,own,-,MIT,"ROSGD C interface; its few constants (key status bits, zero-page offsets, error numbers) are RISC OS interface facts named in ROSGD's own terms"
+rosgd/include/rosgd/heap.h,own,-,MIT,New code written for ROSGD
+rosgd/include/rosgd/international.h,ROOL,Sources/Internat/Inter/hdr/Internatio,Apache-2.0,"The enum is the hdr file's reason list, name for name, in C"
+rosgd/include/rosgd/keyboard.h,own,-,MIT,"ROSGD C interface; its few constants (key status bits, zero-page offsets, error numbers) are RISC OS interface facts named in ROSGD's own terms"
+rosgd/include/rosgd/meter.h,own,-,MIT,New code written for ROSGD
+rosgd/include/rosgd/module.h,own,-,MIT,New code written for ROSGD
+rosgd/include/rosgd/platform.h,own,-,MIT,New code written for ROSGD
+rosgd/include/rosgd/rma.h,own,-,MIT,New code written for ROSGD
+rosgd/include/rosgd/rom.h,own,-,MIT,New code written for ROSGD
+rosgd/include/rosgd/screen.h,own,-,MIT,New code written for ROSGD
+rosgd/include/rosgd/streams.h,own,-,MIT,New code written for ROSGD
+rosgd/include/rosgd/swi.h,own,-,MIT,New code written for ROSGD
+rosgd/include/rosgd/switrace.h,own,-,MIT,New code written for ROSGD
+rosgd/include/rosgd/sysvars.h,own,-,MIT,"ROSGD C interface; its few constants (key status bits, zero-page offsets, error numbers) are RISC OS interface facts named in ROSGD's own terms"
+rosgd/include/rosgd/task.h,own,-,MIT,New code written for ROSGD
+rosgd/include/rosgd/ticker.h,own,-,MIT,"ROSGD C interface; its few constants (key status bits, zero-page offsets, error numbers) are RISC OS interface facts named in ROSGD's own terms"
+rosgd/include/rosgd/unixbridge.h,own,-,MIT,New code written for ROSGD
+rosgd/include/rosgd/vdu.h,own,-,MIT,"ROSGD C interface; its few constants (key status bits, zero-page offsets, error numbers) are RISC OS interface facts named in ROSGD's own terms"
+rosgd/include/rosgd/vector.h,own,-,MIT,"ROSGD C interface; its few constants (key status bits, zero-page offsets, error numbers) are RISC OS interface facts named in ROSGD's own terms"
+rosgd/include/rosgd/wimprec.h,own,-,MIT,New code written for ROSGD
+rosgd/modules/dhcp/dhcp.c,unclear,Sources/Networking/DHCP/c/dhcp; Sources/Networking/AUN/Internet/whoami/c/whoami,(none given),"Thin interface over the Linux lease. The Inet$ variable setting mirrors bootp_interpret in whoami; the lead decides whether this is ROOL (Apache, Element 14 1999 / Acorn 1996) or own"
+rosgd/modules/dhcp/dhcp.h,own,-,MIT,New code written for ROSGD
+rosgd/modules/drmvideo/drmvideo.c,own,-,MIT,New code written for ROSGD
+rosgd/modules/drmvideo/drmvideo.h,own,-,MIT,New code written for ROSGD
+rosgd/modules/hostfsfiler/hostfsfiler.c,own,-,MIT,New code written for ROSGD
+rosgd/modules/hostfsfiler/hostfsfiler.h,own,-,MIT,New code written for ROSGD
+rosgd/modules/inetres/arp.c,other open source,Sources/SystemRes/InetRes/Sources/arp/c/ARP,BSD-3-Clause,"Header cites InetRes/Sources/arp and print_entry; output formats and options follow ARP; code is new, over /proc/net/arp and ioctls"
+rosgd/modules/inetres/digest.c,own,-,MIT,"Header: written from RFC 1321, FIPS 180-4, the RIPEMD-160 paper and Skein 1.3; no FreeBSD libmd code"
+rosgd/modules/inetres/digest.h,own,-,MIT,New code written for ROSGD
+rosgd/modules/inetres/files.c,own,-,MIT,"Module glue written for ROSGD (FileSwitch access, command table); the command output lives in the per-tool files"
+rosgd/modules/inetres/ifconfig.c,other open source,"Sources/SystemRes/InetRes/Sources/ifconfig/c/{IfConfig,af_inet,af_link}",BSD-3-Clause,Header cites InetRes/Sources/ifconfig and status(); output and options follow IfConfig
+rosgd/modules/inetres/inetres.c,own,-,MIT,"Module glue written for ROSGD (FileSwitch access, command table); the command output lives in the per-tool files"
+rosgd/modules/inetres/inetres.h,own,-,MIT,"Module glue written for ROSGD (FileSwitch access, command table); the command output lives in the per-tool files"
+rosgd/modules/inetres/inetstat.c,other open source,"Sources/SystemRes/InetRes/Sources/inetstat/c/{main,inet,if,route}","BSD-4-Clause (c.inet), BSD-3-Clause (others)","Header cites InetRes/Sources/inetstat; listing layouts follow inet.c, if.c, route.c; strictest terms (c.inet) kept"
+rosgd/modules/inetres/md5.c,other open source,Sources/SystemRes/InetRes/Sources/md5/c/md5,RSA Data Security (MDDRIVER) notice,"Header cites InetRes/Sources/md5; command set, options, -x test suite follow md5.c (derived from MDDRIVER.C); 11 identical strings"
+rosgd/modules/inetres/misc.c,ROOL,"Sources/SystemRes/InetRes/Sources/{ipvars/c/ipvars,gethost/c/gethost,ifrconfig/c/IfRConfig,showstat/c/main,showstat/c/msgs}",Apache-2.0,"Header cites the four sources; output, return codes and variable names reproduce them"
+rosgd/modules/inetres/ping.c,other open source,"Sources/SystemRes/InetRes/Sources/ping/c/{Ping,utils}",BSD-3-Clause,"Header cites InetRes/Sources/ping, pr_pack and finish(); messages follow Ping"
+rosgd/modules/inetres/route.c,other open source,Sources/SystemRes/InetRes/Sources/route/c/Route,BSD-3-Clause,"Header cites InetRes/Sources/route, print_getmsg, inet_makenetandmask; 10 identical message strings"
+rosgd/modules/inetres/sysctl.c,other open source,Sources/SystemRes/InetRes/Sources/sysctl/c/SysCtl,BSD-3-Clause,"Header cites InetRes/Sources/sysctl; FreeBSD names, messages and options"
+rosgd/modules/inetres/tftp.c,other open source,"Sources/SystemRes/InetRes/Sources/tftp/c/{main,tftp,tftp-file,tftp-io,tftp-options,tftp-transfer,tftp-utils}",BSD-3-Clause (Regents) and BSD-2-Clause (Groothuis),144 string literals and 42 code lines identical to the FreeBSD client; header says the protocol is FreeBSD's client
+rosgd/modules/inetres/traceroute.c,other open source,Sources/SystemRes/InetRes/Sources/traceroute/c/TraceRoute,BSD-style (LBL),Header cites InetRes/Sources/traceroute; output format follows TraceRoute
+rosgd/modules/inetres/utils.c,ROOL,"Sources/SystemRes/InetRes/Sources/utils/s/{CheckMem,ReadCMOSIP,TriggerCBs}",Apache-2.0,Header cites InetRes/Sources/utils; behaviour taken from the ARM source
+rosgd/modules/input/input.c,own,-,MIT,"Header: written from the calls the USB driver makes (README.md); makes the calls the USB HID driver makes, which is behaviour only"
+rosgd/modules/input/input.h,own,-,MIT,New code written for ROSGD
+rosgd/modules/internet/internet.c,own,-,MIT,"Header: written from the documented Socket_* interface; socket constants are 4.4BSD interface numbers named by hand, not copied text"
+rosgd/modules/internet/internet.h,own,-,MIT,New code written for ROSGD
+rosgd/modules/machine/machine.c,own,-,MIT,New code written for ROSGD
+rosgd/modules/machine/machine.h,own,-,MIT,New code written for ROSGD
+rosgd/modules/resolver/resolver.c,own,-,MIT,Header: behaviour read from the binary (no source); thin layer over getaddrinfo
+rosgd/modules/resolver/resolver.h,own,-,MIT,New code written for ROSGD
+rosgd/modules/systemdevs/systemdevs.c,ROOL,Sources/HWSupport/SystemDevs/s/SystemDevs,Apache-2.0,"Header gives 5.30 module name/version 1.34 and each filing system; the filing systems, error numbers and LCG seed behaviour follow the ARM source"
+rosgd/modules/systemdevs/systemdevs.h,own,-,MIT,New code written for ROSGD
+rosgd/modules/waylandwin/browser.c,own,-,MIT,New code written for ROSGD
+rosgd/modules/waylandwin/waylandwin.c,own,-,MIT,New code written for ROSGD
+rosgd/modules/waylandwin/waylandwin.h,own,-,MIT,New code written for ROSGD
+rosgd/modules/waylandwin/wwin.h,own,-,MIT,New code written for ROSGD
+rosgd/platform/agent_vsock.c,own,-,MIT,New code written for ROSGD
+rosgd/platform/audio_alsa.c,own,-,MIT,New code written for ROSGD
+rosgd/platform/console.c,own,-,MIT,New code written for ROSGD
+rosgd/platform/display_drm.c,own,-,MIT,New code written for ROSGD
+rosgd/platform/hosted.c,own,-,MIT,New code written for ROSGD
+rosgd/platform/input_evdev.c,own,-,MIT,"Linux evdev reader; the key number table maps Linux KEY_* to RISC OS key numbers, interface facts"
+rosgd/platform/net_linux.c,own,-,MIT,New code written for ROSGD
+rosgd/platform/sine.c,own,-,MIT,New code written for ROSGD
+rosgd/platform/time_power.c,own,-,MIT,New code written for ROSGD

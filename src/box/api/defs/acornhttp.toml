@@ -1,0 +1,102 @@
+# AcornHTTP, as a native module over libcurl (modules/acornhttp): its SWIs
+# are register-level, raw, as RISC OS 5's AcornHTTP 1.09 takes them
+# (Docs/SWIs, SWInums, AddMethds).  GetData, Status, ReadData and Stop are
+# the protocol module interface URL_Fetcher calls (Docs/APISpec); the
+# Secure ones the same for https:; the cookie SWIs and the method
+# registration sit at the top of the chunk.
+
+[module]
+name = "AcornHTTP"
+impl = "native"
+chunk = 0x83F80
+
+[[swi]]
+name = "HTTP_GetData"
+number = 0x83F80
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "HTTP_Status"
+number = 0x83F81
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "HTTP_ReadData"
+number = 0x83F82
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "HTTP_Stop"
+number = 0x83F83
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "HTTP_SecureGetData"
+number = 0x83F90
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "HTTP_SecureStatus"
+number = 0x83F91
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "HTTP_SecureReadData"
+number = 0x83F92
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "HTTP_SecureStop"
+number = 0x83F93
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "HTTP_RegisterMethod"
+number = 0x83FBB
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "HTTP_DeregisterMethod"
+number = 0x83FBC
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "HTTP_AddCookie"
+number = 0x83FBD
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "HTTP_ConsumeCookie"
+number = 0x83FBE
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "HTTP_EnumerateCookies"
+number = 0x83FBF
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]

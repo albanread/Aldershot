@@ -1,0 +1,191 @@
+ret
+push rbx
+pop r12
+mov eax, 61
+add al, 1
+add eax, 1
+add rax, 1
+sub rsp, 8
+add rsp, 128
+mov rax, qword ptr [rdi + 8]
+mov qword ptr [rdi + 8], rax
+mov dword ptr [rdi], eax
+mov eax, dword ptr [rdi + rcx*4]
+mov eax, dword ptr [rdi + rcx*4 + 1000]
+lea rax, [rdi + 8]
+lea rax, [rdi + rsi*2 - 4]
+movzx eax, byte ptr [rdi + 1]
+movsx rax, word ptr [rsi]
+movsxd rax, dword ptr [rsi]
+cmp rax, 10
+cmp eax, 1000
+test eax, eax
+test al, 1
+xor eax, eax
+and ecx, 255
+or rdx, rax
+shl rax, 4
+shr eax, 1
+sar ecx, cl
+imul eax, ecx
+imul eax, ecx, 5
+imul rax, rdx, 1000
+idiv ecx
+mul rcx
+neg rax
+not eax
+inc eax
+dec qword ptr [rdi]
+cdq
+cqo
+mov rax, 0x123456789
+movabs rax, 0x1234
+mov r8d, 1
+mov r15, rsp
+xchg rax, rbx
+cmove eax, ecx
+sete al
+nop
+int3
+syscall
+leave
+movsd xmm0, qword ptr [rdi]
+movsd qword ptr [rdi + 8], xmm1
+addsd xmm0, xmm1
+mulsd xmm0, qword ptr [rsi]
+cvtsi2sd xmm0, eax
+cvttsd2si eax, xmm0
+sqrtsd xmm0, xmm0
+ucomisd xmm0, xmm1
+movaps xmm1, xmm2
+xorps xmm0, xmm0
+movdqu xmm0, xmmword ptr [rdi]
+paddd xmm0, xmm1
+vaddps ymm0, ymm1, ymm2
+call rax
+jmp qword ptr [rax]
+mov byte ptr [rdi], 65
+mov word ptr [rdi], 1
+mov qword ptr [rdi], -1
+add dword ptr [rdi + 4], 1
+lock xadd dword ptr [rdi], eax
+rep movsb
+add ax, 1000
+add ax, 1
+add al, 200
+cmp al, 1
+and al, 0x7f
+test eax, 0x100
+xchg eax, ecx
+xchg rax, r9
+mov sil, 5
+mov r12b, 7
+mov r9, 1
+lock add dword ptr [rdi], eax
+lock inc qword ptr [rdi]
+lock cmpxchg qword ptr [rsi], rcx
+mov eax, dword ptr [0x1000]
+mov rax, qword ptr [rsp + 8]
+mov qword ptr [r12], rax
+mov eax, dword ptr [r13]
+push 5
+push 1000
+jmp rax
+int 3
+int 0x80
+call rax
+lea rax, [rip]
+# 2026-09-27: ah..bh, spl..dil, an index with no base, rsp as an index,
+# 8-bit xchg, imm16, 32-bit immediates MC takes as negative, rip + a
+# number (a displacement), fences
+mov ah, 1
+mov bh, 0x7f
+add ah, 1
+or ah, 1
+cmp ah, 5
+xor ah, ah
+mov ah, al
+mov al, ah
+mov ah, byte ptr [rax]
+mov byte ptr [rax], ah
+movzx eax, ah
+movsx ecx, bh
+xchg ah, al
+xchg al, cl
+xchg cl, al
+xchg al, al
+test ah, al
+test al, ah
+test ah, 1
+test bh, 0x80
+sete ah
+inc ah
+dec bh
+neg ah
+not dh
+shl ah, 1
+shl ah, cl
+shr bh, 3
+mul ah
+cmp ah, byte ptr [rbx]
+mov dil, byte ptr [rsi]
+mov byte ptr [rsi], dil
+add bl, sil
+mov sil, dil
+cmp spl, bpl
+add sil, 5
+imul ax, bx, 1000
+imul ax, bx, 10
+imul ax, word ptr [rax], 300
+mov eax, dword ptr [rbp*4]
+mov eax, dword ptr [rax*1 + 8]
+mov eax, dword ptr [rcx*8 + 0x1000]
+lea rax, [rcx*2]
+lea rax, [rcx*2 + 5]
+mov eax, dword ptr [rax + rsp]
+mov eax, dword ptr [rsp + rax]
+mov eax, dword ptr [r12*4]
+mov eax, dword ptr [rax + r12]
+mov eax, dword ptr [r13*2 + 16]
+mov eax, dword ptr [rbp + rax*4]
+mov eax, dword ptr [-8]
+add eax, 0xffffffff
+add ax, 0xffff
+imul eax, ebx, 0xffffffff
+and ecx, 0xfffffff0
+cmp ecx, 0x80000000
+test eax, 0xffffffff
+mov dword ptr [rax], 0xffffffff
+mov rax, 0x7fffffff
+mov rax, -0x80000000
+mov rax, 0x80000000
+mov rax, 0xffffffff
+mov rax, -1
+push 0x7fffffff
+push -1
+push 127
+push 128
+ret 65535
+int 255
+shl eax, 31
+sar rax, 63
+bt eax, 31
+bts rax, 63
+lea rax, [rip + 16]
+lea rax, [rip - 8]
+mov eax, dword ptr [rip + 0x100]
+jmp qword ptr [rip + 0]
+lock add qword ptr [rip + 16], 1
+ud2
+mfence
+lfence
+sfence
+movsd
+rep movsd
+repne movsd
+rep movsq
+push fs
+push gs
+mov fs, eax
+mov gs, eax
+mov eax, fs

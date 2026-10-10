@@ -1,0 +1,1048 @@
+# The kernel's SWIs that the runtime implements natively.
+#
+# The schema is cut to what the generator reads today.  Names, numbers and register roles are facts from RISC OS 5's
+# sources (Kernel/hdr/RISCOS, Kernel/s/Kernel); descriptions are ours.
+#
+# Per SWI:     name, number, impl ("native", "module:<title>", or "planned":
+#              defined, not implemented yet), kind ("call" or
+#              "multiplexer"), params, results, flags_out; reads and writes,
+#              every register it may read and write for any reason; count,
+#              for a range of numbers.
+# Per register: reg, name, type, and optionally const and null_ok.
+# Types:       u8 u32 i32 bool str ptr<u8> ptr<u32> ptr<void> ptr<os_error>
+#
+# A multiplexer names its selector register and gives one op per reason,
+# each with its own typed function.
+
+[module]
+name = "Kernel"
+impl = "native"
+
+[[swi]]
+name = "OS_WriteC"
+number = 0x00
+params = [{ reg = 0, name = "ch", type = "u8" }]
+
+[[swi]]
+name = "OS_Write0"
+number = 0x02
+params = [{ reg = 0, name = "s", type = "str" }]
+# R0 comes back pointing after the terminator
+results = [{ reg = 0, name = "end", type = "ptr<u8>" }]
+
+[[swi]]
+name = "OS_NewLine"
+number = 0x03
+
+[[swi]]
+name = "OS_ReadC"
+number = 0x04
+results = [{ reg = 0, name = "ch", type = "u8" }]
+# carry set: Escape was pressed (Kernel/s/Kernel, notes A 1.3)
+flags_out = [{ flag = "c", name = "escape" }]
+
+# All its reasons in runtime/module.c: incarnations, the RMA claimed as
+# the kernel claims it, ROM modules killed and started again, entered as
+# the application.  Loading from files or memory would run ARM code:
+# refused.
+[[swi]]
+name = "OS_Module"
+number = 0x1E
+raw = true
+reads = [0, 1, 2, 3, 4, 5]
+writes = [1, 2, 3, 4, 5, 6]
+
+[[swi]]
+name = "OS_GenerateError"
+number = 0x2B
+# It succeeds by failing: the x form returns the block it was given.
+params = [{ reg = 0, name = "error", type = "ptr<os_error>", const = true }]
+
+# Interrupts on and off: under ROSGD, background work allowed and deferred,
+# as a nesting count (runtime/background.c).
+[[swi]]
+name = "OS_IntOn"
+number = 0x13
+
+[[swi]]
+name = "OS_IntOff"
+number = 0x14
+
+# The ticker events (runtime/ticker.c): code called with R12 after cs + 1
+# centiseconds, once or every cs + 1.  Kernel/s/TickEvents.
+[[swi]]
+name = "OS_CallAfter"
+number = 0x3B
+params = [
+  { reg = 0, name = "cs", type = "u32" },
+  { reg = 1, name = "code", type = "code" },
+  { reg = 2, name = "r12", type = "addr" },
+]
+
+[[swi]]
+name = "OS_CallEvery"
+number = 0x3C
+params = [
+  { reg = 0, name = "cs", type = "u32" },
+  { reg = 1, name = "code", type = "code" },
+  { reg = 2, name = "r12", type = "addr" },
+]
+
+[[swi]]
+name = "OS_RemoveTickerEvent"
+number = 0x3D
+params = [
+  { reg = 0, name = "code", type = "code" },
+  { reg = 1, name = "r12", type = "addr" },
+]
+
+[[swi]]
+name = "OS_ReadMonotonicTime"
+number = 0x42
+results = [{ reg = 0, name = "cs", type = "u32" }]
+
+# The kernel's heap sort and CRC, register for register (runtime/heapsort.c):
+# a sort's comparison may be a procedure of the caller's, called with R0,
+# R1 and R12.
+[[swi]]
+name = "OS_HeapSort"
+number = 0x4F
+raw = true
+
+[[swi]]
+name = "OS_HeapSort32"
+number = 0x7F
+raw = true
+
+[[swi]]
+name = "OS_CRC"
+number = 0x5B
+raw = true
+
+# MEMC1's control register, kept as a soft copy (runtime/vdu/palette.c):
+# R0 new bits, R1 the mask; R0 out the old value.  Bit 10, video DMA,
+# blanks the screen through GraphicsV.  ChangeFSI's front end reads it.
+[[swi]]
+name = "OS_UpdateMEMC"
+number = 0x1A
+raw = true
+
+# The page size and how many pages of RAM (runtime/os_native.c): the
+# legacy call (OS_Memory is RISC OS 3.5's); the Wimp sizes its slots in
+# pages from it.
+[[swi]]
+name = "OS_ReadMemMapInfo"
+number = 0x51
+results = [
+  { reg = 0, name = "page_size", type = "u32" },
+  { reg = 1, name = "pages", type = "u32" },
+]
+
+[[swi]]
+name = "OS_WriteN"
+number = 0x46
+params = [
+  { reg = 0, name = "s", type = "ptr<u8>", const = true },
+  { reg = 1, name = "n", type = "u32" },
+]
+
+# ---- hook chains: vectors, events, callbacks, services -------------------
+# (Kernel/s/ArthurSWIs and NewIRQs; the runtime's vector.c and module.c)
+
+[[swi]]
+name = "OS_Claim"
+number = 0x1F
+params = [
+  { reg = 0, name = "vector", type = "u32" },
+  { reg = 1, name = "code", type = "code" },
+  { reg = 2, name = "r12", type = "addr" },
+]
+
+[[swi]]
+name = "OS_Release"
+number = 0x20
+params = [
+  { reg = 0, name = "vector", type = "u32" },
+  { reg = 1, name = "code", type = "code" },
+  { reg = 2, name = "r12", type = "addr" },
+]
+
+# R0 = the event, R1... its parameters; C clear if EventV was called.
+[[swi]]
+name = "OS_GenerateEvent"
+number = 0x22
+raw = true
+
+# R1 = the service, the rest its parameters; R1 = 0 on return if claimed.
+[[swi]]
+name = "OS_ServiceCall"
+number = 0x30
+raw = true
+
+# R9 = the vector, R0-R8 and the flags as that vector defines them.
+[[swi]]
+name = "OS_CallAVector"
+number = 0x34
+raw = true
+
+[[swi]]
+name = "OS_AddToVector"
+number = 0x47
+params = [
+  { reg = 0, name = "vector", type = "u32" },
+  { reg = 1, name = "code", type = "code" },
+  { reg = 2, name = "r12", type = "addr" },
+]
+
+[[swi]]
+name = "OS_AddCallBack"
+number = 0x54
+params = [
+  { reg = 0, name = "code", type = "code" },
+  { reg = 1, name = "r12", type = "addr" },
+]
+
+[[swi]]
+name = "OS_RemoveCallBack"
+number = 0x5F
+params = [
+  { reg = 0, name = "code", type = "code" },
+  { reg = 1, name = "r12", type = "addr" },
+]
+
+# ---- planned: defined, not implemented yet ----------------------------------
+#
+# What compiled ObjAsm calls most.  The
+# compiler keeps registers in C locals across a SWI whose registers it knows,
+# so each gives `reads` and `writes`: every register the SWI may read or
+# write, for any reason, from the PRMs and the kernel's sources, widened
+# where a reason is in doubt -- a register too many costs a store or a load,
+# one too few is a bug.  Registers not in `writes` are preserved, as RISC OS
+# documents; R0 may always come back as an error.
+
+# Through CLIV, whose default owner is runtime/oscli.c.  R0-R2 preserved.
+[[swi]]
+name = "OS_CLI"
+number = 0x05
+raw = true
+reads = [0]
+writes = []
+
+[[swi]]
+name = "OS_Byte"
+number = 0x06
+raw = true
+reads = [0, 1, 2]
+writes = [1, 2]
+
+# The results go into the block at R1.  Both through their vectors, ByteV
+# and WordV, whose default owner is runtime/osbyte.c.
+[[swi]]
+name = "OS_Word"
+number = 0x07
+raw = true
+reads = [0, 1]
+writes = []
+
+# The file SWIs go through their vectors -- FileV, ArgsV, BGetV, BPutV,
+# GBPBV, FindV, FSCV -- whose owner is FileSwitch (modules/fileswitch);
+# without it, each is "No selected filing system".
+[[swi]]
+name = "OS_File"
+number = 0x08
+raw = true
+reads = [0, 1, 2, 3, 4, 5]
+writes = [0, 1, 2, 3, 4, 5, 6]
+
+[[swi]]
+name = "OS_Args"
+number = 0x09
+raw = true
+reads = [0, 1, 2, 5]
+writes = [0, 1, 2, 5]
+
+[[swi]]
+name = "OS_BGet"
+number = 0x0A
+raw = true
+reads = [1]
+writes = [0]
+
+[[swi]]
+name = "OS_BPut"
+number = 0x0B
+raw = true
+reads = [0, 1]
+writes = []
+
+[[swi]]
+name = "OS_GBPB"
+number = 0x0C
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6]
+writes = [1, 2, 3, 4]
+
+[[swi]]
+name = "OS_Find"
+number = 0x0D
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+# Through ReadLineV (runtime/streams.c): R0 the buffer, its top two bits
+# flags; R1 the length less the CR; R2-R3 the characters kept; R4 the echo
+# byte.  R1 comes back the length, C set if Escape ended it.
+[[swi]]
+name = "OS_ReadLine"
+number = 0x0E
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = [0, 1]
+
+# OS_ReadLine with its flags in R4, and all 32 bits of R0 the buffer.
+[[swi]]
+name = "OS_ReadLine32"
+number = 0x7D
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = [0, 1]
+
+# R0 the new input handle, R1 the output's (0 none, >= &100 unchanged); the
+# old ones back (runtime/streams.c).
+[[swi]]
+name = "OS_ChangeRedirection"
+number = 0x5E
+raw = true
+reads = [0, 1]
+writes = [0, 1]
+
+# It does not return: to the program's exit handler (runtime/environment.c).
+[[swi]]
+name = "OS_Exit"
+number = 0x11
+params = [
+  { reg = 0, name = "error", type = "ptr<os_error>", const = true, null_ok = true },
+  { reg = 1, name = "abex", type = "u32" },
+  { reg = 2, name = "rc", type = "u32" },
+]
+
+# The kernel's old-style CallBack: the Wimp's task switch (runtime/callback.c).
+[[swi]]
+name = "OS_SetCallBack"
+number = 0x1B
+raw = true
+
+[[swi]]
+name = "OS_Mouse"
+number = 0x1C
+raw = true
+writes = [0, 1, 2, 3]
+
+# R0 = 0 read the key handler, 1 the keyboard id; a handler in ARM code is
+# refused (runtime/keyboard.c).
+[[swi]]
+name = "OS_InstallKeyHandler"
+number = 0x3E
+raw = true
+reads = [0]
+writes = [0]
+
+# R0 = 0 read the pointer type, 1 set it (R1), 2 read the scroll wheels.
+[[swi]]
+name = "OS_Pointer"
+number = 0x64
+raw = true
+reads = [0, 1]
+writes = [0, 1]
+
+# The kernel's heaps, in its format and with its algorithms: runtime/heap.c.
+# 0 initialise, 1 describe, 2 get, 3 free, 4 extend block, 5 extend heap,
+# 6 read block size, 7 get aligned, 8 get skew-aligned.
+[[swi]]
+name = "OS_Heap"
+number = 0x1D
+raw = true
+reads = [0, 1, 2, 3, 4, 5]
+writes = [2, 3]
+
+# Flags in R0's top bits: 31 the terminator must be a control character or
+# space, 30 the value at most &FF, 29 at most R2 (R3:R2 with 28), 28 64-bit
+# -- only with R4 = "WIDE", which comes back as the flags supported.  The
+# base in the rest, or bits 0-7 with "WIDE".  runtime/convert.c.
+[[swi]]
+name = "OS_ReadUnsigned"
+number = 0x21
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = [1, 2, 3, 4]
+
+# A signed word in decimal, no terminator; R2 the characters.
+[[swi]]
+name = "OS_BinaryToDecimal"
+number = 0x28
+raw = true
+reads = [0, 1, 2]
+writes = [2]
+
+# The system variables and GSTrans: runtime/sysvars.c, from the kernel's
+# Arthur2.  R3 is a context: 0, or the name a previous call returned, to
+# go on after it.  OS_ReadVarVal's R4 = 3 asks for the value expanded;
+# R2 < 0 asks for its length, as NOT R2 with the overflow error.
+[[swi]]
+name = "OS_ReadVarVal"
+number = 0x23
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = [2, 3, 4]
+
+# R2 < 0 deletes.  R4: 0 string (GSTransed), 1 number, 2 macro, 3
+# expression, 4 literal string, 16 code.  A code variable's routine may
+# corrupt R10-R12.
+[[swi]]
+name = "OS_SetVarVal"
+number = 0x24
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = [3, 4, 10, 11, 12]
+
+# Z out: the string is empty.
+[[swi]]
+name = "OS_GSInit"
+number = 0x25
+raw = true
+reads = [0, 2]
+writes = [0, 1, 2]
+
+# C out: the end, R1 the terminator.
+[[swi]]
+name = "OS_GSRead"
+number = 0x26
+raw = true
+reads = [0, 2]
+writes = [0, 1, 2]
+
+# C out: the buffer overflowed.  R2 the characters, the terminator stored
+# after them but not counted.
+[[swi]]
+name = "OS_GSTrans"
+number = 0x27
+raw = true
+reads = [0, 1, 2]
+writes = [0, 2]
+
+[[swi]]
+name = "OS_FSControl"
+number = 0x29
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+writes = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+
+# Application memory blocks, the Wimp's task slots (runtime/amb.c).
+[[swi]]
+name = "OS_AMBControl"
+number = 0x70
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = [1, 2, 3]
+
+[[swi]]
+name = "OS_ChangeDynamicArea"
+number = 0x2A
+raw = true
+reads = [0, 1]
+writes = [1]
+
+[[swi]]
+name = "OS_ReadEscapeState"
+number = 0x2C
+flags_out = [{ flag = "c", name = "escape" }]
+
+# The program's environment (runtime/environment.c): OS_GetEnv's R0 the
+# command line, R1 the RAM limit, R2 -> the five-byte time it started;
+# OS_WriteEnv sets the first and the last; OS_EnterOS enters SVC mode;
+# OS_UpCall through UpCallV, then the UpCall handler.
+[[swi]]
+name = "OS_GetEnv"
+number = 0x10
+raw = true
+reads = []
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_EnterOS"
+number = 0x16
+raw = true
+reads = []
+writes = []
+
+[[swi]]
+name = "OS_UpCall"
+number = 0x33
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+writes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+# R0 the text, R1 the dictionary (0 the kernel's), R2 the string for token
+# 0: words wrapped to the window (runtime/pretty.c).
+[[swi]]
+name = "OS_PrettyPrint"
+number = 0x44
+raw = true
+reads = [0, 1, 2]
+writes = []
+
+[[swi]]
+name = "OS_WriteEnv"
+number = 0x48
+raw = true
+reads = [0, 1]
+writes = []
+
+# Out: R1 = 0 and R2 the integer, or R1 the buffer and R2 the string's
+# length.  runtime/expr.c.
+[[swi]]
+name = "OS_EvaluateExpression"
+number = 0x2D
+raw = true
+reads = [0, 1, 2]
+writes = [1, 2]
+
+[[swi]]
+name = "OS_SpriteOp"
+number = 0x2E
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+# The VDU drivers' (runtime/vdu): R0 the colour, R1 16, 24 or 25; R2 and
+# R3 the two flash states.
+[[swi]]
+name = "OS_ReadPalette"
+number = 0x2F
+raw = true
+reads = [0, 1]
+writes = [2, 3]
+
+# The values go into the block at R1.
+[[swi]]
+name = "OS_ReadVduVariables"
+number = 0x31
+raw = true
+reads = [0, 1]
+writes = []
+
+# R0 the mode (-1 the current one), R1 the variable; R2 its value, C set
+# if either is not known.
+[[swi]]
+name = "OS_ReadModeVariable"
+number = 0x35
+raw = true
+reads = [0, 1]
+writes = [2]
+
+[[swi]]
+name = "OS_RemoveCursors"
+number = 0x36
+raw = true
+reads = []
+writes = []
+
+[[swi]]
+name = "OS_RestoreCursors"
+number = 0x37
+raw = true
+reads = []
+writes = []
+
+# R0 = -1 read, 0 disable, 1 enable, 2 reset the box; out R0 the old
+# state, R1 -> the five words.
+[[swi]]
+name = "OS_ChangedBox"
+number = 0x5A
+raw = true
+reads = [0]
+writes = [0, 1]
+
+# R0 the number, R1 -> buffer, R2 its size; out R2 the length written.
+[[swi]]
+name = "OS_SWINumberToString"
+number = 0x38
+raw = true
+reads = [0, 1, 2]
+writes = [0, 2]
+
+# R1 -> the name; out R0 the number.
+[[swi]]
+name = "OS_SWINumberFromString"
+number = 0x39
+raw = true
+reads = [1]
+writes = [0]
+
+# [R0, R1) wholly accessible (the slot, the heaps, the ROM, zero page,
+# dynamic areas) or screen memory, else Service_ValidateAddress: C clear if
+# so (runtime/heap.c).
+[[swi]]
+name = "OS_ValidateAddress"
+number = 0x3A
+params = [
+  { reg = 0, name = "start", type = "addr" },
+  { reg = 1, name = "end", type = "addr" },
+]
+flags_out = [{ flag = "c", name = "invalid" }]
+
+# R0 the handler, R1-R3 its code, R12 and buffer (0: leave); the old ones
+# back in R1-R3.  Through ChangeEnvironmentV (runtime/environment.c).
+[[swi]]
+name = "OS_ChangeEnvironment"
+number = 0x40
+raw = true
+reads = [0, 1, 2, 3]
+writes = [1, 2, 3]
+
+# R0 the arguments, R1 and R2 the buffer, R3 and R4 the text with %0-%9
+# and %*n; out, R2 the characters.  OS_SubstituteArgs32's R5 bit 31: do not
+# append the arguments not used.  runtime/oscli.c.
+[[swi]]
+name = "OS_SubstituteArgs"
+number = 0x43
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = [2]
+
+[[swi]]
+name = "OS_SubstituteArgs32"
+number = 0x7E
+raw = true
+reads = [0, 1, 2, 3, 4, 5]
+writes = [2]
+
+# It corrupts R0-R2.
+# R0 a mode: preserved, C clear, if it can be selected; else C set, R0 -1.
+[[swi]]
+name = "OS_CheckModeValid"
+number = 0x3F
+raw = true
+reads = [0]
+writes = [0]
+
+# The VDU drivers' PLOT (runtime/vdu/plot.c): R0 the plot code, R1 and R2
+# the point, as VDU 25 would give them.
+[[swi]]
+name = "OS_Plot"
+number = 0x45
+raw = true
+reads = [0, 1, 2]
+writes = []
+
+# R0, R1 a point, external; R2 its colour, R3 its tint, R4 -1 if it is
+# outside the graphics window.
+[[swi]]
+name = "OS_ReadPoint"
+number = 0x32
+raw = true
+reads = [0, 1]
+writes = [2, 3, 4]
+
+# R0 the ECF origin's x, R1 its y, external.
+[[swi]]
+name = "OS_SetECFOrigin"
+number = 0x56
+raw = true
+reads = [0, 1]
+writes = []
+
+# R0 flags (action, background, pattern, text, read), R1 a colour number or
+# a pattern block.
+[[swi]]
+name = "OS_SetColour"
+number = 0x61
+raw = true
+reads = [0, 1]
+writes = [0, 1]
+
+# R0 the keys, R1 the command line, R2 and R3 the output buffer; out, a
+# word per key at R2, and R3 the bytes left.  runtime/readargs.c.
+[[swi]]
+name = "OS_ReadArgs"
+number = 0x49
+raw = true
+reads = [0, 1, 2, 3]
+writes = [3]
+
+[[swi]]
+name = "OS_ReadDefaultHandler"
+number = 0x55
+params = [{ reg = 0, name = "handler", type = "u32" }]
+results = [
+  { reg = 1, name = "code", type = "code" },
+  { reg = 2, name = "r12", type = "addr" },
+  { reg = 3, name = "buffer", type = "addr" },
+]
+
+[[swi]]
+name = "OS_SerialOp"
+number = 0x57
+impl = "planned"
+kind = "multiplexer"
+selector = 0
+reads = [0, 1, 2]
+writes = [1, 2]
+
+# Reason 2 returns five words.
+# OS_ScreenMode (runtime/vdu/modes.c): 0 selects the mode in R1 (a number
+# or a mode selector), 1 reads the current one into R1, 2 enumerates the
+# display's own mode list (platform.h) as ScreenModes enumerates its
+# monitor description's -- format 0 and format 1 descriptors, R2 the
+# index, R6 the block or 0 to count, R7 the room, R1 0 when the block runs
+# short; 13 reads a mode string into a selector and 14 writes one, the
+# kernel's tokens; 4 answers R1 1 and R2 1 (no screen cache), and 5 and 6
+# (clean the screen cache) do nothing.  The kernel's unknown reasons (7-10,
+# 12, 16-63, 69 up) are its error; the rest -- 3, 11, 15, 64-68 -- are
+# still to come.  reads and writes cover every reason.
+[[swi]]
+name = "OS_ScreenMode"
+number = 0x65
+raw = true
+reads = [0, 1, 2, 3, 6, 7]
+writes = [1, 2, 6, 7]
+
+# OS_Reset (runtime/sysinfo.c): Service_PreReset, then a restart -- or with
+# R0 '&OFF' a power off.  It does not return.
+[[swi]]
+name = "OS_Reset"
+number = 0x6A
+raw = true
+reads = [0]
+writes = []
+
+[[swi]]
+name = "OS_ReadSysInfo"
+number = 0x58
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2, 3, 4]
+
+# OS_PlatformFeatures (runtime/sysinfo.c): the kernel's reasons, answered
+# for the box -- 0 the code features, 32 the processor vectors, 33 the
+# host's caches, 34 the ARM instruction features, 35 the exclusive
+# monitor's clear routine; the rest the kernel's "Unknown ... reason code".
+[[swi]]
+name = "OS_PlatformFeatures"
+number = 0x6D
+raw = true
+reads = [0, 1]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+# OS_Hardware (runtime/hardware.c): the kernel's reasons -- 0 CallHAL to
+# the entries the box answers, 1 LookupRoutine (no routines: "not
+# available"), 2-5 the device table, Service_Hardware -- the rest the
+# kernel's "Bad OS_Hardware reason code".
+[[swi]]
+name = "OS_Hardware"
+number = 0x7A
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "OS_Confirm"
+number = 0x59
+impl = "planned"
+results = [{ reg = 0, name = "key", type = "u8" }]
+flags_out = [{ flag = "c", name = "escape" }]
+
+[[swi]]
+name = "OS_ReadDynamicArea"
+number = 0x5C
+raw = true
+reads = [0]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_PrintChar"
+number = 0x5D
+impl = "planned"
+params = [{ reg = 0, name = "ch", type = "u8" }]
+
+# OS_DynamicArea (runtime/dynarea.c): 0 create, 1 remove, 2 read, 3
+# enumerate, 4 renumber, 5 and 27 the free memory, 6 what changed, 7 and 28
+# enumerate with information, 8 the clamps, 24 read (PMP_GetInfo).  The
+# kernel's unknown reasons are its "Bad reason code"; the rest, still to
+# come, "not implemented" (&1E7).
+[[swi]]
+name = "OS_DynamicArea"
+number = 0x66
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+writes = [1, 2, 3, 4, 5, 6, 7, 8]
+
+
+# CMOS, simulated in a file (runtime/cmos.c): R0 0 the size, 1 read a byte,
+# 2 write one, 3 read a block, 4 write one.
+[[swi]]
+name = "OS_NVMemory"
+number = 0x76
+raw = true
+reads = [0, 1, 2, 3]
+writes = [1, 2]
+
+[[swi]]
+name = "OS_SynchroniseCodeAreas"
+number = 0x6E
+raw = true
+reads = [0, 1, 2]
+writes = []
+
+# OS_Memory (runtime/dynarea.c): reason 8, the amounts of memory, and 16,
+# MemoryAreaInfo; the kernel's unknown reasons are its "Bad reason code";
+# the rest, still to come, "not implemented" (&1E7).  The reason is R0's
+# low byte, its flags the rest.
+[[swi]]
+name = "OS_Memory"
+number = 0x68
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5]
+
+# The conversions: R0 the value, R1 the buffer, R2 its size; out, R0 the
+# buffer, R1 the terminator, R2 the space left.  All one engine,
+# OS_ConvertVariform (runtime/convert.c).
+
+[[swi]]
+name = "OS_ConvertHex1"
+number = 0xD0
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertHex2"
+number = 0xD1
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertHex4"
+number = 0xD2
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertHex6"
+number = 0xD3
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertHex8"
+number = 0xD4
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertCardinal1"
+number = 0xD5
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertCardinal2"
+number = 0xD6
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertCardinal3"
+number = 0xD7
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertCardinal4"
+number = 0xD8
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertInteger1"
+number = 0xD9
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertInteger2"
+number = 0xDA
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertInteger3"
+number = 0xDB
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertInteger4"
+number = 0xDC
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertBinary1"
+number = 0xDD
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertBinary2"
+number = 0xDE
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertBinary3"
+number = 0xDF
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertBinary4"
+number = 0xE0
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertSpacedCardinal1"
+number = 0xE1
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertSpacedCardinal2"
+number = 0xE2
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertSpacedCardinal3"
+number = 0xE3
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertSpacedCardinal4"
+number = 0xE4
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertSpacedInteger1"
+number = 0xE5
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertSpacedInteger2"
+number = 0xE6
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertSpacedInteger3"
+number = 0xE7
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertSpacedInteger4"
+number = 0xE8
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertFixedNetStation"
+number = 0xE9
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+# The dates, in the UK territory's formats until there is a Territory
+# module: R0 -> five bytes of UTC centiseconds, R1 buffer, R2 size, and for
+# OS_ConvertDateAndTime R3 the format (runtime/convert.c).
+[[swi]]
+name = "OS_ConvertStandardDateAndTime"
+number = 0xC0
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertDateAndTime"
+number = 0xC1
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertNetStation"
+number = 0xEA
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertFixedFileSize"
+number = 0xEB
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+[[swi]]
+name = "OS_ConvertFileSize"
+number = 0xEC
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1, 2]
+
+# R0 -> the value, R3 its size (nybbles for hex), R4 the type; a negative
+# R2 counts: the overflow error, and R2 = NOT the length needed.
+[[swi]]
+name = "OS_ConvertVariform"
+number = 0xED
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = [0, 1, 2]
+
+# OS_WriteI+ch writes ch: 256 numbers.
+[[swi]]
+name = "OS_WriteI"
+number = 0x100
+count = 256
+impl = "planned"
+reads = []
+writes = []

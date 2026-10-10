@@ -1,0 +1,310 @@
+# common_a64.txt, as LLVM MC encodes it (gen_common.py, Xcode's clang)
+ret	c0035fd6
+ret x1	20005fd6
+br x16	00021fd6
+blr x3	60003fd6
+nop	1f2003d5
+svc #0	010000d4
+stp x29, x30, [sp, #-16]!	fd7bbfa9
+ldp x29, x30, [sp], #16	fd7bc1a8
+mov x29, sp	fd030091
+mov x0, #42	400580d2
+mov w0, #-1	00008012
+mov x1, x0	e10300aa
+add x0, x0, #1	00040091
+sub sp, sp, #32	ff8300d1
+add x0, x1, #4096	20044091
+add x0, x1, #-8	202000d1
+sub w2, w3, #-1	62040011
+cmp w0, #10	1f280071
+cmp x0, #-1	1f0400b1
+ldr w1, [x0, #4]	010440b9
+str w1, [x0]	010000b9
+ldr x2, [x0, #8]!	028c40f8
+ldrb w3, [x1], #1	23144038
+strb w3, [x1, #255]	23fc0339
+movk x0, #0x1234, lsl #16	8046a2f2
+and w0, w1, #0xff	201c0012
+and w0, w1, #-256	205c1812
+orr x0, x0, #0x8000000000000000	000041b2
+eor w5, w6, w7	c500074a
+lsl x0, x1, #3	20f07dd3
+lsr w0, w1, #31	207c1f53
+asr x0, x1, #1	20fc4193
+mul w0, w1, w2	207c021b
+udiv x0, x1, x2	2008c29a
+csel w0, w1, w2, ne	2010821a
+cset w0, eq	e0179f1a
+cbnz w0, #0	00000035
+tst w0, #1	1f000072
+mvn w0, w1	e003212a
+neg x0, x1	e00301cb
+sxtw x0, w1	207c4093
+fmov d0, #1.5	00106f1e
+fadd d0, d1, d2	2028621e
+fmul s0, s1, s2	2008221e
+scvtf d0, w1	2000621e
+fcvtzs w0, d1	2000781e
+ldr d0, [x0, #16]	000840fd
+str s1, [sp, #4]	e10700bd
+dmb ish	bf3b03d5
+isb	df3f03d5
+ldr x0, [x1, x2]	206862f8
+ldr x0, [x1, x2, lsl #3]	207862f8
+ldr w0, [x1, w2, sxtw #2]	20d862b8
+ldrh w0, [x1, #2]	20044079
+strh w0, [x1, #-2]!	20ec1f78
+ldrsb x0, [x1]	20008039
+ldrsh w0, [x1, #6]	200cc079
+ldrsw x0, [x1, #4]	200480b9
+ldur x0, [x1, #-8]	20805ff8
+stur w0, [x1, #3]	203000b8
+ldp w0, w1, [x2, #8]	40044129
+stp x0, x1, [sp, #-32]!	e007bea9
+ldp d0, d1, [x0]	0004406d
+ldr q0, [x1, #32]	2008c03d
+str q1, [x1], #16	2104813c
+add x0, x1, x2	2000028b
+add x0, x1, x2, lsl #2	2008028b
+add x0, sp, x1	e063218b
+add sp, sp, #16	ff430091
+adds w0, w1, w2	2000022b
+subs x0, x1, #1	200400f1
+sub x0, x1, w2, uxtw	204022cb
+cmp x0, x1	1f0001eb
+cmn w0, #5	1f140031
+orr w0, w1, w2, lsl #4	2010022a
+bic x0, x1, x2	2000228a
+eon w0, w1, w2	2000224a
+ands x0, x1, #0xff00	201c78f2
+ror w0, w1, #3	200c8113
+ubfx x0, x1, #4, #8	202c44d3
+sbfx w0, w1, #0, #16	203c0013
+bfi x0, x1, #8, #4	200c78b3
+uxtb w0, w1	201c0053
+sxth x0, w1	203c4093
+madd x0, x1, x2, x3	200c029b
+msub w0, w1, w2, w3	208c021b
+smull x0, w1, w2	207c229b
+umulh x0, x1, x2	207cc29b
+sdiv w0, w1, w2	200cc21a
+clz x0, x1	2010c0da
+rbit w0, w1	2000c05a
+rev x0, x1	200cc0da
+csinc w0, w1, w2, lt	20b4821a
+cneg x0, x1, mi	205481da
+csetm x0, hs	e0339fda
+ccmp w0, #3, #0, ne	0018437a
+movn w0, #0	00008012
+movz x0, #0xffff, lsl #48	e0ffffd2
+mov x0, #0x10000	2000a0d2
+mov x0, #-2	20008092
+mov w0, #0x7fffffff	0000b012
+mov x0, #0xffffffff	e07f40b2
+fmov d0, x1	2000679e
+fmov w0, s1	2000261e
+fmov s0, #-2.0	0010301e
+fsub s0, s1, s2	2038221e
+fdiv d0, d1, d2	2018621e
+fsqrt d0, d1	20c0611e
+fabs s0, s1	20c0201e
+fneg d0, d1	2040611e
+fcmp d0, d1	0020611e
+fcmp s0, #0.0	0820201e
+fcsel d0, d1, d2, gt	20cc621e
+fcvt d0, s1	20c0221e
+fcvtzu x0, d1	2000799e
+ucvtf s0, x1	2000239e
+frintz d0, d1	20c0651e
+fmadd d0, d1, d2, d3	200c421f
+ldr s0, [x0, #4]	000440bd
+str d0, [x0, #8]	000400fd
+ldr d1, [x0, x1, lsl #3]	017861fc
+brk #1	200020d4
+hlt #0	000040d4
+wfi	7f2003d5
+yield	3f2003d5
+mrs x0, nzcv	00423bd5
+msr nzcv, x0	00421bd5
+dsb sy	9f3f03d5
+eret	e0039fd6
+add x0, x1, w2, uxtb	2000228b
+add x0, x1, w2, sxtw #2	20c8228b
+sub w0, w1, w2, uxth #1	2024224b
+adds x0, x1, x2, uxtx #3	206c22ab
+cmp x0, w1, uxtw	1f4021eb
+cmp sp, x1	ff6321eb
+sub sp, sp, x0	ff6320cb
+add w0, wsp, w1	e043210b
+mov w0, #0xff000000	00e0bf52
+mov w0, #-16777216	00e0bf52
+mov w1, #0x12340000	8146a252
+mov x0, #0xffff0000	e0ffbfd2
+mov x0, #-65536	e0ff9f92
+mov w0, #-2	20008012
+ext v0.16b, v1.16b, v2.16b, #3	2018026e
+ext v0.8b, v1.8b, v2.8b, #7	2038022e
+ext v3.16b, v4.16b, v5.16b, #15	8378056e
+shl v0.4s, v1.4s, #3	2054234f
+ushr v0.2d, v1.2d, #7	2004796f
+sshr v2.8h, v3.8h, #1	62041f4f
+movi v0.4s, #0x12	4006004f
+shl v1.16b, v2.16b, #7	41540f4f
+shl v0.2d, v1.2d, #63	20547f4f
+sli v0.8h, v1.8h, #4	2054146f
+ushr v0.4s, v1.4s, #32	2004206f
+ssra v0.2s, v1.2s, #5	20143b0f
+urshr v0.8b, v1.8b, #1	20240f2f
+sri v0.2d, v1.2d, #10	2044766f
+movi v0.16b, #0xff	e0e7074f
+movi v0.8b, #7	e0e4000f
+movi v0.8h, #0x12, lsl #8	40a6004f
+movi v0.4h, #3	6084000f
+movi v0.4s, #0x12, lsl #24	4066004f
+movi v0.2s, #0x40, msl #16	00d4020f
+movi v0.2d, #0xff00ff00ff00ff00	40e5056f
+mvni v0.4s, #0x5	a004006f
+mvni v0.8h, #0x5, lsl #8	a0a4006f
+orr v0.4s, #0x1	2014004f
+bic v0.8h, #0x80, lsl #8	00b4046f
+ldxr x0, [x1]	207c5fc8
+ldxr w0, [x1]	207c5f88
+ldaxr x2, [x3]	62fc5fc8
+stxr w4, x5, [x6]	c57c04c8
+stlxr w4, w5, [x6]	c5fc0488
+ldxp x0, x1, [x2]	40047fc8
+stxp w3, x0, x1, [x2]	400423c8
+ldar x0, [x1]	20fcdfc8
+ldar w0, [x1]	20fcdf88
+stlr x0, [x1]	20fc9fc8
+stlr w0, [x1]	20fc9f88
+stlr w7, [sp]	e7ff9f88
+ldarb w0, [x1]	20fcdf08
+stlrb w0, [x1]	20fc9f08
+ldarh w0, [x1]	20fcdf48
+stlrh w0, [x1]	20fc9f48
+stp d8, d9, [sp, #16]	e827016d
+ldp d8, d9, [sp, #16]	e827416d
+stp s0, s1, [x0]	0004002d
+ldp s0, s1, [x0, #8]	0004412d
+stp d0, d1, [sp, #-16]!	e007bf6d
+ldp d0, d1, [sp], #16	e007c16c
+stp w0, w1, [x2, #8]	40040129
+ldpsw x0, x1, [x2]	40044069
+ccmn w0, w1, #0, eq	0000413a
+ccmn x0, x1, #4, ne	041041ba
+ccmn w0, #5, #2, lt	02b8453a
+ccmp x0, x1, #0, eq	000041fa
+ccmp w0, #31, #15, hi	0f885f7a
+umov w0, v1.b[3]	203c070e
+umov w0, v1.h[7]	203c1e0e
+umov w0, v1.s[3]	203c1c0e
+umov x0, v1.d[1]	203c184e
+smov w0, v1.b[3]	202c070e
+smov w0, v1.h[3]	202c0e0e
+smov x0, v1.b[15]	202c1f4e
+smov x0, v1.h[1]	202c064e
+smov x0, v1.s[2]	202c144e
+dup v0.16b, v1.b[15]	20041f4e
+dup v0.8b, v1.b[3]	2004070e
+dup v0.4h, v1.h[2]	20040a0e
+dup v0.8h, v1.h[7]	20041e4e
+dup v0.2s, v1.s[1]	20040c0e
+dup v0.4s, v1.s[3]	20041c4e
+dup v0.2d, v1.d[1]	2004184e
+dup v0.4s, w1	200c044e
+dup v0.2d, x1	200c084e
+dup v0.16b, w3	600c014e
+ins v0.b[5], v1.b[9]	204c0b6e
+ins v0.h[3], v1.h[1]	20140e6e
+ins v0.s[3], v1.s[2]	20441c6e
+ins v0.d[1], v1.d[0]	2004186e
+ins v0.s[2], w1	201c144e
+ins v0.d[0], x1	201c084e
+ins v0.b[15], w1	201c1f4e
+mov v0.s[1], v1.s[3]	20640c6e
+mov v0.d[1], x2	401c184e
+mov v0.h[5], w2	401c164e
+mov w0, v1.s[2]	203c140e
+mov x0, v1.d[1]	203c184e
+mul v0.4s, v1.4s, v2.s[3]	2088a24f
+mul v0.4s, v1.4s, v17.s[1]	2080b14f
+mul v0.8h, v1.8h, v2.h[5]	2088524f
+mul v0.8h, v1.8h, v15.h[7]	20887f4f
+mul v0.4h, v1.4h, v2.h[1]	2080520f
+mul v0.2s, v1.2s, v3.s[2]	2088830f
+mla v0.4s, v1.4s, v2.s[2]	2008826f
+mls v0.8h, v1.8h, v3.h[6]	2048636f
+sqdmulh v0.4s, v1.4s, v2.s[3]	20c8a24f
+sqrdmulh v0.8h, v1.8h, v2.h[4]	20d8424f
+fmul v0.4s, v1.4s, v2.s[3]	2098a24f
+fmul v0.2d, v1.2d, v31.d[1]	2098df4f
+fmul v0.2s, v1.2s, v2.s[1]	2090a20f
+fmla v0.4s, v1.4s, v2.s[1]	2010a24f
+fmla v0.2d, v1.2d, v2.d[1]	2018c24f
+fmla v0.2s, v1.2s, v20.s[3]	2018b40f
+fmls v0.4s, v1.4s, v2.s[2]	2058824f
+fmulx v0.4s, v1.4s, v2.s[3]	2098a26f
+fmulx v0.2d, v1.2d, v2.d[0]	2090c26f
+smull v0.4s, v1.4h, v2.h[3]	20a0720f
+umull v0.4s, v1.4h, v2.h[7]	20a8722f
+smull v0.2d, v1.2s, v2.s[3]	20a8a20f
+smull2 v0.4s, v1.8h, v2.h[3]	20a0724f
+smlal v0.4s, v1.4h, v2.h[3]	2020720f
+umlal v0.4s, v1.4h, v2.h[6]	2028622f
+umlal v0.2d, v1.2s, v2.s[1]	2020a22f
+fmul s0, s1, v2.s[3]	2098a25f
+fmla s0, s1, v2.s[1]	2010a25f
+fmul d0, d1, v2.d[1]	2098c25f
+mov w0, #0xffff0000	e0ffbf52
+mov w4, #-65536	e4ffbf52
+mov x0, #0xffffffff0000	e07f70b2
+mov x0, #0xffff00000000	e0ffdfd2
+mov x0, #0xffffffffffff0000	e0ff9f92
+mov w0, #0x10000	2000a052
+mov w0, #0xffff	e0ff9f52
+mov x0, #-1	00008092
+mov w0, #0x80000000	0000b052
+mov x0, #0x1234000000000000	8046e2d2
+mov x0, #0xffff000000000000	e0ffffd2
+mov w0, #0xfffffffe	20008012
+ldapr x0, [x1]	20c0bff8
+ldapr w0, [x1]	20c0bfb8
+frintx s0, s1	2040271e
+frintx d3, d9	2341671e
+frinta d0, d1	2040661e
+frinti s4, s5	a4c0271e
+frintn d0, d7	e040641e
+fcvt s0, d1	2040621e
+fcvt h0, s1	20c0231e
+fcvt s0, h1	2040e21e
+fcvtzs w0, s1	2000381e
+fcvtzs x0, d1	2000789e
+fcvtzu w3, d4	8300791e
+fcvtns x0, s1	2000209e
+fcvtms w0, d1	2000701e
+fcvtps x0, d1	2000689e
+fcvtas w0, s1	2000241e
+fcvtau x0, d1	2000659e
+fcvtmu w0, s1	2000311e
+fcvtpu w0, s1	2000291e
+fcvtnu x0, d1	2000619e
+scvtf s0, w1	2000221e
+scvtf d0, x1	2000629e
+ucvtf d3, w4	8300631e
+fmov s0, w1	2000271e
+fmov x0, d1	2000669e
+fmov d0, d1	2040601e
+fmov s0, #1.0	00102e1e
+fmov d0, #-2.5	0090701e
+fabs d0, d1	20c0601e
+fneg s0, s1	2040211e
+fcmp s0, s1	0020211e
+fcmp d0, #0.0	0820601e
+fcmpe d0, d1	1020611e
+fmsub s0, s1, s2, s3	208c021f
+fnmadd d0, d1, d2, d3	200c621f
+fnmsub d0, d1, d2, d3	208c621f
+fdiv s0, s1, s2	2018221e
+svc #0xffff	e1ff1fd4
+hlt #1	200040d4

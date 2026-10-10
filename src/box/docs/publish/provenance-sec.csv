@@ -1,0 +1,26 @@
+path,kind,source,licence,evidence
+modules/sshd/relay.c,own,,MIT,header describes new code over Linux/OpenSSH/ksmbd/libsmb2; no ROOL source cited
+modules/sshd/session.c,own,,MIT,header describes new code over Linux/OpenSSH/ksmbd/libsmb2; no ROOL source cited
+modules/sshd/sshd.c,own,,MIT,header describes new code over Linux/OpenSSH/ksmbd/libsmb2; no ROOL source cited
+modules/sshd/sshd.h,own,,MIT,header describes new code over Linux/OpenSSH/ksmbd/libsmb2; no ROOL source cited
+modules/smbserver/smbserver.c,own,,MIT,header describes new code over Linux/OpenSSH/ksmbd/libsmb2; no ROOL source cited
+modules/smbserver/smbserver.h,own,,MIT,header describes new code over Linux/OpenSSH/ksmbd/libsmb2; no ROOL source cited
+modules/pty/pty.c,own,,MIT,header describes new code over Linux/OpenSSH/ksmbd/libsmb2; no ROOL source cited
+modules/pty/pty.h,own,,MIT,header describes new code over Linux/OpenSSH/ksmbd/libsmb2; no ROOL source cited
+modules/pty/term.c,own,,MIT,header describes new code over Linux/OpenSSH/ksmbd/libsmb2; no ROOL source cited
+modules/unixbridge/unixbridge.c,own,,MIT,header describes new code over Linux/OpenSSH/ksmbd/libsmb2; no ROOL source cited
+modules/unixbridge/unixbridge.h,own,,MIT,header describes new code over Linux/OpenSSH/ksmbd/libsmb2; no ROOL source cited
+modules/lanmanfs/lanmanfs.c,own,,MIT,new SMB2/3 client over libsmb2; ROOL's LanManFS (SMB1) named only as the interface it replaces
+modules/lanmanfs/lanmanfs.h,own,,MIT,header describes new code over Linux/OpenSSH/ksmbd/libsmb2; no ROOL source cited
+modules/acornssl/acornssl.h,own,,MIT,one extern declaration
+modules/urlfetcher/urlfetcher.h,own,,MIT,one extern declaration
+modules/unixbridge/ubsys.h,generated,tools/unix_syscalls.py from linux-6.18.54 syscall_64.tbl,none added,generated file marked do not edit; call numbers only
+modules/urlfetcher/parseurl.c,ROOL,Networking/Fetchers/URL c.parseurl,Apache-2.0 (as existing header),"existing Acorn copyright and Apache block, ported note; left as is. Original not in local tree to confirm licence"
+modules/acornhttp/cookie.c,ROOL,Networking/Fetchers/HTTP c.cookie,Apache-2.0 (as existing header),"existing Acorn copyright and Apache block, ported note; left as is. Original not in local tree"
+modules/acornhttp/dates.c,ROOL,Networking/Fetchers/HTTP c.dates,Apache-2.0 (as existing header),existing Acorn header; left as is
+modules/acornhttp/dates.h,ROOL,Networking/Fetchers/HTTP h.dates,Apache-2.0 (as existing header),existing Acorn header (its comment says h.config); left as is
+modules/urlfetcher/parseurl.h,unclear,Networking/Fetchers/URL h.URLstruct,unknown,declares the original's URL union; no ROOL header; lead to decide
+modules/urlfetcher/urlfetcher.c,unclear,Networking/Fetchers/URL,unknown (ROOL Fetchers may be CDDL),"rewrite that cites the original's rules, its third-step search bug and its messages"
+modules/acornhttp/acornhttp.c,unclear,Networking/Fetchers/HTTP,unknown (ROOL Fetchers may be CDDL),rewrite over libcurl that cites start.c and keeps the original's SWI behaviour
+modules/acornhttp/acornhttp.h,unclear,"Networking/Fetchers/HTTP h.module, c.header",unknown,flag names copied from h.module
+modules/acornssl/acornssl.c,unclear,Networking/Fetchers/AcornSSL,unknown (ROOL AcornSSL source is CDDL),rewrite over OpenSSL that cites sslmod.c and the original's Messages

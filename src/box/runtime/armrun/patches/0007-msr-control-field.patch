@@ -1,0 +1,37 @@
+diff --git a/src/dynarmic/frontend/A32/translate/impl/status_register_access.cpp b/src/dynarmic/frontend/A32/translate/impl/status_register_access.cpp
+index 60110df8..43fbef91 100644
+--- a/src/dynarmic/frontend/A32/translate/impl/status_register_access.cpp
++++ b/src/dynarmic/frontend/A32/translate/impl/status_register_access.cpp
+@@ -6,6 +6,7 @@
+ #include <mcl/bit/bit_field.hpp>
+ 
+ #include "dynarmic/frontend/A32/translate/impl/a32_translate_impl.h"
++#include "dynarmic/interface/A32/config.h"
+ 
+ namespace Dynarmic::A32 {
+ 
+@@ -37,6 +38,13 @@ bool TranslatorVisitor::arm_MSR_imm(Cond cond, unsigned mask, int rotate, Imm<8>
+         return true;
+     }
+ 
++    // ROSGD (runtime/armrun/patches/0007): a write to the control field (the
++    // mode, I, F) is the embedder's, which models the privileged modes the
++    // engine does not; upstream drops it, as user mode does
++    if (mcl::bit::get_bit<0>(mask)) {
++        return RaiseException(Exception::InterpretRequired);
++    }
++
+     const bool write_nzcvq = mcl::bit::get_bit<3>(mask);
+     const bool write_g = mcl::bit::get_bit<2>(mask);
+     const bool write_e = mcl::bit::get_bit<1>(mask);
+@@ -75,6 +83,10 @@ bool TranslatorVisitor::arm_MSR_reg(Cond cond, unsigned mask, Reg n) {
+         return true;
+     }
+ 
++    if (mcl::bit::get_bit<0>(mask)) {               // ROSGD (patches/0007), as above
++        return RaiseException(Exception::InterpretRequired);
++    }
++
+     const bool write_nzcvq = mcl::bit::get_bit<3>(mask);
+     const bool write_g = mcl::bit::get_bit<2>(mask);
+     const bool write_e = mcl::bit::get_bit<1>(mask);

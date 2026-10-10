@@ -1,0 +1,62 @@
+# PTY, a native module (modules/pty): runs a Linux program on a
+# pseudo-terminal and gives RISC OS non-blocking reads and writes to it, as
+# TaskWindow gives a task's output to its parent ("The network's
+# next layer": the SSH client).  RISC OS has no such module; its SWIs are
+# ROSGD's own, in the application range after CtxTest's and FPTest's.
+
+[module]
+name = "PTY"
+impl = "native"
+chunk = 0xC00C0
+
+# R0 flags (0), R1 the command line (control-terminated), R2 columns,
+# R3 rows -> R0 a handle
+[[swi]]
+name = "PTY_Open"
+number = 0xC00C0
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0]
+
+# R0 handle, R1 buffer, R2 its size -> R3 bytes read: 0 when there is
+# nothing yet, and nothing ever again once PTY_Status says it has ended
+[[swi]]
+name = "PTY_Read"
+number = 0xC00C1
+raw = true
+reads = [0, 1, 2]
+writes = [3]
+
+# R0 handle, R1 bytes, R2 how many -> R3 how many were taken
+[[swi]]
+name = "PTY_Write"
+number = 0xC00C2
+raw = true
+reads = [0, 1, 2]
+writes = [3]
+
+# R0 handle -> R1 0 running, 1 ended; R2 its exit status (128 + n if
+# signal n ended it); R3 bytes waiting to be read (at least)
+[[swi]]
+name = "PTY_Status"
+number = 0xC00C3
+raw = true
+reads = [0]
+writes = [1, 2, 3]
+
+# R0 handle, R2 columns, R3 rows
+[[swi]]
+name = "PTY_Resize"
+number = 0xC00C4
+raw = true
+reads = [0, 2, 3]
+writes = []
+
+# R0 handle: the program sent SIGHUP (as a terminal closing does), waited
+# for, and the handle freed -> R2 its exit status
+[[swi]]
+name = "PTY_Close"
+number = 0xC00C5
+raw = true
+reads = [0]
+writes = [2]

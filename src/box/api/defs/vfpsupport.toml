@@ -1,0 +1,95 @@
+# VFPSupport: VFP contexts and the elementary functions -- a native module
+# (modules/vfpsupport) over the runtime's per-task floating point.
+# Every SWI is register-level: raw.
+#
+# Names, numbers and registers are facts of RISC OS 5's interface
+# (HWSupport/VFPSupport); the comments are ours.
+
+[module]
+name = "VFPSupport"
+impl = "native"
+chunk = 0x58EC0
+
+# R0 flags, R1 registers wanted: R0 the context's size.
+[[swi]]
+name = "VFPSupport_CheckContext"
+number = 0x58EC0
+raw = true
+reads = [0, 1]
+writes = [0]
+
+# R0 flags, R1 registers, R2 the save area (0: VFPSupport's own), R3 the
+# FPSCR: R0 the context, R1 the one active before when it activates.
+[[swi]]
+name = "VFPSupport_CreateContext"
+number = 0x58EC1
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1]
+
+# R0 the context, R1 the one to activate if R0 was active: R0 the active one.
+[[swi]]
+name = "VFPSupport_DestroyContext"
+number = 0x58EC2
+raw = true
+reads = [0, 1]
+writes = [0]
+
+# R0 the context to activate, R1 flags: R0 the one active before.
+[[swi]]
+name = "VFPSupport_ChangeContext"
+number = 0x58EC3
+raw = true
+reads = [0, 1]
+writes = [0]
+
+[[swi]]
+name = "VFPSupport_ExamineContext"
+number = 0x58EC4
+raw = true
+reads = [0, 1]
+writes = [0, 1, 2, 3, 4]
+
+[[swi]]
+name = "VFPSupport_FastAPI"
+number = 0x58EC5
+raw = true
+reads = []
+writes = [0, 1, 2, 3, 4]
+
+[[swi]]
+name = "VFPSupport_ActiveContext"
+number = 0x58EC6
+raw = true
+reads = []
+writes = [0]
+
+[[swi]]
+name = "VFPSupport_Version"
+number = 0x58EC7
+raw = true
+reads = []
+writes = [0]
+
+[[swi]]
+name = "VFPSupport_Features"
+number = 0x58EC8
+raw = true
+reads = [0]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "VFPSupport_ExceptionDump"
+number = 0x58EC9
+raw = true
+reads = [0, 1]
+writes = [0, 1]
+
+# R0 0: R0 the number of functions, R1 the single-precision table, R2 the
+# double-precision one -- entries 4 bytes apart, called with BLX.
+[[swi]]
+name = "VFPSupport_ElementaryFunctions"
+number = 0x58ECA
+raw = true
+reads = [0]
+writes = [0, 1, 2]

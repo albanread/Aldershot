@@ -1,0 +1,24 @@
+; ColourPicker: RISC OS's own colour picker module (Apache 2.0 sources in
+; c/ and support/), an x32 module of the box through oslcr.  The SWI chunk,
+; the entry names and the services are the PRM ColourPicker chapter's.
+; (No apostrophes in these comments: cmhg -p runs the C preprocessor first.)
+title-string:           ColourPicker
+
+help-string:            ColourPicker 1.53
+
+date-string:            29 Sep 2026
+
+initialisation-code:    main_initialise
+
+finalisation-code:      main_terminate
+
+service-call-handler:   main_service 0x53 0x59 0x75
+
+swi-chunk-base-number:  0x47700
+
+swi-handler-code:       main_swi
+
+swi-decoding-table:     ColourPicker,
+                        RegisterModel, DeregisterModel, OpenDialogue,
+                        CloseDialogue, UpdateDialogue, ReadDialogue,
+                        SetColour, HelpReply, ModelSWI

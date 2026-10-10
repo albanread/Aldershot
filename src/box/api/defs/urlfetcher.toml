@@ -1,0 +1,94 @@
+# URL_Fetcher, as a native module (modules/urlfetcher): its SWIs are
+# register-level, raw, as RISC OS 5's URL 0.58 takes them (Docs/APISpec).
+# GetURL, Status, ReadData, Stop and Deregister pass the client's registers
+# to a protocol module's SWIs, so they may read and write any of R0-R9.
+# Offsets 10-31 are the original's NOPs: not known here, as there.
+
+[module]
+name = "URL_Fetcher"
+impl = "native"
+chunk = 0x83E00
+
+[[swi]]
+name = "URL_Register"
+number = 0x83E00
+raw = true
+reads = [0]
+writes = [0, 1]
+
+[[swi]]
+name = "URL_GetURL"
+number = 0x83E01
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+writes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+[[swi]]
+name = "URL_Status"
+number = 0x83E02
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+writes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+[[swi]]
+name = "URL_ReadData"
+number = 0x83E03
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+writes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+[[swi]]
+name = "URL_SetProxy"
+number = 0x83E04
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = [0]
+
+[[swi]]
+name = "URL_Stop"
+number = 0x83E05
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+writes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+[[swi]]
+name = "URL_Deregister"
+number = 0x83E06
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+writes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+[[swi]]
+name = "URL_ParseURL"
+number = 0x83E07
+raw = true
+reads = [0, 1, 2, 3, 4, 5]
+writes = [0, 5]
+
+[[swi]]
+name = "URL_EnumerateSchemes"
+number = 0x83E08
+raw = true
+reads = [0, 1]
+writes = [0, 1, 2, 3, 4, 5]
+
+[[swi]]
+name = "URL_EnumerateProxies"
+number = 0x83E09
+raw = true
+reads = [0, 1, 2]
+writes = [0, 2, 3, 4]
+
+[[swi]]
+name = "URL_ProtocolRegister"
+number = 0x83E20
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6]
+writes = [0]
+
+[[swi]]
+name = "URL_ProtocolDeregister"
+number = 0x83E21
+raw = true
+reads = [0, 1, 2]
+writes = [0, 1]

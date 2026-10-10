@@ -1,0 +1,494 @@
+# The Territory Manager, as a native module (modules/territory): its SWIs,
+# typed, for C clients -- the C library's locale, character tables and time.
+#
+# The SWIs themselves are register-level, in the module (translated code
+# calls them); each typed function here goes through its SWI, so there is
+# one implementation (impl = "module:TerritoryManager").  The module is
+# described in modules/territory/README.md.  Names, numbers and registers are facts of
+# RISC OS 5's interface (hdr/Territory, the 5.30 module); the comments are
+# ours.
+#
+# A territory number of -1 is the configured territory.  The SWIs from
+# ReadTimeZones to DaylightRules are the territory's own: the manager
+# passes them to it, and it may leave R0-R5 changed (writes widened so).
+
+[module]
+name = "TerritoryManager"
+impl = "module:TerritoryManager"
+chunk = 0x43040
+
+[[swi]]
+name = "Territory_Number"
+number = 0x43040
+results = [{ reg = 0, name = "territory", type = "i32" }]
+
+# R1 -> 26 entry points, one for each SWI from ReadTimeZones to DaylightRules
+[[swi]]
+name = "Territory_Register"
+number = 0x43041
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 1, name = "entries", type = "ptr<u32>", const = true },
+  { reg = 2, name = "workspace", type = "addr" },
+]
+
+[[swi]]
+name = "Territory_Deregister"
+number = 0x43042
+params = [{ reg = 0, name = "territory", type = "i32" }]
+
+[[swi]]
+name = "Territory_NumberToName"
+number = 0x43043
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 1, name = "buffer", type = "ptr<u8>" },
+  { reg = 2, name = "size", type = "u32" },
+]
+
+# Z set: the territory is loaded
+[[swi]]
+name = "Territory_Exists"
+number = 0x43044
+params = [{ reg = 0, name = "territory", type = "i32" }]
+flags_out = [{ flag = "z", name = "exists" }]
+
+[[swi]]
+name = "Territory_AlphabetNumberToName"
+number = 0x43045
+params = [
+  { reg = 0, name = "alphabet", type = "i32" },
+  { reg = 1, name = "buffer", type = "ptr<u8>" },
+  { reg = 2, name = "size", type = "u32" },
+]
+
+[[swi]]
+name = "Territory_SelectAlphabet"
+number = 0x43046
+params = [{ reg = 0, name = "territory", type = "i32" }]
+
+# R0 -> a five-byte UTC time
+[[swi]]
+name = "Territory_SetTime"
+number = 0x43047
+params = [{ reg = 0, name = "time", type = "ptr<u8>", const = true }]
+
+# key = "ZONE" (&454E4F5A) asks for the zone within the territory in R2
+[[swi]]
+name = "Territory_ReadCurrentTimeZone"
+number = 0x43048
+params = [{ reg = 2, name = "key", type = "u32" }]
+results = [
+  { reg = 0, name = "zone_name", type = "str" },
+  { reg = 1, name = "offset", type = "i32" },
+  { reg = 2, name = "zone", type = "i32" },
+]
+
+# ordinals: nine words. Centiseconds, seconds, minutes, hours (0 to 23), day of
+# the month (1 to 31), month (1 to 12), year, day of the week (1 to 7, Sunday
+# is 1) and day of the year (1 to 366)
+[[swi]]
+name = "Territory_ConvertTimeToUTCOrdinals"
+number = 0x43049
+params = [
+  { reg = 1, name = "time", type = "ptr<u8>", const = true },
+  { reg = 2, name = "ordinals", type = "ptr<u32>" },
+]
+
+[[swi]]
+name = "Territory_ReadTimeZones"
+number = 0x4304A
+reads = [0, 1, 4]
+writes = [0, 1, 2, 3, 4, 5]
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 1, name = "zone", type = "u32" },
+  { reg = 4, name = "key", type = "u32" },
+]
+results = [
+  { reg = 0, name = "std_name", type = "str" },
+  { reg = 1, name = "dst_name", type = "str" },
+  { reg = 2, name = "std_offset", type = "i32" },
+  { reg = 3, name = "dst_offset", type = "i32" },
+  { reg = 4, name = "key_out", type = "u32" },
+]
+
+# size: bits 0-15 with the flags in bits 28-31 (bit 31 set), else all of R3
+[[swi]]
+name = "Territory_ConvertDateAndTime"
+number = 0x4304B
+reads = [0, 1, 2, 3, 4, 5]
+writes = [0, 1, 2, 3, 4, 5]
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 1, name = "time", type = "ptr<u8>", const = true },
+  { reg = 2, name = "buffer", type = "ptr<u8>" },
+  { reg = 3, name = "size", type = "u32" },
+  { reg = 4, name = "format", type = "str" },
+  { reg = 5, name = "zone", type = "i32" },
+]
+results = [
+  { reg = 1, name = "end", type = "ptr<u8>" },
+  { reg = 2, name = "left", type = "u32" },
+]
+
+[[swi]]
+name = "Territory_ConvertStandardDateAndTime"
+number = 0x4304C
+reads = [0, 1, 2, 3, 5]
+writes = [0, 1, 2, 3, 4, 5]
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 1, name = "time", type = "ptr<u8>", const = true },
+  { reg = 2, name = "buffer", type = "ptr<u8>" },
+  { reg = 3, name = "size", type = "u32" },
+  { reg = 5, name = "zone", type = "i32" },
+]
+results = [
+  { reg = 1, name = "end", type = "ptr<u8>" },
+  { reg = 2, name = "left", type = "u32" },
+]
+
+[[swi]]
+name = "Territory_ConvertStandardDate"
+number = 0x4304D
+reads = [0, 1, 2, 3, 5]
+writes = [0, 1, 2, 3, 4, 5]
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 1, name = "time", type = "ptr<u8>", const = true },
+  { reg = 2, name = "buffer", type = "ptr<u8>" },
+  { reg = 3, name = "size", type = "u32" },
+  { reg = 5, name = "zone", type = "i32" },
+]
+results = [
+  { reg = 1, name = "end", type = "ptr<u8>" },
+  { reg = 2, name = "left", type = "u32" },
+]
+
+[[swi]]
+name = "Territory_ConvertStandardTime"
+number = 0x4304E
+reads = [0, 1, 2, 3, 5]
+writes = [0, 1, 2, 3, 4, 5]
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 1, name = "time", type = "ptr<u8>", const = true },
+  { reg = 2, name = "buffer", type = "ptr<u8>" },
+  { reg = 3, name = "size", type = "u32" },
+  { reg = 5, name = "zone", type = "i32" },
+]
+results = [
+  { reg = 1, name = "end", type = "ptr<u8>" },
+  { reg = 2, name = "left", type = "u32" },
+]
+
+[[swi]]
+name = "Territory_ConvertTimeToOrdinals"
+number = 0x4304F
+reads = [0, 1, 2]
+writes = [0, 1, 2, 3, 4, 5]
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 1, name = "time", type = "ptr<u8>", const = true },
+  { reg = 2, name = "ordinals", type = "ptr<u32>" },
+]
+
+# reason: 1 the time, 2 the date, 3 both
+[[swi]]
+name = "Territory_ConvertTimeStringToOrdinals"
+number = 0x43050
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3, 4, 5]
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 1, name = "reason", type = "u32" },
+  { reg = 2, name = "string", type = "str" },
+  { reg = 3, name = "ordinals", type = "ptr<u32>" },
+]
+
+[[swi]]
+name = "Territory_ConvertOrdinalsToTime"
+number = 0x43051
+reads = [0, 1, 2]
+writes = [0, 1, 2, 3, 4, 5]
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 1, name = "time", type = "ptr<u8>" },
+  { reg = 2, name = "ordinals", type = "ptr<u32>", const = true },
+]
+
+[[swi]]
+name = "Territory_Alphabet"
+number = 0x43052
+reads = [0]
+writes = [0, 1, 2, 3, 4, 5]
+params = [{ reg = 0, name = "territory", type = "i32" }]
+results = [{ reg = 0, name = "alphabet", type = "i32" }]
+
+[[swi]]
+name = "Territory_AlphabetIdentifier"
+number = 0x43053
+reads = [0]
+writes = [0, 1, 2, 3, 4, 5]
+params = [{ reg = 0, name = "territory", type = "i32" }]
+results = [{ reg = 0, name = "identifier", type = "str" }]
+
+[[swi]]
+name = "Territory_SelectKeyboardHandler"
+number = 0x43054
+reads = [0]
+writes = [0, 1, 2, 3, 4, 5]
+params = [{ reg = 0, name = "territory", type = "i32" }]
+
+# bit 0 right to left, bit 1 bottom to top, bit 2 vertical lines
+[[swi]]
+name = "Territory_WriteDirection"
+number = 0x43055
+reads = [0]
+writes = [0, 1, 2, 3, 4, 5]
+params = [{ reg = 0, name = "territory", type = "i32" }]
+results = [{ reg = 0, name = "direction", type = "u32" }]
+
+# property 0-10: control, upper, lower, alpha, punctuation, space, digit,
+# hex digit, accented, forward flow, backward flow -- 256 bits
+[[swi]]
+name = "Territory_CharacterPropertyTable"
+number = 0x43056
+reads = [0, 1]
+writes = [0, 1, 2, 3, 4, 5]
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 1, name = "property", type = "u32" },
+]
+results = [{ reg = 0, name = "table", type = "ptr<u32>" }]
+
+[[swi]]
+name = "Territory_LowerCaseTable"
+number = 0x43057
+reads = [0]
+writes = [0, 1, 2, 3, 4, 5]
+params = [{ reg = 0, name = "territory", type = "i32" }]
+results = [{ reg = 0, name = "table", type = "ptr<u8>" }]
+
+[[swi]]
+name = "Territory_UpperCaseTable"
+number = 0x43058
+reads = [0]
+writes = [0, 1, 2, 3, 4, 5]
+params = [{ reg = 0, name = "territory", type = "i32" }]
+results = [{ reg = 0, name = "table", type = "ptr<u8>" }]
+
+[[swi]]
+name = "Territory_ControlTable"
+number = 0x43059
+reads = [0]
+writes = [0, 1, 2, 3, 4, 5]
+params = [{ reg = 0, name = "territory", type = "i32" }]
+results = [{ reg = 0, name = "table", type = "ptr<u8>" }]
+
+[[swi]]
+name = "Territory_PlainTable"
+number = 0x4305A
+reads = [0]
+writes = [0, 1, 2, 3, 4, 5]
+params = [{ reg = 0, name = "territory", type = "i32" }]
+results = [{ reg = 0, name = "table", type = "ptr<u8>" }]
+
+[[swi]]
+name = "Territory_ValueTable"
+number = 0x4305B
+reads = [0]
+writes = [0, 1, 2, 3, 4, 5]
+params = [{ reg = 0, name = "territory", type = "i32" }]
+results = [{ reg = 0, name = "table", type = "ptr<u8>" }]
+
+# sixteen bytes: the digits 0-9, A-F
+[[swi]]
+name = "Territory_RepresentationTable"
+number = 0x4305C
+reads = [0]
+writes = [0, 1, 2, 3, 4, 5]
+params = [{ reg = 0, name = "territory", type = "i32" }]
+results = [{ reg = 0, name = "table", type = "ptr<u8>" }]
+
+# flags: bit 0 ignore case, 1 ignore accents, 2 digits as numbers.
+# order < 0, 0, > 0; the flags N, Z, C as a compare leaves them
+[[swi]]
+name = "Territory_Collate"
+number = 0x4305D
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3, 4, 5]
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 1, name = "s1", type = "str" },
+  { reg = 2, name = "s2", type = "str" },
+  { reg = 3, name = "flags", type = "u32" },
+]
+results = [{ reg = 0, name = "order", type = "i32" }]
+
+# reason 0-9 and 18: an arena address (a string, or 2 and 7 a byte list);
+# 10-17: a number
+[[swi]]
+name = "Territory_ReadSymbols"
+number = 0x4305E
+reads = [0, 1]
+writes = [0, 1, 2, 3, 4, 5]
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 1, name = "reason", type = "u32" },
+]
+results = [{ reg = 0, name = "value", type = "u32" }]
+
+# info: twelve words. The first and last working days (2 and 6 for the UK), the
+# months in the year (12), the days in the month of the given local time, then
+# the longest length of each name: am/pm (2), weekday (9), short weekday (3),
+# day (2), day suffix (2), month (9), short month (3) and zone name (3)
+[[swi]]
+name = "Territory_ReadCalendarInformation"
+number = 0x4305F
+reads = [0, 1, 2]
+writes = [0, 1, 2, 3, 4, 5]
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 1, name = "time", type = "ptr<u8>", const = true },
+  { reg = 2, name = "info", type = "ptr<u32>" },
+]
+
+# number 0: not known
+[[swi]]
+name = "Territory_NameToNumber"
+number = 0x43060
+reads = [0, 1]
+writes = [0, 1, 2, 3, 4, 5]
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 1, name = "name", type = "str" },
+]
+results = [{ reg = 0, name = "number", type = "i32" }]
+
+# written only if length < size
+[[swi]]
+name = "Territory_TransformString"
+number = 0x43061
+reads = [0, 1, 2, 3]
+writes = [0, 1, 2, 3, 4, 5]
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 1, name = "buffer", type = "ptr<u8>", null_ok = true },
+  { reg = 2, name = "string", type = "str" },
+  { reg = 3, name = "size", type = "u32" },
+]
+results = [{ reg = 0, name = "length", type = "u32" }]
+
+[[swi]]
+name = "Territory_IME"
+number = 0x43062
+reads = [0]
+writes = [0, 1, 2, 3, 4, 5]
+params = [{ reg = 0, name = "territory", type = "i32" }]
+results = [{ reg = 0, name = "chunk", type = "u32" }]
+
+# The manager's own use (DaylightSaving is the clients'): reason 0 whether
+# the territory has rules (value 1), 1 the bounds of a year into start and end
+[[swi]]
+name = "Territory_DaylightRules"
+number = 0x43063
+reads = [0, 1, 2, 3, 4, 5]
+writes = [0, 1, 2, 3, 4, 5]
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 1, name = "reason", type = "u32" },
+  { reg = 2, name = "zone", type = "u32" },
+  { reg = 3, name = "year", type = "i32" },
+  { reg = 4, name = "start", type = "ptr<u8>", null_ok = true },
+  { reg = 5, name = "end", type = "ptr<u8>", null_ok = true },
+]
+results = [{ reg = 0, name = "value", type = "u32" }]
+
+# Nothing, in RISC OS 5.30: registers kept, no error
+[[swi]]
+name = "Territory_ConvertTextToString"
+number = 0x43075
+reads = []
+writes = []
+
+[[swi]]
+name = "Territory_Select"
+number = 0x43076
+params = [{ reg = 0, name = "territory", type = "i32" }]
+
+# state: bit 0 DST, bit 1 AutoDST
+[[swi]]
+name = "Territory_DaylightSaving"
+number = 0x43077
+kind = "multiplexer"
+selector = 1
+reads = [0, 1, 2, 3, 4, 5]
+writes = [0]
+bad_reason = { errnum = 0x1E8, message = "Unsupported subreason" }
+
+[[swi.ops]]
+reason = 0
+fn = "read_dst_state"
+params = [{ reg = 0, name = "territory", type = "i32" }]
+results = [{ reg = 0, name = "state", type = "u32" }]
+
+[[swi.ops]]
+reason = 1
+fn = "write_dst_state"
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 2, name = "state", type = "u32" },
+]
+
+[[swi.ops]]
+reason = 2
+fn = "dst_supported"
+params = [{ reg = 0, name = "territory", type = "i32" }]
+results = [{ reg = 0, name = "supported", type = "u32" }]
+
+[[swi.ops]]
+reason = 3
+fn = "apply_dst_rule_to_ordinals"
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 2, name = "zone", type = "u32" },
+  { reg = 3, name = "ordinals", type = "ptr<u32>", const = true },
+]
+results = [{ reg = 0, name = "dst", type = "u32" }]
+
+[[swi.ops]]
+reason = 4
+fn = "apply_dst_rule_to_time"
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 2, name = "zone", type = "u32" },
+  { reg = 3, name = "time", type = "ptr<u8>", const = true },
+]
+results = [{ reg = 0, name = "dst", type = "u32" }]
+
+[[swi.ops]]
+reason = 5
+fn = "dst_bounds"
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 2, name = "zone", type = "u32" },
+  { reg = 3, name = "year", type = "i32" },
+  { reg = 4, name = "start", type = "ptr<u8>" },
+  { reg = 5, name = "end", type = "ptr<u8>" },
+]
+
+# flags: bits 0-7 in, 8-15 out (0 local ordinals, 1 local five-byte, 2 UTC
+# ordinals, 3 UTC five-byte); 16 DST, 17 standard time if no rule, 18 the
+# rule decides, 19 zone is an offset in centiseconds
+[[swi]]
+name = "Territory_ConvertTimeFormats"
+number = 0x43078
+params = [
+  { reg = 0, name = "territory", type = "i32" },
+  { reg = 1, name = "input", type = "ptr<void>", const = true },
+  { reg = 2, name = "output", type = "ptr<void>" },
+  { reg = 3, name = "flags", type = "u32" },
+  { reg = 4, name = "zone", type = "i32" },
+]

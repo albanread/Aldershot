@@ -1,0 +1,57 @@
+# SharedCLibrary, as a native module (modules/sharedclib): the SWIs of
+# RISC_OSLib's module (hdr/SharedCLib, clib/s/cl_rmhdr), SWI chunk &80680.
+#
+# Names, numbers and the chunk are facts of RISC OS 5's interface; what each
+# does is s/initmodule's _Shared_Lib_Module_SWI_Code (the comments here are
+# ours).  The first three are refused: APCS-A (C71), APCS-R and the old
+# module registration (C72).  The last two register a client -- an
+# application, a module -- with the ROM C library: R0 its stubs' chunk
+# descriptors, R1/R2 its workspace, R3 the base of its zero-initialised
+# statics, R4/R5 the statics to copy, R6 the root stack's size in K << 16
+# and the flags.  They return R0 the workspace's end, R1/R2 the stack's
+# base and top, R6 the library's version; R3-R5 kept.  On an error R0 is
+# the error; R1/R2 are the stack's base and top once the workspace has been
+# found big enough (an error from C02 on: 5.30 has stored them by then),
+# else as they came in; R6 is a working value on RISC OS (s/initmodule's
+# Failed does not restore it) -- ROSGD gives the root stack's size in bytes
+# for C01, as 5.30 does, and leaves it as it came in after that.
+
+[module]
+name = "SharedCLibrary"
+impl = "native"
+chunk = 0x80680
+
+[[swi]]
+name = "SharedCLibrary_LibInitAPCS_A"
+number = 0x80680
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6]
+writes = [0, 1, 2, 6]
+
+[[swi]]
+name = "SharedCLibrary_LibInitAPCS_R"
+number = 0x80681
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6]
+writes = [0, 1, 2, 6]
+
+[[swi]]
+name = "SharedCLibrary_LibInitModule"
+number = 0x80682
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6]
+writes = [0, 1, 2, 6]
+
+[[swi]]
+name = "SharedCLibrary_LibInitAPCS_32"
+number = 0x80683
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6]
+writes = [0, 1, 2, 6]
+
+[[swi]]
+name = "SharedCLibrary_LibInitModuleAPCS_32"
+number = 0x80684
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6]
+writes = [0, 1, 2, 6]

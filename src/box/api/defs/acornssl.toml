@@ -1,0 +1,124 @@
+# AcornSSL, as a native module over OpenSSL (modules/acornssl): its SWIs are
+# register-level, raw, as RISC OS 5's AcornSSL 1.09 takes them (doc/AcornSSL
+# and sslmod.c's dispatcher; where they differ, the code).  Each mirrors a
+# Socket_* SWI, on an ssl handle in R0.
+
+[module]
+name = "AcornSSL"
+impl = "native"
+chunk = 0x50F80
+
+[[swi]]
+name = "AcornSSL_Creat"
+number = 0x50F80
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+[[swi]]
+name = "AcornSSL_Ioctl"
+number = 0x50F81
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+[[swi]]
+name = "AcornSSL_Connect"
+number = 0x50F82
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+[[swi]]
+name = "AcornSSL_Shutdown"
+number = 0x50F83
+raw = true
+reads = [0, 1]
+writes = [0]
+
+[[swi]]
+name = "AcornSSL_Close"
+number = 0x50F84
+raw = true
+reads = [0]
+writes = [0]
+
+# R3 -> the value, R4 -> its length (a pointer, as the code reads it)
+[[swi]]
+name = "AcornSSL_Getsockopt"
+number = 0x50F85
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = [0]
+
+[[swi]]
+name = "AcornSSL_Write"
+number = 0x50F86
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+[[swi]]
+name = "AcornSSL_Recv"
+number = 0x50F87
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0]
+
+# R0 a socket, R1 the reason (0 new, 1 reuse R2's authentication)
+[[swi]]
+name = "AcornSSL_CreateSession"
+number = 0x50F88
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+[[swi]]
+name = "AcornSSL_Getpeername"
+number = 0x50F89
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+[[swi]]
+name = "AcornSSL_Getsockname"
+number = 0x50F8A
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+# R3 -> the value (for SO_ACORNSSL_HOSTNAME the name itself), R4 its length
+[[swi]]
+name = "AcornSSL_Setsockopt"
+number = 0x50F8B
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = [0]
+
+[[swi]]
+name = "AcornSSL_Stat"
+number = 0x50F8C
+raw = true
+reads = [0, 1]
+writes = [0]
+
+[[swi]]
+name = "AcornSSL_Version"
+number = 0x50F8D
+raw = true
+reads = []
+writes = [0]
+
+[[swi]]
+name = "AcornSSL_Read"
+number = 0x50F8E
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+[[swi]]
+name = "AcornSSL_Send"
+number = 0x50F8F
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0]

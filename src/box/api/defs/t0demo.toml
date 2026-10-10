@@ -1,0 +1,59 @@
+# T0Demo's SWIs: a module that runs as compiled ObjAsm
+# (modules/t0demo/t0demo.s, translated by hand exactly as the ObjAsm
+# compiler's tier 0 must translate it).
+#
+# The typed functions generated from this are reverse thunks: native C calls
+# xt0demo_sum() with real pointers, and the thunk packs a register block and
+# enters the compiled module's SWI handler.  The caller cannot tell the
+# implementation is compiled ("Where the implementation lives is
+# invisible").
+
+[module]
+name = "T0Demo"
+impl = "module:T0Demo"
+chunk = 0xC0000
+
+[[swi]]
+name = "T0Demo_Sum"
+number = 0xC0000
+params = [
+  { reg = 0, name = "words", type = "ptr<u32>", const = true },
+  { reg = 1, name = "count", type = "u32" },
+]
+# a 64-bit total, low word and carries
+results = [
+  { reg = 0, name = "lo", type = "u32" },
+  { reg = 1, name = "hi", type = "u32" },
+]
+
+[[swi]]
+name = "T0Demo_Classify"
+number = 0xC0001
+params = [{ reg = 0, name = "value", type = "i32" }]
+# 0 zero, 1 negative, 2 below 100, 3 larger
+results = [{ reg = 0, name = "kind", type = "u32" }]
+# a result in the flags: Z set when the value was zero
+flags_out = [{ flag = "z", name = "is_zero" }]
+
+[[swi]]
+name = "T0Demo_Fail"
+number = 0xC0002
+# always returns its error block, from the ROM image
+
+[[swi]]
+name = "T0Demo_Greet"
+number = 0xC0003
+# prints through OS_Write0 and OS_NewLine, calls T0Demo_Classify by SWI,
+# and makes an indirect call through a table of code addresses
+results = [
+  { reg = 0, name = "calls", type = "u32" },     # SWIs the module has taken
+  { reg = 1, name = "indirect", type = "u32" },  # what the indirect call returned
+]
+
+[[swi]]
+name = "T0Demo_LongJump"
+number = 0xC0004
+# returns from two calls deep: the sp it was entered with put back and
+# the entry's lr popped, as the Wimp leaves a menu selection
+params = [{ reg = 0, name = "value", type = "u32" }]
+results = [{ reg = 0, name = "next", type = "u32" }]

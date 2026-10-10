@@ -1,0 +1,21 @@
+# Unix, the Unix bridge's SWI chunk, a native module
+# (modules/unixbridge): Linux's system calls for RISC OS programs -- a POSIX
+# application's C library (rosgd/posix), BASIC, any language that makes
+# SWIs.  RISC OS has no such module; the chunk is ROSGD's own, in the
+# application range after PTY's &C00C0.  include/rosgd/unixbridge.h is the
+# contract.
+
+[module]
+name = "Unix"
+impl = "native"
+chunk = 0xC0100
+
+# R0 the call's number (x86-64's; UNIX_X32_BIT for x32 structures; 1024 up
+# ROSGD's own), R1 -> its six 64-bit arguments
+# -> R0, R1 the result's low and high words (-errno on failure)
+[[swi]]
+name = "Unix_Syscall"
+number = 0xC0100
+raw = true
+reads = [0, 1]
+writes = [0, 1]

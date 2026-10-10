@@ -1,0 +1,26 @@
+# MimeMap, as a native module (modules/mimemap): RISC OS 5.30's ROM
+# MimeMap 0.19 (Networking/MimeMap), its one SWI, which converts between
+# RISC OS file types, MIME types and file extensions from the MIME mappings
+# file, <Inet$MimeMappings> (#106).
+#
+# Names, numbers and registers are facts of RISC OS 5's interface
+# (Networking/MimeMap's hdr/MimeMap and c/mime); the comments are ours.
+
+[module]
+name = "MimeMap"
+impl = "native"
+chunk = 0x50B00
+
+# R0 the input's format, R1 the input (a file type for MMM_TYPE_RISCOS, else
+# -> a string), R2 the output's format, R3 -> the output buffer (for
+# MMM_TYPE_DOT_EXTNS, -> a word that gets the extensions' array).  Out:
+# R3 the file type for MMM_TYPE_RISCOS, R4 the number of extensions for
+# MMM_TYPE_DOT_EXTNS; everything else kept (R0 an error, V set).  The
+# formats: 0 MMM_TYPE_RISCOS, 1 _RISCOS_STRING, 2 _MIME, 3 _DOT_EXTN, 4
+# _MAC (no output, refused as input), 5 _DOT_EXTNS (output only).
+[[swi]]
+name = "MimeMap_Translate"
+number = 0x50B00
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 3, 4]

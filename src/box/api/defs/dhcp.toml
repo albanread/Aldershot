@@ -1,0 +1,90 @@
+# DHCP, as a native module over Linux's kernel DHCP: its SWIs, typed.
+#
+# RISC OS 5's DHCP module (0.28, Sources/Networking/DHCP) is a DHCP client
+# of its own.  Under ROSGD the kernel is the client (ip=dhcp), so this module
+# is the interface over the lease the kernel took: an interface is BOUND when
+# it has its address, and a lease is a DHCPACK built from what Linux knows
+# (modules/dhcp/dhcp.c).  An interface is named as RISC OS names it (eth0,
+# or the driver's own name and unit), dhcp_state numbers as h.DHCP's.
+
+[module]
+name = "DHCP"
+impl = "native"
+chunk = 0x52E80
+
+[[swi]]
+name = "DHCP_Version"
+number = 0x52E80
+results = [{ reg = 0, name = "version", type = "u32" }]   # 28: DHCP 0.28
+
+# R0 bit 0 starts at once, bit 1 waits for the interface, bit 2 blocks,
+# bit 3 private addresses: accepted; the kernel's lease is the answer.
+[[swi]]
+name = "DHCP_Execute"
+number = 0x52E81
+params = [
+  { reg = 0, name = "flags", type = "u32" },
+  { reg = 1, name = "if_name", type = "str" },
+]
+results = [{ reg = 2, name = "status", type = "u32" }]
+
+# R3 -> a buffer for the DHCP packet (548 bytes), or 0; R4 its size, less the
+# packet's on exit.
+[[swi]]
+name = "DHCP_GetState"
+number = 0x52E82
+params = [
+  { reg = 0, name = "flags", type = "u32" },
+  { reg = 1, name = "if_name", type = "str" },
+  { reg = 3, name = "buffer", type = "addr" },
+  { reg = 4, name = "size", type = "i32" },
+]
+results = [
+  { reg = 2, name = "status", type = "u32" },
+  { reg = 4, name = "size_left", type = "i32" },
+]
+
+# R0 bit 0: R1 -> a DHCP packet, not an interface's name.  R2 the option,
+# the interface's state on exit; R3 -> a buffer or 0; R4 its size, less the
+# option's on exit.
+[[swi]]
+name = "DHCP_GetOption"
+number = 0x52E83
+params = [
+  { reg = 0, name = "flags", type = "u32" },
+  { reg = 1, name = "if_name", type = "addr" },
+  { reg = 2, name = "option", type = "u32" },
+  { reg = 3, name = "buffer", type = "addr" },
+  { reg = 4, name = "size", type = "i32" },
+]
+results = [
+  { reg = 2, name = "status", type = "u32" },
+  { reg = 4, name = "size_left", type = "i32" },
+]
+
+# R0 bit 0: R1 -> a DHCP packet, whose option R2 is replaced by R4 bytes at
+# R3 (deleted when R3 = 0).  An interface's request is the kernel's to send,
+# so the interface form is "Option not added".
+[[swi]]
+name = "DHCP_SetOption"
+number = 0x52E84
+params = [
+  { reg = 0, name = "flags", type = "u32" },
+  { reg = 1, name = "if_name", type = "addr" },
+  { reg = 2, name = "option", type = "u32" },
+  { reg = 3, name = "buffer", type = "addr" },
+  { reg = 4, name = "size", type = "u32" },
+]
+results = [{ reg = 2, name = "status", type = "u32" }]
+
+# A DHCPINFORM asks a server for options without a lease; the kernel's lease
+# already holds them, so it is accepted and nothing is sent.
+[[swi]]
+name = "DHCP_Inform"
+number = 0x52E85
+params = [
+  { reg = 0, name = "flags", type = "u32" },
+  { reg = 1, name = "address", type = "addr" },
+  { reg = 2, name = "req_list", type = "addr" },
+  { reg = 3, name = "len_req_list", type = "u32" },
+]

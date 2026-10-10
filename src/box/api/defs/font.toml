@@ -1,0 +1,314 @@
+# The Font Manager, as a native module (modules/fontmanager): every SWI is
+# register-level and raw, as in RISC OS 5.
+#
+# Names, numbers and registers are facts of RISC OS 5's interface
+# (Video/Render/Fonts/FontManager); the comments are ours.  reads and
+# writes are widened to R0-R7, which covers every SWI's registers.
+# Font_ChangeArea (&400BF, called by OS_ChangeDynamicArea) has no name in
+# the original's table either.
+
+[module]
+name = "FontManager"
+impl = "native"
+chunk = 0x40080
+
+[[swi]]
+name = "Font_CacheAddr"
+number = 0x40080
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_FindFont"
+number = 0x40081
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_LoseFont"
+number = 0x40082
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_ReadDefn"
+number = 0x40083
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_ReadInfo"
+number = 0x40084
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_StringWidth"
+number = 0x40085
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_Paint"
+number = 0x40086
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_Caret"
+number = 0x40087
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_ConverttoOS"
+number = 0x40088
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_Converttopoints"
+number = 0x40089
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_SetFont"
+number = 0x4008A
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_CurrentFont"
+number = 0x4008B
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_FutureFont"
+number = 0x4008C
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_FindCaret"
+number = 0x4008D
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_CharBBox"
+number = 0x4008E
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_ReadScaleFactor"
+number = 0x4008F
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_SetScaleFactor"
+number = 0x40090
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_ListFonts"
+number = 0x40091
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_SetFontColours"
+number = 0x40092
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_SetPalette"
+number = 0x40093
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_ReadThresholds"
+number = 0x40094
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_SetThresholds"
+number = 0x40095
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_FindCaretJ"
+number = 0x40096
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_StringBBox"
+number = 0x40097
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_ReadColourTable"
+number = 0x40098
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_MakeBitmap"
+number = 0x40099
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_UnCacheFile"
+number = 0x4009A
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_SetFontMax"
+number = 0x4009B
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_ReadFontMax"
+number = 0x4009C
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_ReadFontPrefix"
+number = 0x4009D
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_SwitchOutputToBuffer"
+number = 0x4009E
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_ReadFontMetrics"
+number = 0x4009F
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_DecodeMenu"
+number = 0x400A0
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_ScanString"
+number = 0x400A1
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_SetColourTable"
+number = 0x400A2
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_CurrentRGB"
+number = 0x400A3
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_FutureRGB"
+number = 0x400A4
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_ReadEncodingFilename"
+number = 0x400A5
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_FindField"
+number = 0x400A6
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_ApplyFields"
+number = 0x400A7
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_LookupFont"
+number = 0x400A8
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_EnumerateCharacters"
+number = 0x400A9
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Font_ChangeArea"
+number = 0x400BF
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]

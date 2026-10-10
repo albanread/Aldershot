@@ -1,0 +1,154 @@
+diff --git a/src/dynarmic/backend/arm64/a32_address_space.cpp b/src/dynarmic/backend/arm64/a32_address_space.cpp
+index 54cc665e..55b5f2c8 100644
+--- a/src/dynarmic/backend/arm64/a32_address_space.cpp
++++ b/src/dynarmic/backend/arm64/a32_address_space.cpp
+@@ -162,7 +162,7 @@ A32AddressSpace::A32AddressSpace(const A32::UserConfig& conf)
+ }
+ 
+ IR::Block A32AddressSpace::GenerateIR(IR::LocationDescriptor descriptor) const {
+-    IR::Block ir_block = A32::Translate(A32::LocationDescriptor{descriptor}, conf.callbacks, {conf.arch_version, conf.define_unpredictable_behaviour, conf.hook_hint_instructions});
++    IR::Block ir_block = A32::Translate(A32::LocationDescriptor{descriptor}, conf.callbacks, {conf.arch_version, conf.define_unpredictable_behaviour, conf.hook_hint_instructions, conf.coprocessors});
+ 
+     Optimization::PolyfillPass(ir_block, {});
+     Optimization::NamingPass(ir_block);
+diff --git a/src/dynarmic/backend/x64/a32_interface.cpp b/src/dynarmic/backend/x64/a32_interface.cpp
+index 0eadc5e8..9c3ed6a1 100644
+--- a/src/dynarmic/backend/x64/a32_interface.cpp
++++ b/src/dynarmic/backend/x64/a32_interface.cpp
+@@ -213,7 +213,7 @@ private:
+         }
+         block_of_code.EnsureMemoryCommitted(MINIMUM_REMAINING_CODESIZE);
+ 
+-        IR::Block ir_block = A32::Translate(A32::LocationDescriptor{descriptor}, conf.callbacks, {conf.arch_version, conf.define_unpredictable_behaviour, conf.hook_hint_instructions});
++        IR::Block ir_block = A32::Translate(A32::LocationDescriptor{descriptor}, conf.callbacks, {conf.arch_version, conf.define_unpredictable_behaviour, conf.hook_hint_instructions, conf.coprocessors});
+         Optimization::PolyfillPass(ir_block, polyfill_options);
+         Optimization::NamingPass(ir_block);
+         if (conf.HasOptimization(OptimizationFlag::GetSetElimination) && !conf.check_halt_on_memory_access) {
+diff --git a/src/dynarmic/frontend/A32/translate/a32_translate.h b/src/dynarmic/frontend/A32/translate/a32_translate.h
+index 0f2c3a12..8845cc6d 100644
+--- a/src/dynarmic/frontend/A32/translate/a32_translate.h
++++ b/src/dynarmic/frontend/A32/translate/a32_translate.h
+@@ -6,7 +6,11 @@
+ 
+ #include <mcl/stdint.hpp>
+ 
++#include <array>
++#include <memory>
++
+ #include "dynarmic/interface/A32/arch_version.h"
++#include "dynarmic/interface/A32/coprocessor.h"
+ 
+ namespace Dynarmic::IR {
+ class Block;
+@@ -29,6 +33,10 @@ struct TranslationOptions {
+     /// If this is false, we treat the instruction as a NOP.
+     /// If this is true, we emit an ExceptionRaised instruction.
+     bool hook_hint_instructions = true;
++
++    /// ROSGD (runtime/armrun/patches/0004): the coprocessors installed, so a
++    /// coprocessor instruction none takes is raised as undefined at translation.
++    std::array<std::shared_ptr<Coprocessor>, 16> coprocessors{};
+ };
+ 
+ /**
+diff --git a/src/dynarmic/frontend/A32/translate/impl/coprocessor.cpp b/src/dynarmic/frontend/A32/translate/impl/coprocessor.cpp
+index 29748a6e..d2ecbfe5 100644
+--- a/src/dynarmic/frontend/A32/translate/impl/coprocessor.cpp
++++ b/src/dynarmic/frontend/A32/translate/impl/coprocessor.cpp
+@@ -3,10 +3,24 @@
+  * SPDX-License-Identifier: 0BSD
+  */
+ 
++#include <optional>
++#include <variant>
++
+ #include "dynarmic/frontend/A32/translate/impl/a32_translate_impl.h"
++#include "dynarmic/interface/A32/coprocessor.h"
+ 
+ namespace Dynarmic::A32 {
+ 
++// ROSGD (runtime/armrun/patches/0004): a coprocessor instruction no installed
++// coprocessor takes is an undefined instruction, as on hardware -- raised here,
++// when its condition passes.  Upstream emits it anyway and both back ends assert
++// ("Should raise coproc exception here").  The FPA (CP1, CP2) reaches the
++// embedder this way until it installs coprocessors for it.
++static bool Takes(const TranslationOptions& o, size_t n, auto&& compile) {
++    const auto& c = o.coprocessors[n];
++    return c && compile(*c);
++}
++
+ // CDP{2} <coproc_no>, #<opc1>, <CRd>, <CRn>, <CRm>, #<opc2>
+ bool TranslatorVisitor::arm_CDP(Cond cond, size_t opc1, CoprocReg CRn, CoprocReg CRd, size_t coproc_no, size_t opc2, CoprocReg CRm) {
+     if ((coproc_no & 0b1110) == 0b1010) {
+@@ -16,6 +30,9 @@ bool TranslatorVisitor::arm_CDP(Cond cond, size_t opc1, CoprocReg CRn, CoprocReg
+     const bool two = cond == Cond::NV;
+ 
+     if (two || ArmConditionPassed(cond)) {
++        if (!Takes(options, coproc_no, [&](Coprocessor& c) { return c.CompileInternalOperation(two, static_cast<unsigned>(opc1), CRd, CRn, CRm, static_cast<unsigned>(opc2)).has_value(); })) {
++            return UndefinedInstruction();
++        }
+         ir.CoprocInternalOperation(coproc_no, two, opc1, CRd, CRn, CRm, opc2);
+     }
+     return true;
+@@ -44,6 +61,10 @@ bool TranslatorVisitor::arm_LDC(Cond cond, bool p, bool u, bool d, bool w, Reg n
+         const IR::U32 reg_n = ir.GetRegister(n);
+         const IR::U32 offset_address = add ? ir.Add(reg_n, ir.Imm32(imm32)) : ir.Sub(reg_n, ir.Imm32(imm32));
+         const IR::U32 address = index ? offset_address : reg_n;
++        const std::optional<u8> option = has_option ? std::optional<u8>{imm8.ZeroExtend<u8>()} : std::nullopt;
++        if (!Takes(options, coproc_no, [&](Coprocessor& c) { return c.CompileLoadWords(two, d, CRd, option).has_value(); })) {
++            return UndefinedInstruction();
++        }
+         ir.CoprocLoadWords(coproc_no, two, d, CRd, address, has_option, imm8.ZeroExtend<u8>());
+         if (wback) {
+             ir.SetRegister(n, offset_address);
+@@ -65,6 +86,9 @@ bool TranslatorVisitor::arm_MCR(Cond cond, size_t opc1, CoprocReg CRn, Reg t, si
+     const bool two = cond == Cond::NV;
+ 
+     if (two || ArmConditionPassed(cond)) {
++        if (!Takes(options, coproc_no, [&](Coprocessor& c) { return !std::holds_alternative<std::monostate>(c.CompileSendOneWord(two, static_cast<unsigned>(opc1), CRn, CRm, static_cast<unsigned>(opc2))); })) {
++            return UndefinedInstruction();
++        }
+         ir.CoprocSendOneWord(coproc_no, two, opc1, CRn, CRm, opc2, ir.GetRegister(t));
+     }
+     return true;
+@@ -83,6 +107,9 @@ bool TranslatorVisitor::arm_MCRR(Cond cond, Reg t2, Reg t, size_t coproc_no, siz
+     const bool two = cond == Cond::NV;
+ 
+     if (two || ArmConditionPassed(cond)) {
++        if (!Takes(options, coproc_no, [&](Coprocessor& c) { return !std::holds_alternative<std::monostate>(c.CompileSendTwoWords(two, static_cast<unsigned>(opc), CRm)); })) {
++            return UndefinedInstruction();
++        }
+         ir.CoprocSendTwoWords(coproc_no, two, opc, CRm, ir.GetRegister(t), ir.GetRegister(t2));
+     }
+     return true;
+@@ -97,6 +124,9 @@ bool TranslatorVisitor::arm_MRC(Cond cond, size_t opc1, CoprocReg CRn, Reg t, si
+     const bool two = cond == Cond::NV;
+ 
+     if (two || ArmConditionPassed(cond)) {
++        if (!Takes(options, coproc_no, [&](Coprocessor& c) { return !std::holds_alternative<std::monostate>(c.CompileGetOneWord(two, static_cast<unsigned>(opc1), CRn, CRm, static_cast<unsigned>(opc2))); })) {
++            return UndefinedInstruction();
++        }
+         const auto word = ir.CoprocGetOneWord(coproc_no, two, opc1, CRn, CRm, opc2);
+         if (t != Reg::PC) {
+             ir.SetRegister(t, word);
+@@ -121,6 +151,9 @@ bool TranslatorVisitor::arm_MRRC(Cond cond, Reg t2, Reg t, size_t coproc_no, siz
+     const bool two = cond == Cond::NV;
+ 
+     if (two || ArmConditionPassed(cond)) {
++        if (!Takes(options, coproc_no, [&](Coprocessor& c) { return !std::holds_alternative<std::monostate>(c.CompileGetTwoWords(two, static_cast<unsigned>(opc), CRm)); })) {
++            return UndefinedInstruction();
++        }
+         const auto two_words = ir.CoprocGetTwoWords(coproc_no, two, opc, CRm);
+         ir.SetRegister(t, ir.LeastSignificantWord(two_words));
+         ir.SetRegister(t2, ir.MostSignificantWord(two_words).result);
+@@ -155,6 +188,10 @@ bool TranslatorVisitor::arm_STC(Cond cond, bool p, bool u, bool d, bool w, Reg n
+         const IR::U32 reg_n = ir.GetRegister(n);
+         const IR::U32 offset_address = add ? ir.Add(reg_n, ir.Imm32(imm32)) : ir.Sub(reg_n, ir.Imm32(imm32));
+         const IR::U32 address = index ? offset_address : reg_n;
++        const std::optional<u8> option = has_option ? std::optional<u8>{imm8.ZeroExtend<u8>()} : std::nullopt;
++        if (!Takes(options, coproc_no, [&](Coprocessor& c) { return c.CompileStoreWords(two, d, CRd, option).has_value(); })) {
++            return UndefinedInstruction();
++        }
+         ir.CoprocStoreWords(coproc_no, two, d, CRd, address, has_option, imm8.ZeroExtend<u8>());
+         if (wback) {
+             ir.SetRegister(n, offset_address);

@@ -1,0 +1,81 @@
+# The Screen Blanker, as a native module: its SWI, typed.
+#
+# The interface is RISC OS 5's module's (Video/Render/ScrBlank: Doc/ScrBlank,
+# hdr/ScrBlank and the source); modules/screenblanker/README.md describes
+# *BlankTime, the service calls and what counts as activity.  Names,
+# numbers and register roles are facts from RISC OS 5's sources.
+#
+# One SWI, a reason in R0.  What the documentation says a reason corrupts
+# comes back as it went: only the reads give results.  Reasons 6 and 7 (a
+# portable's dimming) are not built into RISC OS 5's module, and give the
+# error any unknown reason gives -- the Global messages' BadSWI.
+
+[module]
+name = "ScreenBlanker"
+impl = "native"
+chunk = 0x43100
+
+[[swi]]
+name = "ScreenBlanker_Control"
+number = 0x43100
+kind = "multiplexer"
+selector = 0
+reads = [0, 1, 2, 3, 4]
+writes = [1]
+bad_reason = { errnum = 0x110, message = "SWI value out of range for module ScreenBlanker" }
+
+# Blank now, cancelling any flashing: Service_ScreenBlanking first
+[[swi.ops]]
+reason = 0
+fn = "blank"
+
+# Unblank now, cancelling any flashing; not in standby (reason 8)
+[[swi.ops]]
+reason = 1
+fn = "unblank"
+
+# Flash: on and off for these times (at least 40 cs each), the first
+# cycles not to be cut short by the user; flags go to the service calls
+[[swi.ops]]
+reason = 2
+fn = "flash"
+params = [
+  { reg = 1, name = "on_cs", type = "u32" },
+  { reg = 2, name = "off_cs", type = "u32" },
+  { reg = 3, name = "cycles", type = "u32" },
+  { reg = 4, name = "flags", type = "u32" },
+]
+
+# The time before blanking, in centiseconds (0 never, else at least 500);
+# unblanks, as reason 1 does
+[[swi.ops]]
+reason = 3
+fn = "set_timeout"
+params = [{ reg = 1, name = "cs", type = "u32" }]
+
+# The time before blanking, in seconds
+[[swi.ops]]
+reason = 4
+fn = "read_timeout"
+results = [{ reg = 1, name = "seconds", type = "u32" }]
+
+# ... in centiseconds
+[[swi.ops]]
+reason = 5
+fn = "read_timeout2"
+results = [{ reg = 1, name = "cs", type = "u32" }]
+
+# Blank into standby: only reason 9 ends it
+[[swi.ops]]
+reason = 8
+fn = "strict_blank"
+
+# Unblank, from standby too
+[[swi.ops]]
+reason = 9
+fn = "strict_unblank"
+
+# The time from CMOS again (Misc1CMOS &BC, bits 3-5)
+[[swi.ops]]
+reason = 10
+fn = "reread_timeout"

@@ -1,0 +1,48 @@
+# CompressPNG, as a native module (modules/compresspng; README.md there
+# describes it), over libpng.
+#
+# Names, numbers and registers are facts of RISC OS 5's interface
+# (Video/Render/CompressPNG 0.07: doc/SWIs, c/compresspng), checked
+# against RISC OS 5.30 on the farm (tests/desktop/compress); the comments
+# are ours.  All four are raw: Finish sets R0 and R1 even as it fails.
+
+[module]
+name = "CompressPNG"
+impl = "native"
+chunk = 0x59E00
+
+# R0 -> output buffer, or file name (flags bit 0), or 0 for the size; R1
+# the buffer's size; R2 -> parameter block (width, height, x dpi, y dpi,
+# flags, then twelve-byte parameters to a type of 0).  Out R0 the tag.
+[[swi]]
+name = "CompressPNG_Start"
+number = 0x59E00
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+# R0 the tag, R1 -> key, R2 -> value; registers kept.
+[[swi]]
+name = "CompressPNG_Comment"
+number = 0x59E01
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+# R0 the tag, R1 -> a row of pixels (a palettised row of under eight bits
+# a pixel is packed where it lies); registers kept.
+[[swi]]
+name = "CompressPNG_WriteLine"
+number = 0x59E02
+raw = true
+reads = [0, 1]
+writes = [0]
+
+# R0 the tag.  Out, to a buffer: R0 -> it, R1 the PNG's length; for the
+# size: R0 0, R1 the size; to a file, kept.
+[[swi]]
+name = "CompressPNG_Finish"
+number = 0x59E03
+raw = true
+reads = [0]
+writes = [0, 1]

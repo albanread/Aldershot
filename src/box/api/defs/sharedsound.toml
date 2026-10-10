@@ -1,0 +1,135 @@
+# SharedSound, as an x32 module: RISC OS's sound mixer
+# (Sources/Audio/SharedSnd, the Expressive Software Projects module).
+#
+# Clients install linear handlers -- callbacks that fill or mix 16-bit
+# stereo into the shared buffer -- and drivers produce the stream; here
+# the driver is the platform's (audio_alsa.c), reached by its SWI.  The
+# handler contract and the SWIs are facts of RISC OS 5's interface
+# (hdr/SWIs: SharedSoundSWI_Base = &4B440); modules/sharedsnd/README.md
+# says what is and is not done.
+
+[module]
+name = "SharedSound"
+impl = "native"
+chunk = 0x4B440
+
+# R0 = handler address, R1 = its R12 parameter, R2 = flags, R3 = name,
+# R4 = type if flags bit 0; out R0 the handler number.
+[[swi]]
+name = "SharedSound_InstallHandler"
+number = 0x4B440
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = [0]
+
+# R0 = handler number, or R1 = address and parameter to match.
+[[swi]]
+name = "SharedSound_RemoveHandler"
+number = 0x4B441
+raw = true
+reads = [0, 1]
+writes = []
+
+# R0 = handler number; out R0 its type.
+[[swi]]
+name = "SharedSound_HandlerType"
+number = 0x4B442
+raw = true
+reads = [0]
+writes = [0]
+
+# R0 = 0 or a handler number; out R0 the number, R1 the address, R2 the
+# parameter, R3 the flags, R4 the name's room, R5 its length.
+[[swi]]
+name = "SharedSound_HandlerInfo"
+number = 0x4B443
+raw = true
+reads = [0, 4]
+writes = [0, 1, 2, 3, 5]
+
+# R0 = 0 reads the system rate (out R1 frequency, R2 the 16.16 fraction
+# of it per handler -- SampleRate's exact arithmetic); R0 = a frequency
+# and R1 = a handler number sets that handler's.
+[[swi]]
+name = "SharedSound_SampleRate"
+number = 0x4B444
+raw = true
+reads = [0, 1]
+writes = [1, 2]
+
+# R0 = 0 or a handler number, R1 = the volume; out R0 the volume.
+[[swi]]
+name = "SharedSound_HandlerVolume"
+number = 0x4B445
+raw = true
+reads = [0, 1]
+writes = [0]
+
+# R0 = 0 or a handler number, R1 = the sample type.
+[[swi]]
+name = "SharedSound_HandlerSampleType"
+number = 0x4B446
+raw = true
+reads = [0, 1]
+writes = []
+
+# R0 = 0 or a handler number, R1 = pause state.
+[[swi]]
+name = "SharedSound_HandlerPause"
+number = 0x4B447
+raw = true
+reads = [0, 1]
+writes = []
+
+# R0 = the driver's SWI number to call, R1 = its parameter; out R0 the
+# driver number.  The platform's driver registers itself at init.
+[[swi]]
+name = "SharedSound_InstallDriver"
+number = 0x4B448
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+[[swi]]
+name = "SharedSound_RemoveDriver"
+number = 0x4B449
+raw = true
+reads = [0]
+writes = []
+
+[[swi]]
+name = "SharedSound_DriverInfo"
+number = 0x4B44A
+raw = true
+reads = [0]
+writes = [0, 1, 2, 3]
+
+[[swi]]
+name = "SharedSound_DriverVolume"
+number = 0x4B44B
+raw = true
+reads = [0, 1]
+writes = [0]
+
+[[swi]]
+name = "SharedSound_DriverMixer"
+number = 0x4B44C
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = []
+
+# Replay's 1-of-n playback: out R0 the control word's address.
+[[swi]]
+name = "SharedSound_ControlWord"
+number = 0x4B44D
+raw = true
+reads = []
+writes = [0]
+
+# Out R0 the system sample frequency, R1 its period.
+[[swi]]
+name = "SharedSound_Info"
+number = 0x4B44E
+raw = true
+reads = []
+writes = [0, 1]

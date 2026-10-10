@@ -1,0 +1,189 @@
+# GDraw, as a native module (modules/gdraw): the anti-aliasing Draw.
+# Every SWI is register-level and raw.  SWIs 0-11 are Draw's, with the same
+# registers; 12-24 are GDraw's own.  The three unnamed reasons 61-63 (read,
+# claim and release DrawV) are not in the name table: the module's own
+# thunk table carries them (modules/gdraw/gdraw.c).
+#
+# Names, numbers and registers are facts of the module's interface, as the
+# specification records them; the comments are ours.  reads and writes are
+# widened to R0-R7, which covers every SWI's registers.
+
+[module]
+name = "GDraw"
+impl = "native"
+chunk = 0x44540
+
+[[swi]]
+name = "GDraw_ProcessPath"
+number = 0x44540
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_ProcessPathFP"
+number = 0x44541
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_Fill"
+number = 0x44542
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_FillFP"
+number = 0x44543
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_Stroke"
+number = 0x44544
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_StrokeFP"
+number = 0x44545
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_StrokePath"
+number = 0x44546
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_StrokePathFP"
+number = 0x44547
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_FlattenPath"
+number = 0x44548
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_FlattenPathFP"
+number = 0x44549
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_TransformPath"
+number = 0x4454A
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_TransformPathFP"
+number = 0x4454B
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_ProcessClipPath"
+number = 0x4454C
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_ProcessClipPathFP"
+number = 0x4454D
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_ClipPath"
+number = 0x4454E
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_ClipPathFP"
+number = 0x4454F
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_ClipPathToPath"
+number = 0x44550
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_ClipPathToPathFP"
+number = 0x44551
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_ClearClipRegion"
+number = 0x44552
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_SetClipRegion"
+number = 0x44553
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_SetFillStyle"
+number = 0x44554
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_FillRegion"
+number = 0x44555
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_SetPrintFlag"
+number = 0x44556
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_ReadFillStyle"
+number = 0x44557
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "GDraw_GetClipRegion"
+number = 0x44558
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]

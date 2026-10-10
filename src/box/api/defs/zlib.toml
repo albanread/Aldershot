@@ -1,0 +1,333 @@
+# ZLib, as a native module (modules/zlibmod; README.md there lists the
+# SWIs), over zlib.
+#
+# Names, numbers and registers are facts of RISC OS 5's interface
+# (Programmer/ZLibMod 0.05: cmhg/modhead, c/cmodule, hdr/ZLib), checked
+# against RISC OS 5.30 on the farm (tests/desktop/compress); the comments
+# are ours.  Every SWI is register-level, raw: R0 is the zlib return code
+# (errors only for the module's own failures), the registers not written
+# are kept, and a stream is a 56-byte block in the caller's memory.
+
+[module]
+name = "ZLib"
+impl = "native"
+chunk = 0x53AC0
+
+# R0 flags (bit 0 continue, bit 1 more input to come, bit 3 the sizes, bit 4
+# not bound to the task); R1 -> workspace (a 56-byte stream block), or with
+# bit 3 the input's size or -1; R2 -> input, R3 its size, R4 -> output, R5
+# its size. Out R0 the status (0 done, 1 wants input, 2 output full) and
+# R2-R5 past what was used; with bit 3, R0 the workspace size (56) and R1
+# the most output (compressBound, -1 kept). zlib format, level 9.
+[[swi]]
+name = "ZLib_Compress"
+number = 0x53AC0
+raw = true
+reads = [0, 1, 2, 3, 4, 5]
+writes = [0, 1, 2, 3, 4, 5]
+
+# As ZLib_Compress; R0 bit 2 (the output will all fit) is allowed and
+# ignored; bit 3's R1 is -1.
+[[swi]]
+name = "ZLib_Decompress"
+number = 0x53AC1
+raw = true
+reads = [0, 1, 2, 3, 4, 5]
+writes = [0, 1, 2, 3, 4, 5]
+
+# R0 the CRC so far, R1 -> start, R2 -> end; out R0 the CRC-32.
+[[swi]]
+name = "ZLib_CRC32"
+number = 0x53AC2
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+# R0 the checksum so far, R1 -> start, R2 -> end; out R0 the Adler-32.
+[[swi]]
+name = "ZLib_Adler32"
+number = 0x53AC3
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+# Out R0 -> zlib's version string.
+[[swi]]
+name = "ZLib_Version"
+number = 0x53AC4
+raw = true
+reads = []
+writes = [0]
+
+# zlib's compress(): R0 -> output, R1 its size, R2 -> input, R3 its size;
+# out R0 the code, R1 the output's length.
+[[swi]]
+name = "ZLib_ZCompress"
+number = 0x53AC5
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1]
+
+# compress2(): as ZLib_ZCompress, R4 the level.
+[[swi]]
+name = "ZLib_ZCompress2"
+number = 0x53AC6
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = [0, 1]
+
+# uncompress(): as ZLib_ZCompress.
+[[swi]]
+name = "ZLib_ZUncompress"
+number = 0x53AC7
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1]
+
+# deflateInit_(): R0 -> stream block, R1 level, R2 -> version, R3 the
+# block's size (56); out R0 the code.
+[[swi]]
+name = "ZLib_DeflateInit"
+number = 0x53AC8
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0]
+
+# inflateInit_(): R0 -> stream block, R1 -> version, R2 the block's size.
+[[swi]]
+name = "ZLib_InflateInit"
+number = 0x53AC9
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+# deflateInit2_(): R0 -> block, R1 level, R2 method, R3 window bits, R4
+# memory level, R5 strategy, R6 -> version, R7 the block's size.
+[[swi]]
+name = "ZLib_DeflateInit2"
+number = 0x53ACA
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [0]
+
+# inflateInit2_(): R0 -> block, R1 window bits, R2 -> version, R3 the
+# block's size.
+[[swi]]
+name = "ZLib_InflateInit2"
+number = 0x53ACB
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0]
+
+# deflate(): R0 -> block, R1 flush type; out R0 the code.
+[[swi]]
+name = "ZLib_Deflate"
+number = 0x53ACC
+raw = true
+reads = [0, 1]
+writes = [0]
+
+# deflateEnd().
+[[swi]]
+name = "ZLib_DeflateEnd"
+number = 0x53ACD
+raw = true
+reads = [0]
+writes = [0]
+
+# inflate(): R0 -> block, R1 flush type.
+[[swi]]
+name = "ZLib_Inflate"
+number = 0x53ACE
+raw = true
+reads = [0, 1]
+writes = [0]
+
+# inflateEnd().
+[[swi]]
+name = "ZLib_InflateEnd"
+number = 0x53ACF
+raw = true
+reads = [0]
+writes = [0]
+
+# deflateSetDictionary(): R1 -> dictionary, R2 its length.
+[[swi]]
+name = "ZLib_DeflateSetDictionary"
+number = 0x53AD0
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+# deflateCopy(): R0 -> destination block, R1 -> source block.
+[[swi]]
+name = "ZLib_DeflateCopy"
+number = 0x53AD1
+raw = true
+reads = [0, 1]
+writes = [0]
+
+# deflateReset().
+[[swi]]
+name = "ZLib_DeflateReset"
+number = 0x53AD2
+raw = true
+reads = [0]
+writes = [0]
+
+# deflateParams(): R1 level, R2 strategy.
+[[swi]]
+name = "ZLib_DeflateParams"
+number = 0x53AD3
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+# inflateSetDictionary().
+[[swi]]
+name = "ZLib_InflateSetDictionary"
+number = 0x53AD4
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+# inflateSync().
+[[swi]]
+name = "ZLib_InflateSync"
+number = 0x53AD5
+raw = true
+reads = [0]
+writes = [0]
+
+# inflateReset().
+[[swi]]
+name = "ZLib_InflateReset"
+number = 0x53AD6
+raw = true
+reads = [0]
+writes = [0]
+
+# gzopen(): R0 -> name, R1 -> mode ('R': RISC OS's load, exec, length,
+# attributes in R2-R5, written into the header or read from it); out R0 the
+# handle or 0.
+[[swi]]
+name = "ZLib_GZOpen"
+number = 0x53AD7
+raw = true
+reads = [0, 1, 2, 3, 4, 5]
+writes = [0, 2, 3, 4, 5]
+
+# gzread(): R0 handle, R1 -> buffer, R2 its size; out R0 bytes read or -1.
+[[swi]]
+name = "ZLib_GZRead"
+number = 0x53AD8
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+# gzwrite(): out R0 bytes written, 0 on an error.
+[[swi]]
+name = "ZLib_GZWrite"
+number = 0x53AD9
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+# gzflush(): R1 the flush type.
+[[swi]]
+name = "ZLib_GZFlush"
+number = 0x53ADA
+raw = true
+reads = [0, 1]
+writes = [0]
+
+# gzclose().
+[[swi]]
+name = "ZLib_GZClose"
+number = 0x53ADB
+raw = true
+reads = [0]
+writes = [0]
+
+# gzerror(): out R0 -> the message, R1 the code.
+[[swi]]
+name = "ZLib_GZError"
+number = 0x53ADC
+raw = true
+reads = [0]
+writes = [0, 1]
+
+# gzseek(): R1 offset, R2 0 from the start or 1 from here; out R0 the
+# position or -1.
+[[swi]]
+name = "ZLib_GZSeek"
+number = 0x53ADD
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+# gztell().
+[[swi]]
+name = "ZLib_GZTell"
+number = 0x53ADE
+raw = true
+reads = [0]
+writes = [0]
+
+# gzeof().
+[[swi]]
+name = "ZLib_GZEOF"
+number = 0x53ADF
+raw = true
+reads = [0]
+writes = [0]
+
+# R0 -> block, R1 0 to let the stream outlive its task, 1 to end it with its
+# task; registers kept.
+[[swi]]
+name = "ZLib_TaskAssociate"
+number = 0x53AE0
+raw = true
+reads = [0, 1]
+writes = [0]
+
+# inflateReset2(): R1 window bits.
+[[swi]]
+name = "ZLib_InflateReset2"
+number = 0x53AE1
+raw = true
+reads = [0, 1]
+writes = [0]
+
+# uncompress2(): R3 -> the input's size, a word, updated.
+[[swi]]
+name = "ZLib_ZUncompress2"
+number = 0x53AE2
+raw = true
+reads = [0, 1, 2, 3]
+writes = [0, 1]
+
+# deflatePending(): R1 -> word for the bytes pending, R2 -> word for the
+# bits (either 0).
+[[swi]]
+name = "ZLib_DeflatePending"
+number = 0x53AE3
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+# deflateGetDictionary(): R1 -> buffer (or 0), R2 -> a word, its length.
+[[swi]]
+name = "ZLib_DeflateGetDictionary"
+number = 0x53AE4
+raw = true
+reads = [0, 1, 2]
+writes = [0]
+
+# inflateGetDictionary().
+[[swi]]
+name = "ZLib_InflateGetDictionary"
+number = 0x53AE5
+raw = true
+reads = [0, 1, 2]
+writes = [0]

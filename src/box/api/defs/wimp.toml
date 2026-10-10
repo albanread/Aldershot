@@ -1,0 +1,400 @@
+# The Window Manager: its SWIs, planned -- defined, not implemented yet.
+#
+# Names, numbers and registers are facts of RISC OS 5's interface; the
+# comments are ours.  `reads` and `writes` are every register a SWI may read
+# and write, for any reason, widened where in doubt (see os.toml).
+
+[module]
+name = "WindowManager"
+impl = "planned"
+chunk = 0x400C0
+
+# R0 = the version known, R1 = "TASK", R2 -> name, R3 -> messages; out R0 = version, R1 = task.
+[[swi]]
+name = "Wimp_Initialise"
+number = 0x400C0
+reads = [0, 1, 2, 3]
+writes = [1]
+
+[[swi]]
+name = "Wimp_CreateWindow"
+number = 0x400C1
+params = [
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+results = [
+  { reg = 0, name = "window", type = "u32" },
+]
+
+[[swi]]
+name = "Wimp_CreateIcon"
+number = 0x400C2
+params = [
+  { reg = 0, name = "priority", type = "u32" },
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+results = [
+  { reg = 0, name = "icon", type = "u32" },
+]
+
+[[swi]]
+name = "Wimp_DeleteWindow"
+number = 0x400C3
+params = [
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+
+[[swi]]
+name = "Wimp_DeleteIcon"
+number = 0x400C4
+params = [
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+
+[[swi]]
+name = "Wimp_OpenWindow"
+number = 0x400C5
+params = [
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+
+[[swi]]
+name = "Wimp_CloseWindow"
+number = 0x400C6
+params = [
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+
+# R0 = mask, R1 -> block, R3 -> poll word; out R0 = reason.
+[[swi]]
+name = "Wimp_Poll"
+number = 0x400C7
+reads = [0, 1, 2, 3]
+writes = [1, 2]
+
+[[swi]]
+name = "Wimp_RedrawWindow"
+number = 0x400C8
+params = [
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+results = [
+  { reg = 0, name = "more", type = "u32" },
+]
+
+[[swi]]
+name = "Wimp_UpdateWindow"
+number = 0x400C9
+params = [
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+results = [
+  { reg = 0, name = "more", type = "u32" },
+]
+
+[[swi]]
+name = "Wimp_GetRectangle"
+number = 0x400CA
+params = [
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+results = [
+  { reg = 0, name = "more", type = "u32" },
+]
+
+[[swi]]
+name = "Wimp_GetWindowState"
+number = 0x400CB
+params = [
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+
+[[swi]]
+name = "Wimp_GetWindowInfo"
+number = 0x400CC
+params = [
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+
+[[swi]]
+name = "Wimp_SetIconState"
+number = 0x400CD
+params = [
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+
+[[swi]]
+name = "Wimp_GetIconState"
+number = 0x400CE
+params = [
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+
+[[swi]]
+name = "Wimp_GetPointerInfo"
+number = 0x400CF
+params = [
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+
+[[swi]]
+name = "Wimp_DragBox"
+number = 0x400D0
+params = [
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+
+[[swi]]
+name = "Wimp_ForceRedraw"
+number = 0x400D1
+reads = [0, 1, 2, 3, 4]
+writes = []
+
+[[swi]]
+name = "Wimp_SetCaretPosition"
+number = 0x400D2
+reads = [0, 1, 2, 3, 4, 5]
+writes = []
+
+[[swi]]
+name = "Wimp_GetCaretPosition"
+number = 0x400D3
+params = [
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+
+[[swi]]
+name = "Wimp_CreateMenu"
+number = 0x400D4
+reads = [0, 1, 2, 3]
+writes = []
+
+[[swi]]
+name = "Wimp_DecodeMenu"
+number = 0x400D5
+reads = [0, 1, 2, 3]
+writes = []
+
+[[swi]]
+name = "Wimp_WhichIcon"
+number = 0x400D6
+reads = [0, 1, 2, 3]
+writes = []
+
+[[swi]]
+name = "Wimp_SetExtent"
+number = 0x400D7
+params = [
+  { reg = 0, name = "window", type = "u32" },
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+
+[[swi]]
+name = "Wimp_SetPointerShape"
+number = 0x400D8
+reads = [0, 1, 2, 3, 4, 5]
+writes = []
+
+[[swi]]
+name = "Wimp_OpenTemplate"
+number = 0x400D9
+params = [
+  { reg = 1, name = "filename", type = "str" },
+]
+
+[[swi]]
+name = "Wimp_CloseTemplate"
+number = 0x400DA
+
+[[swi]]
+name = "Wimp_LoadTemplate"
+number = 0x400DB
+reads = [0, 1, 2, 3, 4, 5, 6]
+writes = [1, 2, 3, 4, 5, 6]
+
+[[swi]]
+name = "Wimp_ProcessKey"
+number = 0x400DC
+params = [
+  { reg = 0, name = "key", type = "u32" },
+]
+
+[[swi]]
+name = "Wimp_CloseDown"
+number = 0x400DD
+reads = [0, 1]
+writes = []
+
+# R0 -> the command; out R0 = the new task, or 0.
+[[swi]]
+name = "Wimp_StartTask"
+number = 0x400DE
+reads = [0, 1]
+writes = []
+
+# R3-R5: sprite, area and extra buttons, from RISC OS 3.5.
+[[swi]]
+name = "Wimp_ReportError"
+number = 0x400DF
+reads = [0, 1, 2, 3, 4, 5]
+writes = [1]
+
+[[swi]]
+name = "Wimp_GetWindowOutline"
+number = 0x400E0
+params = [
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+
+[[swi]]
+name = "Wimp_PollIdle"
+number = 0x400E1
+reads = [0, 1, 2, 3]
+writes = [1, 2]
+
+[[swi]]
+name = "Wimp_PlotIcon"
+number = 0x400E2
+params = [
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+
+[[swi]]
+name = "Wimp_SetMode"
+number = 0x400E3
+params = [
+  { reg = 0, name = "mode", type = "u32" },
+]
+
+[[swi]]
+name = "Wimp_SetPalette"
+number = 0x400E4
+params = [
+  { reg = 1, name = "block", type = "ptr<void>" },
+]
+
+[[swi]]
+name = "Wimp_ReadPalette"
+number = 0x400E5
+reads = [1, 2]
+writes = []
+
+[[swi]]
+name = "Wimp_SetColour"
+number = 0x400E6
+params = [
+  { reg = 0, name = "colour", type = "u32" },
+]
+
+# Out R2 = the task the message went to.
+[[swi]]
+name = "Wimp_SendMessage"
+number = 0x400E7
+reads = [0, 1, 2, 3]
+writes = [2]
+
+[[swi]]
+name = "Wimp_CreateSubMenu"
+number = 0x400E8
+reads = [0, 1, 2, 3]
+writes = []
+
+[[swi]]
+name = "Wimp_SpriteOp"
+number = 0x400E9
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [1, 2, 3, 4, 5, 6, 7]
+
+[[swi]]
+name = "Wimp_BaseOfSprites"
+number = 0x400EA
+results = [
+  { reg = 0, name = "rom", type = "addr" },
+  { reg = 1, name = "ram", type = "addr" },
+]
+
+[[swi]]
+name = "Wimp_BlockCopy"
+number = 0x400EB
+reads = [0, 1, 2, 3, 4, 5, 6]
+writes = []
+
+[[swi]]
+name = "Wimp_SlotSize"
+number = 0x400EC
+reads = [0, 1]
+writes = [1, 2, 3, 4]
+
+[[swi]]
+name = "Wimp_ReadPixTrans"
+number = 0x400ED
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = []
+
+[[swi]]
+name = "Wimp_ClaimFreeMemory"
+number = 0x400EE
+reads = [0, 1]
+writes = [1, 2]
+
+[[swi]]
+name = "Wimp_CommandWindow"
+number = 0x400EF
+params = [
+  { reg = 0, name = "what", type = "u32" },
+]
+
+[[swi]]
+name = "Wimp_TextColour"
+number = 0x400F0
+params = [
+  { reg = 0, name = "colour", type = "u32" },
+]
+
+[[swi]]
+name = "Wimp_TransferBlock"
+number = 0x400F1
+reads = [0, 1, 2, 3, 4]
+writes = []
+
+[[swi]]
+name = "Wimp_ReadSysInfo"
+number = 0x400F2
+reads = [0, 1, 2]
+writes = [1, 2]
+
+[[swi]]
+name = "Wimp_SetFontColours"
+number = 0x400F3
+reads = [1, 2]
+writes = []
+
+[[swi]]
+name = "Wimp_GetMenuState"
+number = 0x400F4
+reads = [0, 1, 2, 3]
+writes = []
+
+[[swi]]
+name = "Wimp_AddMessages"
+number = 0x400F6
+reads = [0, 1]
+writes = []
+
+[[swi]]
+name = "Wimp_RemoveMessages"
+number = 0x400F7
+reads = [0, 1]
+writes = []
+
+[[swi]]
+name = "Wimp_TextOp"
+number = 0x400F9
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [1, 2]
+
+[[swi]]
+name = "Wimp_ResizeIcon"
+number = 0x400FC
+reads = [0, 1, 2, 3, 4, 5]
+writes = []

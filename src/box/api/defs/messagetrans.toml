@@ -1,0 +1,85 @@
+# MessageTrans: messages files and translated errors -- a native module
+# (modules/messagetrans).  Every SWI is register-level, as its callers use
+# it: raw.
+#
+# Names, numbers and registers are facts of RISC OS 5's interface; the
+# comments are ours.  `reads` and `writes` are every register a SWI may read
+# and write, for any reason, widened where in doubt (see os.toml).
+
+[module]
+name = "MessageTrans"
+impl = "native"
+chunk = 0x41500
+
+[[swi]]
+name = "MessageTrans_FileInfo"
+number = 0x41500
+raw = true
+reads = [1]
+writes = [0, 2]
+
+[[swi]]
+name = "MessageTrans_OpenFile"
+number = 0x41501
+raw = true
+reads = [0, 1, 2, 3]
+writes = []
+
+# R4-R7 are the substitutions for %0 to %3.
+[[swi]]
+name = "MessageTrans_Lookup"
+number = 0x41502
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [1, 2, 3]
+
+[[swi]]
+name = "MessageTrans_MakeMenus"
+number = 0x41503
+raw = true
+reads = [0, 1, 2, 3]
+writes = [2, 3]
+
+[[swi]]
+name = "MessageTrans_CloseFile"
+number = 0x41504
+raw = true
+reads = [0]
+writes = []
+
+[[swi]]
+name = "MessageTrans_EnumerateTokens"
+number = 0x41505
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = [2, 3, 4]
+
+# It always fails: R0 comes back as the translated error.
+[[swi]]
+name = "MessageTrans_ErrorLookup"
+number = 0x41506
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = []
+
+[[swi]]
+name = "MessageTrans_GSLookup"
+number = 0x41507
+raw = true
+reads = [0, 1, 2, 3, 4, 5, 6, 7]
+writes = [2, 3]
+
+[[swi]]
+name = "MessageTrans_CopyError"
+number = 0x41508
+raw = true
+reads = [0]
+writes = []
+
+# The kernel's help dictionary: R0 -> it (ROSGD ships none: an error).
+[[swi]]
+name = "MessageTrans_Dictionary"
+number = 0x41509
+raw = true
+reads = []
+writes = [0]

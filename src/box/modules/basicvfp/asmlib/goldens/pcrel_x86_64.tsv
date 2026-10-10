@@ -1,0 +1,15 @@
+# x86-64's PC-relative forms, the operand the target's address as BBC BASIC
+# gives it: LLVM MC's bytes (gen_pcrel.py, Xcode's clang); @ where assembled
+jmp 0x10110	eb0e	@10100
+jmp 0x10400	e9fb020000	@10100
+jmp 0x101f0	ebee	@10200
+jmp 0x10100	e9fbfcffff	@10400
+call 0x10400	e8fb020000	@10100
+call 0x10100	e8fbfcffff	@10400
+je 0x10120	741e	@10100
+jne 0x10800	0f85fa060000	@10100
+jl 0x10100	0f8cfafcffff	@10400
+lea rax, [rip + L_10400]	488d05f9020000	@10100
+mov eax, dword ptr [rip + L_10080]	8b057affffff	@10100
+mov dword ptr [rip + L_10200], 5	c705f600000005000000	@10100
+movsd xmm0, qword ptr [rip + L_10300]	f20f1005f8010000	@10100

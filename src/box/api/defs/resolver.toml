@@ -1,0 +1,52 @@
+# The Resolver, as a native module over the host's name lookup: its SWIs, typed.
+#
+# RISC OS 5 ships the Resolver (0.76) as a binary blob, with no source; its
+# behaviour here was read from that blob's own code, and from its clients
+# (TCPIPLibs' inetlib, OSLib's header).  modules/resolver/README.md describes it.
+#
+# A host is described by a hostent in the RMA, five words: name, aliases,
+# address type, address length, address list -- the cache owns it.
+
+[module]
+name = "Resolver"
+impl = "native"
+chunk = 0x46000
+
+# Blocking: R1 names the host; R0 is not read.
+[[swi]]
+name = "Resolver_GetHostByName"
+number = 0x46000
+params = [{ reg = 1, name = "host_name", type = "str" }]
+results = [
+  { reg = 0, name = "status", type = "u32" },     # 0 found
+  { reg = 1, name = "hostent", type = "addr" },   # 0 when not found
+]
+
+# R0 names the host: one step of a non-blocking lookup (36, EINPROGRESS,
+# until it ends).  R0 = 0: R1 points to a four-byte IPv4 address, looked up
+# by its in-addr.arpa name, blocking.
+[[swi]]
+name = "Resolver_GetHost"
+number = 0x46001
+params = [
+  { reg = 0, name = "host_name", type = "addr" },
+  { reg = 1, name = "address", type = "addr" },
+]
+results = [
+  { reg = 0, name = "status", type = "u32" },
+  { reg = 1, name = "hostent", type = "addr" },
+]
+
+# The cache, one entry at a time: planned until something needs it.
+[[swi]]
+name = "Resolver_GetCache"
+number = 0x46002
+impl = "planned"
+reads = [0]
+writes = [0, 1, 2, 3, 4, 5, 6]
+
+# R0: 0-2 flush the cache, 3 re-read the configuration, 4-9 accepted.
+[[swi]]
+name = "Resolver_CacheControl"
+number = 0x46003
+params = [{ reg = 0, name = "reason", type = "u32" }]

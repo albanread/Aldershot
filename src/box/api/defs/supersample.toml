@@ -1,0 +1,25 @@
+# SuperSample, as a native module (modules/supersample).
+#
+# Names, numbers and registers are facts of RISC OS 5's interface
+# (Video/Render/Super); the comments are ours.
+
+[module]
+name = "Super"
+impl = "native"
+chunk = 0x40D80
+
+# R1 -> 1-bpp input, R2 its line length, R3 its rows (4n+3), R4 -> 4-bpp
+# output, n rows of R2 bytes; R0 corrupted.
+[[swi]]
+name = "Super_Sample90"
+number = 0x40D80
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = [0, 1, 2, 3, 4]
+
+[[swi]]
+name = "Super_Sample45"
+number = 0x40D81
+raw = true
+reads = [0, 1, 2, 3, 4]
+writes = [0, 1, 2, 3, 4]

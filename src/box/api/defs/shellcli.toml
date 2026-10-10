@@ -1,0 +1,26 @@
+# ShellCLI, as a native module: its SWIs, typed.
+#
+# The contract is ShellCLI's own (Desktop/ShellCLI: cmhg/ShellCLIHdr,
+# c/module and hdr/Shell); modules/shellcli/README.md describes
+# *ShellCLI and what the shell does.  Names, numbers and register roles are
+# facts from RISC OS 5's sources.  Neither SWI takes or returns anything in
+# a register: the shell is one at a time, the module's own.
+
+[module]
+name = "ShellCLI"
+impl = "native"
+chunk = 0x405C0
+
+# A shell: its block claimed, every environment handler set to its default
+# but the exit and error handlers, which become the shell's (the exit
+# handler it replaces kept).  A second, while one exists: &900 "ShellCLI
+# not active" (the Messages file's NoSpawn).
+[[swi]]
+name = "Shell_Create"
+number = 0x405C0
+
+# The shell gone: the exit handler put back, the block freed.  With no
+# shell, nothing.
+[[swi]]
+name = "Shell_Destroy"
+number = 0x405C1

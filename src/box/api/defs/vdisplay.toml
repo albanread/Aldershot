@@ -1,0 +1,85 @@
+# VDisplay, a native module (runtime/vdu/vdisplay.c; runtime/vdu/README.md,
+# "Virtual displays"): a task's own screen, in a mode of its own, which the
+# VDU draws into while the task's own code runs (GraphTask uses it).
+#
+# ROSGD's own interface, in the application range after Worker (&C0180);
+# its errors are &C01C0 up.  Every SWI is raw: the registers not written
+# are kept.
+
+[module]
+name = "VDisplay"
+impl = "native"
+chunk = 0xC01C0
+
+# R0 flags (0), R1 the mode: a number, a mode selector's address, or -1 for
+# mode 28.  Out R0 the display's handle, R1 its dynamic area's number.
+[[swi]]
+name = "VDisplay_Create"
+number = 0xC01C0
+raw = true
+reads = [0, 1]
+writes = [0, 1]
+
+# R0 the handle: the display and its area gone.  Refused while a task has
+# it ("Virtual display in use").
+[[swi]]
+name = "VDisplay_Destroy"
+number = 0xC01C1
+raw = true
+reads = [0]
+writes = []
+
+# R0 the handle, or 0 for none (the real display); R1 the task: 0 the
+# caller.  Out R0 the handle the task had, or 0.  The display is live from
+# the SWI's return.
+[[swi]]
+name = "VDisplay_Attach"
+number = 0xC01C2
+raw = true
+reads = [0, 1]
+writes = [0]
+
+# R0 the handle.  Out R0 the mode (a number, or its selector copy's
+# address), R1 -> the shown bank's sprite area, R2 -> its sprite (the
+# palette brought up to date), R3 and R4 width and height in pixels, R5
+# XEig, R6 YEig, R7 the change count.
+[[swi]]
+name = "VDisplay_Info"
+number = 0xC01C3
+raw = true
+reads = [0]
+writes = [0, 1, 2, 3, 4, 5, 6, 7]
+
+# R0 the handle, R1 flags (bit 0: the window has the input focus), R2 the
+# window's handle or -1, R3 -> four words, the rectangle the display is
+# shown in (OS units on the screen: x0, y0 inclusive, x1, y1 exclusive), or
+# 0 for not shown.  The mouse is mapped through the rectangle; buttons and
+# key scans need the focus.
+[[swi]]
+name = "VDisplay_SetFocus"
+number = 0xC01C4
+raw = true
+reads = [0, 1, 2, 3]
+writes = []
+
+# R0 the handle, R1 flags (bit 0: the box cleared after reading).  Out R0
+# bit 0 something changed, bit 1 all of it (a mode or palette change, or
+# drawing the VDU does not see); R1 the change count; R2-R5 the box in the
+# display's pixels, x0, y0, x1, y1 inclusive, y up from the bottom.
+[[swi]]
+name = "VDisplay_Changed"
+number = 0xC01C5
+raw = true
+reads = [0, 1]
+writes = [0, 1, 2, 3, 4, 5]
+
+# R0 the handle, R1 the mode: a number, a mode selector's address, or -1
+# for mode 28.  The display's mode set from outside it (GraphTask's Mode
+# menu), as the program's own MODE sets it: the screen cleared, the
+# context reset, the change count moved.
+[[swi]]
+name = "VDisplay_SetMode"
+number = 0xC01C6
+raw = true
+reads = [0, 1]
+writes = []

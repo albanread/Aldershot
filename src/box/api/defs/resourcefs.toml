@@ -1,0 +1,25 @@
+# ResourceFS: registering files -- a native shim until FileSwitch
+# (modules/resourcefs).
+#
+# Names, numbers and registers are facts of RISC OS 5's interface; the
+# comments are ours.  `reads` and `writes` are every register a SWI may read
+# and write, for any reason, widened where in doubt (see os.toml).
+
+[module]
+name = "ResourceFS"
+impl = "native"
+chunk = 0x41B40
+
+[[swi]]
+name = "ResourceFS_RegisterFiles"
+number = 0x41B40
+params = [
+  { reg = 0, name = "files", type = "ptr<void>" },
+]
+
+[[swi]]
+name = "ResourceFS_DeregisterFiles"
+number = 0x41B41
+params = [
+  { reg = 0, name = "files", type = "ptr<void>" },
+]

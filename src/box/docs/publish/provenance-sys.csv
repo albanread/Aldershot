@@ -1,0 +1,24 @@
+path,kind,source,licence,evidence
+modules/fileswitch/fileswitch.c,ROOL,"FileSys/FileSwitch s.* (FileSwitch, FileSwBody, FSControl, OSFile, OSFind, ...)",Apache-2.0,"header: reimplemented keeping SWI contracts, error numbers and texts; follows FileSwitch's name and stream rules"
+modules/fileswitch/fsutils.c,ROOL,"FileSys/FileSwitch s.FSCommands, CtrlUtils, FSUtils*",Apache-2.0,"header: 'Written from FileSwitch's own (FSControl, CtrlUtils, FSUtils, FSCommands)'"
+modules/fileswitch/modfs.c,ROOL,"FileSys/FileSwitch s.LowLevel, Ensure, FSCommon, FSShared, hdr.LowFSI",Apache-2.0,"header cites LowLevel, Ensure (EnsureCanonicalObject, TryGetFileClosed) and the entry contracts"
+modules/fileswitch/fsw.h,ROOL,"FileSys/FileSwitch hdr.LowFSI, HighFSI, s.FSErrors",Apache-2.0,error numbers and FSInfo bits copied from FileSwitch's headers and Messages
+modules/fileswitch/hostfs.c,own,"the team's HostFS (RISCOSQEMUA72 hw/misc/vmchannel.c), not ROOL",MIT,header: ported from the host side of the team's own HostFS; no ROOL source named
+modules/fileswitch/fileswitch.h,own,ROSGD's C interface between FileSwitch and its native filing systems,MIT,the struct fs interface is new; only attribute bits and a comment cite hdr/LowFSI
+modules/spriteextend/spriteextend.c,ROOL,"Video/Render/SprExtend Sources/SprExtend, SprOp, SWIs, SprAdjSize, SprTrans",Apache-2.0,"header: 'written again here from its sources, pixel for pixel'"
+modules/spriteextend/scaled.c,ROOL,"Video/Render/SprExtend Sources/PutScaled, c/PutScaled, c/asmcore, c/sprtrans",Apache-2.0,"header: DDA, colour and pixel rules 'from the original's sources'"
+modules/spriteextend/sprext.h,ROOL,"Video/Render/SprExtend hdr/SprExtend, hdr/NewErrors",Apache-2.0,error numbers and sprite offsets of SpriteExtend
+modules/spriteextend/jpeg.c,ROOL + other open source (IJG),"Video/Render/SprExtend c/rojpeg, c/romerge, c/jdcolor (IJG release 9, as modified by ROOL)","Apache-2.0; IJG licence; BSD-3-Clause (ROOL 2015, romerge)","upsampling and colour conversion 'the original's, from its sources'; carries the IJG terms and romerge's BSD notice. The IJG library itself is libjpeg-turbo, linked, not copied. Lead to confirm"
+modules/spriteextend/spriteextend.h,own,list entry for the ROM's module table,MIT,declaration only
+modules/territory/territorymanager.c,ROOL,"Internat/Territory/TerritoryManager 0.58 (ObjAsm, read from the 5.30 ROM); tree holds 0.59",Apache-2.0,header: 'Written from RISC OS 5.30's Territory Manager 0.58'. Copyright line from the TerritoryManager hdr/Territory and Makefile (Acorn 1996)
+modules/territory/timecalc.c,ROOL,Internat/Territory/TerritoryModule s.DateTime; Territory Manager 0.58,Apache-2.0,'each RISC OS's own arithmetic to the bit'
+modules/territory/uk.c,ROOL,"Internat/Territory/TerritoryModule s.ModHead, Entries, DateTime, Transform, UK",Apache-2.0,header: 'Written from RISC OS's territory module source'
+modules/territory/territory.h,own,the interface between the manager and the territory data,MIT,struct declarations; the values come from generated data
+modules/messagetrans/messagetrans.c,ROOL,Internat/MsgTrans s.MsgTrans,Apache-2.0,"header: 'Written from RISC OS's (Internat/MsgTrans, s/MsgTrans and its Doc)'"
+modules/messagetrans/messagetrans.h,own,list entry for the ROM's module table,MIT,declaration only
+modules/pdriver/pdriver.c,ROOL,"Printing/Modules/PDriver 3.41 s.PDriver, s.MsgCode, hdr.PDriver; PRM3",Apache-2.0,"header: written from the PRM and ROOL's sources for errors, job list and SelectJob 0. Judgement: follows ROOL for those parts, so ROOL. Lead to confirm"
+modules/pdriver/pdriver.h,own,ROSGD's constants and error base,MIT,new
+modules/pdriver/dest.c,own,"new for BOX: print destinations, *PrintTo",MIT,no ROOL source named
+modules/pdriver/ipp.c,own,"new for BOX, from RFC 8010 (the protocol, not code)",MIT,no third-party code
+modules/pdriver/ipp.h,own,"new for BOX, tag numbers from RFC 8010",MIT,no third-party code
+modules/pdriver/printerfs.c,own,new for BOX: the printer: filing system,MIT,no ROOL source named
