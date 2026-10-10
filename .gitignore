@@ -1,0 +1,5 @@
+.DS_Store
+
+# A list of personal names. It must never be committed or published.
+articles-redact.txt
+**/articles-redact.txt
