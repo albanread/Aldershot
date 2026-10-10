@@ -6,10 +6,11 @@
 
 Is BOX an emulator? No — but it contains one.
 
-RISC OS itself, in BOX, is native code. The kernel, the Window Manager,
-the filing systems, the Font Manager, BASIC and the rest have been
-translated or rewritten in C and compiled for the machine they run on
-(see *Tiers of Translation*). No processor is emulated to run the
+BOX is a RISC OS application environment for 64-bit computers, and
+RISC OS's components in it are native code. The kernel, the Window
+Manager, the filing systems, the Font Manager, BASIC and the rest have
+been translated or rewritten in C and compiled for the machine they run
+on (see *Tiers of Translation*). No processor is emulated to run the
 operating system.
 
 For programs that cannot be converted — chiefly ARM binaries whose
@@ -262,7 +263,7 @@ so is better than guessing.
 
 | | Full emulator | BOX |
 | --- | --- | --- |
-| RISC OS itself | emulated | native |
+| RISC OS's components | emulated | native |
 | ARM binaries | emulated | emulated, in the ARM container |
 | BASIC | emulated | native |
 | C programs | emulated | native, after a recompile |
@@ -271,9 +272,10 @@ so is better than guessing.
 
 If you want to run old software exactly as it was, games that poke the
 hardware, or anything the container does not yet handle, use an
-emulator. If you want RISC OS to run quickly on modern hardware, with
-your own programs in BASIC or C and an emulator to hand for the binaries
-you cannot do without, BOX is the better home.
+emulator. If you want a RISC OS application environment that runs
+quickly on modern hardware, with your own programs in BASIC or C and an
+emulator to hand for the binaries you cannot do without, BOX is the
+better home.
 
 ---
 

@@ -1,8 +1,9 @@
 # Articles
 
-Technical articles about BOX. They follow the style of the RISC OS
-Programmer's Reference Manuals and describe the system as it works
-today. Each article can be read on its own.
+Technical articles about BOX, a RISC OS application environment for
+64-bit computers. They follow the style of the RISC OS Programmer's
+Reference Manuals and describe the system as it works today. Each
+article can be read on its own.
 
 | Article | What it covers |
 | --- | --- |
@@ -11,3 +12,4 @@ today. Each article can be read on its own.
 | [Emulation in BOX](2-Emulation.md) | Is BOX an emulator? No, but it contains one. What a full emulator costs; why BOX's operating system is native and only an ARM program's own instructions are emulated; the ARM container — dynarmic, two back ends, memory without marshalling, native floating point; ARM modules as shadows of native ones; an emulated program as an ordinary Wimp task; what runs today, honestly counted; what it will not do, and when to use a full emulator instead. |
 | [The Native Wimp](3-Wimp.md) | The Window Manager rewritten in C from a specification: why a translation of it could not be kept, how the rewrite was tested against RISC OS 5.30 and against the translation it replaced, what it cost in accuracy and gained in speed; surface windows, which put a BASIC program's screen — or a Linux program's window — in a Wimp window; why BOX keeps every task's slot at `&8000`; and why the slots are 1.5 GB and lazy. |
 | [HostFS and the Filing Systems](4-Filing.md) | Why BOX does not implement FileCore, and why that is a decision taken out of care: a filing system's mistakes are silent and permanent, disc formats are exact about word size where 64-bit host code is not, and a rewrite from a specification is only as good as the specification. What BOX does instead — FileSwitch rewritten, HostFS over Linux's filing systems and its 690-test conformance suite, ResourceFS for the ROM's files, SparkFS for archives — and booting RISC OS from a USB stick. |
+| [Is BOX Linux?](5-Linux.md) | RISC OS is a 32-bit, single-process, interrupt-driven masterpiece, and no 64-bit port can or should be RISC OS; BOX is a RISC OS application environment for 64-bit computers. Yes and no: BOX boots a Linux kernel, which provides portability, drivers, networking and network services, and saved porting RISC OS's own drivers and stacks; but there is no Linux userland — only `/init` and a few static programs linked with musl — and Alpine Linux is used only to build the kernel. Why that is a loss in some ways, and what BOX is for. |

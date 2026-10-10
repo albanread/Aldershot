@@ -4,9 +4,10 @@
 
 ## Introduction
 
-BOX is RISC OS 5 running on a Linux kernel, with RISC OS itself translated
-to C and compiled as native code. This article describes how the system is
-put together as it stands today:
+BOX is a RISC OS application environment for 64-bit computers: RISC OS
+5's components, translated to C and compiled as native code, running on
+a Linux kernel. This article describes how the system is put together as
+it stands today:
 
 * what the Linux kernel provides, and what RISC OS provides
 * the arena, which is the memory both of them share
