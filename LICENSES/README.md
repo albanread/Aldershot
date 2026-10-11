@@ -80,6 +80,7 @@ files are on every BOX's disc, in `Documents.Licences`.
 | [libjpeg-turbo](box/libjpeg-turbo.txt) | 3.2.0 | IJG licence, Modified (3-clause) BSD, zlib | /init (CompressJPEG, SpriteExtend's JPEG, ChangeFSI's CFSI), !NetSurf |
 | [libnl](box/libnl.txt) | 3.12.0 | GNU LGPL 2.1 | ksmbd.tools |
 | [libpng](box/libpng.txt) | 1.6.50 | libpng licence (PNG Reference Library License 2) | /init (CompressPNG, SpriteExtend's PNG, ChangeFSI's CFSI), !NetSurf |
+| [LuaJIT](box/LuaJIT.txt) | 2.1 (c6ffc14) | MIT | *LuaJIT, the Lua language, linked into /init |
 | [libsmb2](box/libsmb2.txt) | commit fc710a3ebd | GNU LGPL 2.1 or later | LanManFS (*LMConnect), linked statically into /init |
 | [Linux](box/Linux.txt) | 6.18.54 | GNU GPL 2, with the Linux syscall note | the kernel BOX runs on (both machines, and the PC image) |
 | [LLVM](box/LLVM.txt) | 22.1.2 | Apache License 2.0 with LLVM Exceptions | both boxes' clang and ld.lld (*CC, *RosBas), compiler-rt's builtins; libc++, libc++abi and libunwind in /init (by zig) |
@@ -94,6 +95,7 @@ files are on every BOX's disc, in `Documents.Licences`.
 | [OpenSSH](box/OpenSSH.txt) | 10.5p1 | BSD-style (several) | ssh, ssh-keygen and sshd in the ROM (*SSH, logging in to the box) |
 | [OpenSSL](box/OpenSSL.txt) | 3.6.4 | Apache License 2.0 | /init (AcornSSL, URL fetching), ssh and sshd |
 | [OvationPro](box/OvationPro.txt) | 2.78 (26-July-2022) | Not stated in the application; distributed by RISC OS Open in RISC OS 5.30's image | Apps.!OvnPro, as RISC OS 5.30's image has it, unaltered (ARM code, run by the ARM container) |
+| [RiscLua](box/RiscLua.txt) | 8.6 | MIT | the riscos library of *LuaJIT, ported from RiscLua's riscoslib |
 | [Paige](box/Paige.txt) | 3.0b (ec53af9a25) | GNU LGPL 2.1 | !Write's text engine. BOX's changes to Paige are under Paige's licence |
 | [PipeDream](box/PipeDream.txt) | 4.63 (b63a102bd6) | Mozilla Public License 2.0 | Apps.!PipeDream and Documents.PipeDream. BOX's port of PipeDream, its changes and the C that replaces its assembler, is under PipeDream's licence |
 | [QEMU](box/QEMU.txt) | 11.1 (qemu-intel-mac) | GNU GPL 2; parts under other free licences | the Mac releases: BOX.app runs the box in it |
