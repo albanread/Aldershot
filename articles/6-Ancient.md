@@ -2,6 +2,11 @@
 
 *11 October 2026*
 
+**Note — non-technical opinion.** The other articles here describe how the
+code works and can be checked against it. This one is a point of view about
+old software and new machines, and nothing in it should be taken as a
+description of the system.
+
 ## Introduction
 
 I value software for its cultural significance. Some of my favourite
