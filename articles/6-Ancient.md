@@ -96,7 +96,23 @@ So RISC OS got a long run of native hardware, which is more than most
 systems of its generation got, and that hardware was modest for nearly all
 of it. That position is returning now: the machines a 32-bit RISC OS can
 run on natively are again the slow ones, and the fast ones are out of
-reach.
+reach. The good luck runs out in the end.
+
+And then the slowness turns into a sort of virtue. Software written to be
+quick on a modest machine is small, and it does not waste anything, because
+it could not afford to. Move it onto a current processor and it does not
+merely work; it goes like a scalded cat. The thirty-year-old program gets
+the benefit of thirty years of silicon, and it was built lean by people who
+had no choice in the matter.
+
+That benefit is worth more now than it has been for a long while. Computers
+sat in a doldrum for years — Intel's doldrum, mostly — where each new
+generation was a few per cent on the last and the fan got louder. That has
+ended. Every new Mac is quicker than the previous generation's Pro model.
+The Snapdragons are on the prowl. Even Intel is competing again, which it
+had not needed to do for a decade. None of it is down to any one company's
+cleverness: it is down to the extraordinary engineering of the foundries in
+Taiwan, on which all of them depend.
 
 ---
 
