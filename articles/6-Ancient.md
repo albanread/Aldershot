@@ -173,6 +173,37 @@ But the motive is selfish and I would rather say so.
 
 ---
 
+## 8. The best native experience, and how old it is
+
+It is worth putting a date on the hardware, because it makes the point of
+this article better than any argument.
+
+The best native experience of RISC OS — the quickest machine the real
+32-bit system runs on as itself, with no translation and no emulation —
+is a Cortex-A72. Arm announced that core in February 2015, so the design
+work on it dates to roughly 2013 and 2014. It was done at Arm's Austin
+design centre under the codename Maya, as the successor to the Cortex-A57,
+and the aim was not a new architecture but better performance for the same
+watt on the ARMv8-A they already had.
+
+The first chips using it reached telephones in early 2016. The Raspberry Pi
+4 took it in 2019, by which time it was a mature and inexpensive core, which
+is exactly why it was available to a board at that price.
+
+So the fastest native RISC OS machine is built on a design that is about a
+dozen years old, and was a deliberately frugal design when it was new. That
+is not a complaint about the Pi, which is a fine machine and the reason
+RISC OS has had anything to run on at all. It is the whole situation in one
+fact: the system's native hardware ceiling was set by a mobile telephone
+core from the middle of the last decade, while the machines on this desk
+have moved on by a decade and several process nodes.
+
+Which is the argument for doing the work described in these articles. The
+ancient software is not the limit. The limit is insisting that it keep its
+original instruction set.
+
+---
+
 ## Credit
 
 The observation about cassettes is from *Good Omens* (1990) by Terry
