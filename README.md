@@ -35,6 +35,11 @@ Also:
 - Reading the clock no longer costs a system call on Apple silicon, so SWIs run about three times faster.
 - Miscellaneous bug fixes and quality improvements.
 
+Fixes (2026.10.11.3):
+
+- The mouse pointer no longer disappears after the desktop theme is changed.
+- Sound from several programs now plays together, and SharedSound's handlers run safely.
+
 ### Downloads
 
 | Machine | Download | Needs |
