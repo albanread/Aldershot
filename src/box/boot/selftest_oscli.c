@@ -28,7 +28,7 @@
 
 static uint32_t line;               /* arena: the command */
 static const os_error *last;        /* the last command's error */
-static char out[4096];                  /* room for *Modules as the ROM grows */
+static char out[8192];                  /* room for *Modules as the ROM grows */
 static unsigned outn;
 
 static int wrch(struct ros_cpu *s, uint32_t r12)

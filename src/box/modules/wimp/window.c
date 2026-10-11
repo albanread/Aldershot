@@ -391,8 +391,19 @@ static struct wimp_box clip_box(struct wimp_box a, struct wimp_box b)
 }
 
 /* visible(W, box): the box, less what is above W and outside its ancestors */
+static void visible(const struct wimp_window *win, struct wimp_box box, int st, struct wimp_rlist *out);
+
+/* ... and less W's own notches, if its corners are round (shape.c): what
+ * is below draws those */
 void wimp_visible(const struct wimp_window *win, struct wimp_box box, int st,
                   struct wimp_rlist *out)
+{
+    visible(win, box, st, out);
+    if (out->n)
+        wimp_rl_subtract_notches(out, win, st);
+}
+
+static void visible(const struct wimp_window *win, struct wimp_box box, int st, struct wimp_rlist *out)
 {
     out->n = 0;
     out->overflow = 0;
@@ -408,7 +419,10 @@ void wimp_visible(const struct wimp_window *win, struct wimp_box box, int st,
             struct wimp_box ox = x->s[st].outline;
             if (parent && (c->s[st].flags & FLAG_FOREGROUND) && !(x->s[st].flags & FLAG_FOREGROUND))
                 ox = clip_box(ox, parent->s[st].vis);
-            wimp_rl_subtract(out, ox);
+            if (wimp_corner_radius(x, st))
+                wimp_rl_subtract_shape(out, x, st, ox);     /* its shape: its notches are ours */
+            else
+                wimp_rl_subtract(out, ox);
         }
         if (!parent)
             return;
@@ -418,6 +432,7 @@ void wimp_visible(const struct wimp_window *win, struct wimp_box box, int st,
         }
         wimp_rl_clip(out, (c->s[st].flags & FLAG_FOREGROUND) ? parent->s[st].outline
                                                              : parent->s[st].vis);
+        wimp_rl_subtract_notches(out, parent, st);  /* a round-cornered parent's notches are not its */
         c = parent;
     }
 }
@@ -1197,6 +1212,17 @@ void wimp_mode_change_requests(void)
     wr(b, 0, 20);
     wr(b, 16, 0x400C1u);
     wimp_queue_message(17, b, 20, RECV_BROADCAST, 0, 0);
+    wimp_reopen_requests();
+}
+
+/* An Open_Window_Request for each open window that a task owns, from back
+ * to front, leaving out panes: a mode change's, and a theme change's when
+ * the furniture's sizes may have changed (ROSGD, design 35). */
+void wimp_reopen_requests(void)
+{
+    struct wimp_ws *w = wimp_ws();
+    uint8_t b[36];
+    memset(b, 0, sizeof b);
     struct wimp_window *order[WIMP_WINDOWS / 4];
     unsigned n = 0;
     for (struct wimp_window *x = wimp_stack_front(NO_WINDOW, REQ); x && n < sizeof order / sizeof order[0];

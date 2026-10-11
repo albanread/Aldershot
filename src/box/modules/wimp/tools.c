@@ -53,12 +53,13 @@ static int call(uint32_t swi, struct ros_cpu *c)
     return !c->v;
 }
 
-/* The tool area, loaded afresh: 0 if there is no tools file */
+/* The tool area, loaded afresh: 0 if there is no tools file.  The file is
+ * *ToolSprites' (a theme's Tools, design 35), else WindowManager:Tools. */
 static uint32_t load(void)
 {
     struct wimp_ws *w = wimp_ws();
     char *name = (char *)w->scratch;
-    strcpy(name, "WindowManager:Tools");
+    snprintf(name, 250, "%s", w->tools_file[0] ? w->tools_file : "WindowManager:Tools");
     struct ros_cpu c;
     ros_cpu_enter(&c);
     c.r[0] = 17;
@@ -259,6 +260,14 @@ void wimp_tools_refresh(void)
     int ws[] = { M_VSCROLL_W, M_BACK_W, M_CLOSE_W, M_ICONISE_W, M_LEFT_W, M_RIGHT_W };
     for (unsigned i = 0; i < 4; i++) if (!m[hs[i]]) m[hs[i]] = 40;
     for (unsigned i = 0; i < 6; i++) if (!m[ws[i]]) m[ws[i]] = 40;
+    /* A painted theme gives the furniture's sizes (design 35 P2): the title
+     * row's buttons square to the title, the scroll bars' arrows square to
+     * the bars, so outlines and hit-testing follow what is drawn */
+    const struct wimp_style *st = &w->style;
+    if (st->painted && st->title_h > 0)
+        m[M_TITLE_H] = m[M_BACK_W] = m[M_CLOSE_W] = m[M_ICONISE_W] = st->title_h;
+    if (st->painted && st->scroll_w > 0)
+        m[M_VSCROLL_W] = m[M_HSCROLL_H] = m[M_UP_H] = m[M_DOWN_H] = m[M_LEFT_W] = m[M_RIGHT_W] = st->scroll_w;
     struct wimp_furniture *f = &w->furn;
     f->T = m[M_TITLE_H], f->V = m[M_VSCROLL_W], f->H = m[M_HSCROLL_H];
     f->B = m[M_BACK_W], f->C = m[M_CLOSE_W], f->I = m[M_ICONISE_W];
@@ -283,20 +292,45 @@ void wimp_tools_refresh(void)
     uint32_t *blk = (uint32_t *)t->scale;
     factors(blk, xe, ye, (int32_t)w->xeig, (int32_t)w->yeig);
     t->table = 0;
+    t->tint_valid = 0;                          /* the tinted table is made again when needed */
+    t->src1 = 0;
     master_to_active(t);
     if (!t->master[2] && blank) {
-        /* no custom tables: ColourTrans_GenerateTable from the blank tool */
+        /* no custom tables: ColourTrans_GenerateTable from the blank tool.
+         * A tool of fewer than 8 bits per pixel with no palette of its own
+         * is in the Wimp's colours, as recache_tools_trans makes it (5.30
+         * s/Wimp10): a palette made from the Wimp's, pixel n Wimp colour
+         * map[n] (Wimp_SetColourMapping's maps, as icons use them), with
+         * the sprite's mode.  RISC OS 4's 16-colour tools (the Morris4 and
+         * Ursula themes) are drawn in the mode's default colours without
+         * it. */
+        uint32_t r0 = w->tools, r1 = blank, r5 = 0x13;
+        uint32_t img = ros_ld32(blank + 32), trans = ros_ld32(blank + 36);
+        uint32_t pal = img < trans ? img : trans;
+        int32_t l2bpp = eig(mode, 9);
+        if (l2bpp >= 0 && l2bpp < 3 && pal < 48) {
+            const struct wimp_colourmap *cm = &w->cmap;
+            const uint32_t *P = cm->palette_kind == 1 ? cm->palette : w->palette;
+            uint32_t pt = ros_addr(w->scratch + 384);
+            for (int k = 0; k < 16; k++) {
+                uint32_t map = l2bpp == 0 ? (k < 2 ? cm->map1[k] : 0)
+                             : l2bpp == 1 ? (k < 4 ? cm->map2[k] : 0) : cm->map4[k];
+                ros_st32(pt + 4u * (uint32_t)k, P[map & 15u] & 0xFFFFFF00u);
+            }
+            r0 = mode, r1 = pt, r5 = 0x10;      /* the mode and that palette; a wide table */
+        }
+        t->src0 = r0, t->src1 = r1, t->src5 = r5;
         struct ros_cpu c;
         ros_cpu_enter(&c);
-        c.r[0] = w->tools, c.r[1] = blank, c.r[2] = c.r[3] = 0xFFFFFFFFu, c.r[4] = 0;
-        c.r[5] = 0x13;
+        c.r[0] = r0, c.r[1] = r1, c.r[2] = c.r[3] = 0xFFFFFFFFu, c.r[4] = 0;
+        c.r[5] = r5;
         uint32_t buf;
         if (call(XColourTrans_GenerateTable, &c) &&
             (buf = wimp_table_space(&t->pix_at, &t->pix_size, c.r[4])) != 0) {
             uint32_t size = c.r[4];
             ros_cpu_enter(&c);
-            c.r[0] = w->tools, c.r[1] = blank, c.r[2] = c.r[3] = 0xFFFFFFFFu;
-            c.r[4] = buf, c.r[5] = 0x13;
+            c.r[0] = r0, c.r[1] = r1, c.r[2] = c.r[3] = 0xFFFFFFFFu;
+            c.r[4] = buf, c.r[5] = r5;
             if (call(XColourTrans_GenerateTable, &c)) {
                 int identity = size <= 256;
                 for (uint32_t i = 0; identity && i < size; i++)
@@ -317,6 +351,83 @@ void wimp_tools_refresh(void)
             break;
         }
     }
+}
+
+/* ---- tinting (5.30's TrueIcon3: tintfunc, forcetint_on) ---------------------------- */
+
+/* tintfunc, as 5.30 has it (s/Wimp10): only greys change.  A light grey
+ * (&BB or more) is moved towards white as far as the title background is
+ * from white, scaled by its own distance from white over &44; a darker
+ * grey is moved from the title background towards the title foreground,
+ * by its distance below Wimp grey 2 (&BB) over &BB.  Colours are
+ * &BBGGRR00. */
+static uint32_t tint(uint32_t c, uint32_t T, uint32_t F)
+{
+    uint32_t r = (c >> 8) & 0xFFu, g = (c >> 16) & 0xFFu, b = c >> 24;
+    if (r != g || g != b)
+        return c;
+    int32_t bg[3] = { (int32_t)((T >> 8) & 0xFFu), (int32_t)((T >> 16) & 0xFFu), (int32_t)(T >> 24) };
+    if (r >= 0xBB) {
+        int32_t d = 255 - (int32_t)r;
+        for (int k = 0; k < 3; k++)
+            bg[k] = 255 - (d * (255 - bg[k])) / 0x44;
+    } else {
+        int32_t fgc[3] = { (int32_t)((F >> 8) & 0xFFu), (int32_t)((F >> 16) & 0xFFu), (int32_t)(F >> 24) };
+        int32_t d = 0xBB - (int32_t)r;
+        for (int k = 0; k < 3; k++) {
+            int32_t diff = bg[k] - fgc[k];
+            if (!diff)
+                continue;
+            int32_t delta = (d * (diff < 0 ? -diff : diff)) / 0xBB;
+            bg[k] += diff < 0 ? delta : -delta;
+        }
+    }
+    return (uint32_t)bg[0] << 8 | (uint32_t)bg[1] << 16 | (uint32_t)bg[2] << 24;
+}
+
+/* ColourTrans_GenerateTable's transfer function: R0 the colour */
+static void tintfunc(struct ros_cpu *s)
+{
+    struct wimp_tools *t = &wimp_ws()->tl;
+    s->r[0] = tint(s->r[0] & ~0xFFu, t->tint_bg, t->tint_fg);
+    s->r[15] = s->r[14];
+}
+
+/* The table for the title bar's tools, for a window whose title is drawn
+ * in background bg and foreground fg.  The plain table unless the title
+ * is not the standard light grey on black; then the table generated as the
+ * plain one was, through tintfunc, kept for the same colours.  A tool set
+ * with custom tables (table_n) is not tinted, as on 5.30. */
+uint32_t wimp_title_tool_table(uint32_t bg, uint32_t fg)
+{
+    struct wimp_ws *w = wimp_ws();
+    struct wimp_tools *t = &w->tl;
+    if (t->active[2] || !t->src1)
+        return wimp_tool_table(bg);
+    bg &= ~0xFFu, fg &= ~0xFFu;
+    if (bg == 0xDDDDDD00u && fg == 0)
+        return t->table;
+    if (t->tint_valid && t->tint_bg == bg && t->tint_fg == fg)
+        return t->tint_table;
+    if (!t->tint_entry)
+        t->tint_entry = ros_native_entry(tintfunc, "wimp:tintfunc");
+    t->tint_bg = bg, t->tint_fg = fg;
+    struct ros_cpu c;
+    ros_cpu_enter(&c);
+    c.r[0] = t->src0, c.r[1] = t->src1, c.r[2] = c.r[3] = 0xFFFFFFFFu, c.r[4] = 0;
+    c.r[5] = t->src5 | 4, c.r[6] = 0, c.r[7] = t->tint_entry;
+    uint32_t buf;
+    if (!call(XColourTrans_GenerateTable, &c) ||
+        !(buf = wimp_table_space(&t->tint_at, &t->tint_size, c.r[4])))
+        return t->table;
+    ros_cpu_enter(&c);
+    c.r[0] = t->src0, c.r[1] = t->src1, c.r[2] = c.r[3] = 0xFFFFFFFFu, c.r[4] = buf;
+    c.r[5] = t->src5 | 4, c.r[6] = 0, c.r[7] = t->tint_entry;
+    if (!call(XColourTrans_GenerateTable, &c))
+        return t->table;
+    t->tint_table = buf;
+    t->tint_valid = 1;
+    return buf;
 }
 
 /* The translation table for a tool drawn in an element of colour c */

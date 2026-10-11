@@ -154,17 +154,31 @@ REDACTED = "[*redacted*]"
 
 
 def load_redactions(path):
-    """The names to redact (tools/articles-redact.txt): (name regexes, link slugs)."""
+    """The names to redact: (name regexes, link slugs).
+
+    The list is a file of personal names, so it is NOT in the repository:
+    ROSGD_ARTICLES_REDACT names it. If it is not found this refuses to run
+    rather than quietly publishing the names it exists to remove -- the
+    failure anyone would want, and the one silence would hide.
+    """
     names, slugs = [], []
-    if os.path.exists(path):
-        for line in open(path, encoding="utf-8"):
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-            if line.startswith("url:"):
-                slugs.append(line[4:].strip().lower())
-            else:
-                names.append(re.compile(r"\b" + r"\s+".join(re.escape(w) for w in line.split()) + r"\b"))
+    if path == "none":                  # nothing to redact, said deliberately
+        return names, slugs
+    if not os.path.exists(path):
+        raise SystemExit(
+            f"mkarticles: no redaction list at {path}.\n"
+            "  It is a list of personal names and is deliberately not in the\n"
+            "  repository. Put it somewhere outside the tree and name it with\n"
+            "  ROSGD_ARTICLES_REDACT, or, if there is genuinely nothing to\n"
+            "  redact, ROSGD_ARTICLES_REDACT=none.")
+    for line in open(path, encoding="utf-8"):
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("url:"):
+            slugs.append(line[4:].strip().lower())
+        else:
+            names.append(re.compile(r"\b" + r"\s+".join(re.escape(w) for w in line.split()) + r"\b"))
     return names, slugs
 
 
@@ -191,7 +205,9 @@ def main():
     if len(sys.argv) != 3:
         raise SystemExit(__doc__)
     src, dst = sys.argv[1], sys.argv[2]
-    rules = load_redactions(os.path.join(os.path.dirname(os.path.abspath(__file__)), "articles-redact.txt"))
+    rules = load_redactions(os.environ.get(
+        "ROSGD_ARTICLES_REDACT",
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "articles-redact.txt")))
     names = sorted(f[:-3] for f in os.listdir(src) if f.endswith(".md") and f != "README.md")
     texts = {n: open(os.path.join(src, n + ".md"), encoding="utf-8").read() for n in names}
     titles = {}

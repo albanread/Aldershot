@@ -339,6 +339,53 @@ struct wimp_tools {
     int32_t hblip_w, vblip_h;
     uint32_t pix_at, pix_size;           /* the tools' table (tpixtable_at), in the RMA */
     uint32_t act_at, act_size;           /* mastertoactive's block (ttt_activeset), in the RMA */
+    /* the generated table's source, for the tinted one (recache_tools_trans) */
+    uint32_t src0, src1, src5;
+    /* the tinted table (TrueIcon3's tinting, title bars only), for one title
+     * background and foreground; tint_valid 0 when the tools change */
+    int tint_valid;
+    uint32_t tint_bg, tint_fg, tint_table;
+    uint32_t tint_at, tint_size;
+    uint32_t tint_entry;                 /* tintfunc's native entry, or 0 */
+};
+
+/* A theme's painted chrome (theme.c reads it from the theme's Theme file;
+ * draw.c paints with it; design 35 P2).  Colours are &BBGGRR00.  Sizes are
+ * OS units, 0 for the tools' own. */
+enum { STYLE_BUTTONS_GLYPHS, STYLE_BUTTONS_DOTS, STYLE_BUTTONS_BOXES };
+enum { STYLE_SCROLL_CLASSIC, STYLE_SCROLL_SLIM, STYLE_SCROLL_CHANNEL };
+struct wimp_style {
+    int painted;                         /* Chrome.Style: painted (else the tool sprites) */
+    int32_t title_h, scroll_w;           /* Chrome.TitleHeight, Chrome.ScrollWidth */
+    uint32_t outline_w;                  /* Chrome.BorderWidth, in pixels: 1 to 4 */
+    uint32_t focus_fill[2], focus_text;  /* Title.Focus: top and bottom (a gradient when they differ) */
+    uint32_t unfocus_fill[2], unfocus_text;
+    int align_left;                      /* Title.Align: left (else centre) */
+    int buttons;                         /* Buttons.Set */
+    uint32_t button_colour;              /* Buttons.Colour: the glyphs', 0xFFFFFFFF for the title text's */
+    int scroll;                          /* Scroll.Style */
+    uint32_t track, thumb;               /* Scroll.Track, Scroll.Thumb */
+    uint32_t outline;                    /* Window.Outline */
+    uint32_t bevel;                      /* Chrome.Bevel: 3D edges, in pixels (0 none) */
+    uint32_t bevel_light, bevel_dark;    /* Chrome.BevelLight, Chrome.BevelDark */
+    int focus_stripes, unfocus_stripes;  /* a Title fill of "stripes &a &b": rows alternate */
+    uint32_t button_face;                /* Buttons.Face: the boxes' face */
+    int menus;                           /* a [Menus] section was given */
+    uint32_t menu_bg, menu_text;         /* Menus.Background, Menus.Text */
+    uint32_t menu_hl, menu_hl_text;      /* Menus.Highlight, Menus.HighlightText */
+    uint32_t menu_sep;                   /* Menus.Separator */
+    uint32_t menu_title[2], menu_title_text;   /* Menus.TitleFill, Menus.TitleText */
+    int menu_title_stripes;
+    uint32_t button_text;                /* Buttons.Action.Text: dialogue buttons' text, or 0xFFFFFFFF */
+    int iconbar;                         /* an [Iconbar] section was given */
+    uint32_t iconbar_bg, iconbar_text;   /* Iconbar.Background, Iconbar.Text (0xFFFFFFFF: its own) */
+    char title_font[40];                /* Title.Font: an outline font for painted titles ("": the desktop font) */
+    uint32_t title_font_size;           /* its size, sixteenths of a point */
+    uint32_t title_font_handle;         /* found when first drawn; 0 until then */
+    int32_t radius;                     /* Chrome.Radius: round corners, OS units (0: square) */
+    int square_bottom;                  /* Chrome.RoundBottom: no */
+    int32_t shadow_size;                /* Chrome.Shadow: its extent, OS units (0: none) */
+    uint32_t shadow_alpha;              /* ... and its strength at the edge, 0-255 */
 };
 
 /* The icon drawer's state: the clip, the window's and the icon's colours,
@@ -428,6 +475,7 @@ struct wimp_sel {
                                             program's window, which it shows there */
 #define WIMP_SURFACE_REASON 0x5200u      /* Wimp_Extend &5200-&5203 */
 #define MSG_SURFACE_RESIZED 0xC01C2u     /* Message_SurfaceResized, to the owner */
+#define MSG_WIMP_THEME_CHANGED 0xC0240u  /* Message_WimpThemeChanged, a broadcast (design 35) */
 struct wimp_surface {
     uint32_t flags;
     uint32_t source;                     /* a VDisplay's handle, or a sprite area */
@@ -513,6 +561,14 @@ struct wimp_ws {
     char pace_var[48];                   /* arena bytes: its name and value */
     /* the tools (tools.c) */
     uint32_t tools;                      /* the tool sprite area, or 0 */
+    char tools_file[200];                /* arena bytes: *ToolSprites' file; "" for WindowManager:Tools */
+    /* the theme (theme.c, design 35) */
+    char theme[40];                      /* *WimpTheme's name; "" for Classic */
+    char theme_sprites[160];             /* the theme's Sprites, in the ROM area's place; "" for the ROM's */
+    struct wimp_style style;             /* the theme's painted chrome (Theme file, *WimpThemeSet) */
+    int vf_saved;                        /* WimpVisualFlags before any theme, kept */
+    uint32_t vf_threed;
+    uint32_t vf_theme[TH_COUNT];
     struct wimp_furniture furn;
     struct wimp_tools tl;
     struct wimp_draw dr;
@@ -576,7 +632,7 @@ struct wimp_ws {
     uint32_t nexp, pexp;
     /* the sprite pool (sprites.c) */
     uint32_t rom_sprites, ram_sprites;   /* sprite areas, 0 for none */
-    char rom_name[48];                   /* the ROM sprite file loaded */
+    char rom_name[200];                  /* the ROM sprite file loaded */
     char rom_suffix[4];                  /* romspr_suffix: from the Wimp's mode, "xy" */
     uint8_t empty_area[16];              /* loseromsprites' empty sprite area */
     uint32_t ram_number;                 /* the RAM area's dynamic area */
@@ -677,6 +733,7 @@ void wimp_sprout_recache(void);
 void wimp_slot_moved(uint32_t size);
 void wimp_tools_refresh(void);
 uint32_t wimp_tool_table(uint32_t colour);
+uint32_t wimp_title_tool_table(uint32_t bg, uint32_t fg);
 
 /* The desktop font (font.c) */
 void wimp_find_font(void);
@@ -688,6 +745,7 @@ struct wimp_window *wimp_window(uint32_t handle);
 void wimp_windows_start(void);
 void wimp_windows_end(void);
 void wimp_mode_change_requests(void);
+void wimp_reopen_requests(void);
 void wimp_windows_of_task_delete(uint32_t task);
 struct wimp_window *wimp_window_below(const struct wimp_window *w, int st);
 struct wimp_window *wimp_stack_front(uint32_t parent, int st);
@@ -785,6 +843,30 @@ os_error *wimp_cmd_wimpwritedir(struct ros_module *m, uint32_t tail, uint32_t ar
 os_error *wimp_cmd_wimpkillsprite(struct ros_module *m, uint32_t tail, uint32_t argc);
 os_error *wimp_cmd_wimpvisualflags(struct ros_module *m, uint32_t tail, uint32_t argc);
 os_error *wimp_cmd_toolsprites(struct ros_module *m, uint32_t tail, uint32_t argc);
+os_error *wimp_cmd_wimptheme(struct ros_module *m, uint32_t tail, uint32_t argc);
+os_error *wimp_cmd_wimpthemeset(struct ros_module *m, uint32_t tail, uint32_t argc);
+/* The theme (theme.c) */
+os_error *wimp_tools_use(const char *file);
+void wimp_theme_init(void);
+int wimp_menu_themed(const struct wimp_window *win);
+int wimp_iconbar_themed(const struct wimp_window *win);
+void wimp_title_font_forget(struct wimp_style *st);
+/* shape.c: round corners (design 35, P3) */
+int wimp_corner_kind(const struct wimp_window *win, int st);
+int32_t wimp_corner_radius(const struct wimp_window *win, int st);
+unsigned wimp_shape(const struct wimp_window *win, int st, struct wimp_box *b, unsigned max);
+unsigned wimp_notches(const struct wimp_window *win, int st, struct wimp_box *b, unsigned max);
+unsigned wimp_corner_edges(const struct wimp_window *win, int st, struct wimp_box *b, unsigned max);
+int wimp_in_shape(const struct wimp_window *win, int st, int32_t x, int32_t y);
+void wimp_draw_corner_edges(const struct wimp_window *win);
+uint32_t wimp_corner_edge_colour(const struct wimp_window *win);
+/* shadow.c: drop shadows (design 35, P3) */
+void wimp_shadows_above(const struct wimp_window *win, int st, struct wimp_rlist *out);
+void wimp_shadow_add(const struct wimp_window *win, int st, struct wimp_rlist *l);
+void wimp_shadows_out(const struct wimp_window *win, struct wimp_rlist *l);
+void wimp_shadows_over(const struct wimp_window *win, struct wimp_box r);
+void wimp_rl_subtract_shape(struct wimp_rlist *l, const struct wimp_window *win, int st, struct wimp_box clip);
+void wimp_rl_subtract_notches(struct wimp_rlist *l, const struct wimp_window *win, int st);
 os_error *wimp_cmd_wimpmode(struct ros_module *m, uint32_t tail, uint32_t argc);
 void wimp_swi_ReportError(struct ros_cpu *s);
 void wimp_errorbox_make(void);

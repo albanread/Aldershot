@@ -1155,7 +1155,7 @@ void wimp_menu_separators(struct wimp_window *win)
     const void *was = wimp_menu_page_in();
     uint32_t data = m->data[L];
     int32_t H = (int32_t)ros_ld32(data - 8), G = (int32_t)ros_ld32(data - 4);
-    wimp_gcol(wimp_colour(win->def[34] & 15u), 0);
+    wimp_gcol(wimp_menu_themed(win) ? wimp_ws()->style.menu_sep : wimp_colour(win->def[34] & 15u), 0);
     uint8_t v[10] = { 23, 6, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0 };
     wimp_vdu_bytes(v, sizeof v);
     const struct wimp_place *pl = &win->s[APP];

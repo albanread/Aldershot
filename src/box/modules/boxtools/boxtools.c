@@ -71,6 +71,30 @@
  *        kernel(args, results, cancel) -> UInt32`. It calls nothing and has
  *        no statics. It is for Worker_LoadKernel
  *        (riscos.workers.load_kernel).
+ *   *Rust [--linux] <source> [-o <program>] [rustc options...]
+ *        compiles Rust. The program for rs.hello is hello, as *CC names
+ *        one, and the program for hello/rs is hello (a host file
+ *        hello.rs needs -o). By default it makes a RISC OS application,
+ *        typed &FF8: the box's rustc (Rust 1.97.1, one static program
+ *        against musl, the LLVM 22 the box's clang is) emits the program
+ *        alone as LLVM IR for A64X32 (--target aarch64-unknown-linux-
+ *        gnu_ilp32, -Zfixed-x18: x18 is the static base, panic=abort),
+ *        roscc mojo-ir fits the IR as Mojo's is fitted, the box's clang
+ *        compiles it, and roscc links it with the three freestanding
+ *        crates as fitted objects (core, alloc, compiler_builtins --
+ *        freestanding, as a Mojo program: no ROM library), the runtime
+ *        piece that is Rust's own (malloc and its kin, from the Makefile's
+ *        RUST_STAGE) and Mojo's runtime (crt0, which calls the program's
+ *        main; rostrt, the SWI shims, the maths). The program is no_std:
+ *        it declares extern "C" what the runtime has (os_write0, ...),
+ *        #[panic_handler], and, for alloc, a #[global_allocator] over the
+ *        runtime's malloc. With --linux it makes a Linux program, typed
+ *        &E1F, run by *RunBox: a static aarch64-unknown-linux-musl
+ *        program against the kit's std, linked by the box's clang against
+ *        the box's musl. rustc's options come after the command's own, so
+ *        a --edition the user gives wins. Rust$Exe, if set, names another
+ *        compiler. The Apple Silicon box's: the Intel box's Rust is not
+ *        built yet.
  *
  * Both boxes have clang. It is the patched clang that builds A64X32 on the
  * host, with lld, as one program. The Intel box has the same for x86-64,
@@ -168,6 +192,22 @@
 #endif
 #ifndef BOXTOOLS_MOJO_PKG
 #define BOXTOOLS_MOJO_PKG "/usr/lib/mojo/pkg"
+#endif
+/* *Rust: the box's rustc and its kit as the arm64 image has them (the
+ * Makefile's RUST_STAGE: deps/get-rust-box.sh fetches what
+ * deps/build-rust-box.sh made). rust/ is the compiler's sysroot, and
+ * ilp32-fit/ the three freestanding crates as fitted A64X32 objects that
+ * roscc links an application with; rt_a64x32 is the piece of the runtime
+ * that is Rust's own (malloc and its kin -- the rest is Mojo's
+ * rt_a64x32, which the application links too). */
+#ifndef BOXTOOLS_RUST
+#define BOXTOOLS_RUST "/usr/bin/rustc"
+#endif
+#ifndef BOXTOOLS_RUST_SYS
+#define BOXTOOLS_RUST_SYS "/usr/lib/rust"
+#endif
+#ifndef BOXTOOLS_RUST_RT
+#define BOXTOOLS_RUST_RT "/usr/lib/rust/rt_a64x32"
 #endif
 
 /* Both boxes use clang for *CC and *RosBas. The Intel box's clang replaces
@@ -1341,6 +1381,206 @@ done:
     return e;
 }
 
+/* ---- *Rust -------------------------------------------------------------------------- */
+
+/* The Rust target and kit, A64X32 (the Apple Silicon box: the arm64 image
+ * stages the compiler and its libraries, the Makefile's RUST_STAGE). A
+ * program is made exactly as a Mojo one is: rustc emits the program alone
+ * as LLVM IR for the ILP32 target (x18 reserved, as the A64X32 discipline
+ * says), roscc mojo-ir fits the IR (src/mojoir.rs) as Mojo's is fitted,
+ * the box's clang compiles it, and roscc links it with the three
+ * freestanding crates fitted the same way (core, alloc, compiler_builtins
+ * -- the rlibs rustc compiled against are not linked: their code is not
+ * fitted), Rust's own runtime piece (malloc and its kin) and Mojo's
+ * runtime (crt0, which calls main, rostrt, the SWI shims, the maths).
+ * --linux makes a Linux program instead, as *CC's --linux: a static
+ * aarch64-unknown-linux-musl program, &E1F, run by *RunBox, linked by the
+ * box's clang against the box's musl.
+ *
+ * The compiler is Rust 1.97.1, the LLVM 22 release: the box's clang's
+ * own, so the IR it emits is the LLVM the box's clang reads (and mojo-ir
+ * fits the spelling, as it does Mojo's). rustc's channel is stable, so
+ * the -Z flags below need RUSTC_BOOTSTRAP=1, which the PTY gives every
+ * child (as rust's own build does). */
+#if defined(__aarch64__) && !defined(ROS_ARENA_HOSTED)
+#define RUST_A64X32 1
+#define RUST_ILP32  "aarch64-unknown-linux-gnu_ilp32"
+#define RUST_LINUX  "aarch64-unknown-linux-musl"
+#define RUST_FIT    "/lib/rustlib/ilp32-fit"
+#define BOXTOOLS_MOJO_RT "/usr/lib/mojo/rt_a64x32"
+#else
+#define RUST_A64X32 0
+#endif
+
+#define RUST_SYNTAX "Rust [--linux] <source> [-o <program>] [rustc options...]"
+
+/* One step of the build: the line run, then its status checked */
+static os_error *rust_step(struct line *l, const char *what, const char *src)
+{
+    int st;
+    os_error *e = run("Rust", l, &st);
+    if (e)
+        return e;
+    return st ? ros_error(ERR_BOX + 3, "Rust: %s %s", src, what) : NULL;
+}
+
+static os_error *cmd_rust(struct ros_module *m, uint32_t tail, uint32_t argc)
+{
+    (void)m, (void)argc;
+#if RUST_A64X32
+    static struct words ws;
+    os_error *e = split("Rust", tail, &ws);
+    if (e)
+        return e;
+    static char src[1024], out[1024];
+    static const char *opts[MAXW];               /* what the user gave rustc */
+    int nopt = 0, linux_prog = 0;
+    const char *src_name = NULL, *out_name = NULL;
+    for (int i = 0; i < ws.n; i++) {
+        const char *w = ws.w[i];
+        if (!strcmp(w, "-o")) {
+            if (++i >= ws.n)
+                return ros_error(ERR_BOX, "Rust: -o needs a value");
+            out_name = ws.w[i];
+        } else if (!strcmp(w, "--linux")) {
+            linux_prog = 1;
+        } else if (w[0] == '-') {
+            opts[nopt++] = w;                    /* rustc's own, as typed */
+        } else if (src_name) {
+            return ros_error(ERR_BOX, "Rust: one source (%s?): rustc compiles a crate", w);
+        } else {
+            src_name = w;
+        }
+    }
+    if (!src_name)
+        return ros_error(ERR_BOX, "Syntax: *" RUST_SYNTAX);
+    char prog[1024];
+    if (!out_name) {
+        if (!program_name(src_name, "rs", prog, sizeof prog))
+            return ros_error(ERR_BOX + 2, "Rust: %s is not rs.<name> or <name>/rs: give -o", src_name);
+        out_name = prog;
+    }
+    if ((e = map(src_name, src, sizeof src)) || (e = map(out_name, out, sizeof out)))
+        return e;
+    if (!strcmp(src, out))
+        return ros_error(ERR_BOX + 2, "Rust: the program would be written over %s", src_name);
+    char rustc[1024];
+    if (!varval("Rust$Exe", rustc, sizeof rustc))
+        snprintf(rustc, sizeof rustc, "%s", BOXTOOLS_RUST);
+    if (access(rustc, X_OK) != 0)
+        return ros_error(ERR_BOX + 5, "Rust: there is no Rust compiler here (%s)", rustc);
+    static struct line l;
+    static char obj[1100], ir[1100], emit[1200], outdir[1100];
+    snprintf(obj, sizeof obj, "%s.rs.o", out);
+    snprintf(ir, sizeof ir, "%s.rs.ll", out);
+    snprintf(emit, sizeof emit, "--emit=llvm-ir=%s,link", ir);
+    snprintf(outdir, sizeof outdir, "%s", ir);
+    *strrchr(outdir, '/') = 0;                  /* map() made an absolute path */
+    /* 1. rustc: the program alone. The emit includes the link step with a
+     * linker that does nothing, which writes the allocator-shim glue
+     * (what forwards to the program's #[global_allocator]) into the IR;
+     * the two symbols that step alone would define are in the runtime
+     * piece instead (roscc rostrt/rust_rt_a64x32.c). The options the user
+     * gave come after ours, so theirs win. */
+    l.n = 0, l.s[0] = 0;
+    if ((e = add(&l, "Rust", rustc)) || (e = add(&l, "Rust", "--edition")) || (e = add(&l, "Rust", "2024")))
+        goto done;
+    if (linux_prog) {
+        static const char *const linux_cc[] = {
+            "--target=" RUST_LINUX, "--sysroot", BOXTOOLS_RUST_SYS,
+            "-Clinker=/usr/bin/clang", "-Clink-arg=--target=" RUST_LINUX,
+            "-Clink-self-contained=no", "-Ctarget-feature=+crt-static",
+            "-Cpanic=abort", "-Crelocation-model=static",
+            "-Clink-arg=" BOXTOOLS_RUST_SYS "/lib/rustlib/" RUST_LINUX "/lib/self-contained/libunwind.a", NULL,
+        };
+        for (int i = 0; linux_cc[i]; i++)
+            if ((e = add(&l, "Rust", linux_cc[i])))
+                goto done;
+    } else {
+        static const char *const app_cc[] = {
+            "--target=" RUST_ILP32, "--sysroot", BOXTOOLS_RUST_SYS,
+            "-Zfixed-x18", "-Cpanic=abort", "-Crelocation-model=static",
+            "-Ccodegen-units=1", "-Copt-level=2", "-Clinker=" BOXTOOLS_RUST_SYS "/bin/true",
+            NULL,
+        };
+        for (int i = 0; app_cc[i]; i++)
+            if ((e = add(&l, "Rust", app_cc[i])))
+                goto done;
+        /* The IR's path is named, not left to -o: with two emits rustc
+         * derives each file's name from -o's stem and drops the ".rs"
+         * (rhi.rs.ll came out as rhi.ll). The linker writes nothing. */
+        if ((e = add(&l, "Rust", emit)) || (e = add(&l, "Rust", "--out-dir")) || (e = add(&l, "Rust", outdir)))
+            goto done;
+    }
+    for (int i = 0; i < nopt; i++)
+        if ((e = add(&l, "Rust", opts[i])))
+            goto done;
+    if (linux_prog && ((e = add(&l, "Rust", "-o")) || (e = add(&l, "Rust", out))))
+        goto done;
+    if ((e = add(&l, "Rust", src)))
+        goto done;
+    if ((e = rust_step(&l, "did not compile", src_name)))
+        goto done;
+    if (linux_prog) {
+        e = set_type(out_name, TYPE_ELF);        /* runnable by name: its run action is *RunBox */
+        goto done;
+    }
+    /* 1b. Rewrite the IR for A64X32 (roscc mojo-ir), in place: the same
+     * fitting pass Mojo's IR takes. */
+    l.n = 0, l.s[0] = 0;
+    if ((e = add(&l, "Rust", BOXTOOLS_ROSCC)) || (e = add(&l, "Rust", "mojo-ir")) ||
+        (e = add(&l, "Rust", ir)) || (e = add(&l, "Rust", "-o")) || (e = add(&l, "Rust", ir)))
+        goto done;
+    if ((e = rust_step(&l, "did not compile (roscc mojo-ir)", src_name)))
+        goto done;
+    /* 1c. Compile the IR with the box's clang, A64X32's code flags, as
+     * *Mojo compiles its IR. */
+    l.n = 0, l.s[0] = 0;
+    static const char *const ir_cc[] = {
+        "--no-default-config", "--target=" RUST_ILP32, "-O2", "-fno-pic", "-ffixed-x18",
+        "-mno-outline-atomics", "-Wno-override-module", "-c", NULL,
+    };
+    if ((e = add(&l, "Rust", BOXTOOLS_CLANG)))
+        goto done;
+    for (int i = 0; ir_cc[i]; i++)
+        if ((e = add(&l, "Rust", ir_cc[i])))
+            goto done;
+    if ((e = add(&l, "Rust", ir)) || (e = add(&l, "Rust", "-o")) || (e = add(&l, "Rust", obj)))
+        goto done;
+    if ((e = rust_step(&l, "did not compile (clang, from Rust's IR)", src_name)))
+        goto done;
+    /* 2. Link the object with the fitted crates, the runtime piece and
+     *    Mojo's runtime into a freestanding application. */
+    l.n = 0, l.s[0] = 0;
+    if ((e = add(&l, "Rust", BOXTOOLS_ROSCC)) || (e = add(&l, "Rust", "link")) ||
+        (e = add(&l, "Rust", "--entry")) || (e = add(&l, "Rust", "_start")) ||
+        (e = add(&l, "Rust", "-o")) || (e = add(&l, "Rust", out)) ||
+        (e = add(&l, "Rust", BOXTOOLS_MOJO_RT "/crt0_mojo_a64x32.o")) ||
+        (e = add(&l, "Rust", obj)) ||
+        (e = add(&l, "Rust", BOXTOOLS_RUST_RT "/rust_rt_a64x32.o")) ||
+        (e = add(&l, "Rust", BOXTOOLS_MOJO_RT "/swis_os_a64x32.o")) ||
+        (e = add(&l, "Rust", BOXTOOLS_MOJO_RT "/swis_wimp_a64x32.o")) ||
+        (e = add(&l, "Rust", BOXTOOLS_MOJO_RT "/wimp_a64x32.o")) ||
+        (e = add(&l, "Rust", BOXTOOLS_RUST_SYS RUST_FIT "/core.a")) ||
+        (e = add(&l, "Rust", BOXTOOLS_RUST_SYS RUST_FIT "/alloc.a")) ||
+        (e = add(&l, "Rust", BOXTOOLS_RUST_SYS RUST_FIT "/compiler_builtins.a")) ||
+        (e = add(&l, "Rust", BOXTOOLS_MOJO_RT "/maths_a64x32.a")) ||
+        (e = add(&l, "Rust", BOXTOOLS_MOJO_RT "/swis_a64x32.a")) ||
+        (e = add(&l, "Rust", BOXTOOLS_MOJO_RT "/rostrt_a64x32.o")))
+        goto done;
+    if ((e = rust_step(&l, "did not link (roscc)", src_name)))
+        goto done;
+    e = set_type(out_name, TYPE_APP);
+done:
+    unlink(obj);
+    unlink(ir);
+    return e;
+#else
+    (void)tail;
+    return ros_error(ERR_BOX + 5, "Rust: the Apple Silicon box's (the compiler is staged for A64X32)");
+#endif
+}
+
 /* ---- the module ------------------------------------------------------------------------ */
 
 #define C(n, lo, syntax, help, fn) { n, ROS_CMD_INFO(lo, 255, 0, 0), "Syntax: *" syntax, help, fn }
@@ -1358,6 +1598,10 @@ static const struct ros_command commands[] = {
       "): mojo.hello's is hello, as is hello/mojo's.  --kernel makes a Worker kernel "
       "of its @export def kernel.",
       cmd_mojo),
+    C("Rust", 1, RUST_SYNTAX,
+      "*Rust compiles Rust into a RISC OS application (rustc, roscc mojo-ir, A64X32): rs.hello's is "
+      "hello, as is hello/rs's.  --linux makes a Linux program *RunBox runs.",
+      cmd_rust),
     C("RunBox", 1, "RunBox <program> [arguments...]",
       "*RunBox runs a program *CC made, on the text window; its exit status is Sys$ReturnCode.",
       cmd_runbox),
@@ -1377,6 +1621,6 @@ static os_error *init(struct ros_module *m, const char *tail)
 struct ros_module boxtools_module = {
     .title = "BoxTools",
     .init = init,
-    .help = "BoxTools\t1.04 (9 Oct 2026) ROSGD native: *CC (" CC_WHAT "), *RunBox, *RosAsm, *RosBas, *RosBasRun, *Mojo",
+    .help = "BoxTools\t1.05 (10 Oct 2026) ROSGD native: *CC (" CC_WHAT "), *RunBox, *RosAsm, *RosBas, *RosBasRun, *Mojo, *Rust",
     .commands = commands,
 };

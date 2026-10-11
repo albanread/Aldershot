@@ -109,6 +109,7 @@
 #include "deskmeter.h"
 #include "speakers.h"
 #include "machine.h"
+#include "luamodule.h"
 #include "bootcmds.h"
 #include "acornhttp.h"
 #include "resourcefs.h"
@@ -286,6 +287,7 @@ const struct ros_rom_native ros_native_modules[] = {
     { &lanmanfs_module },
     { &smbserver_module },
     { &boxtools_module },
+    { &luajit_module },                 /* *LuaJIT: the box's Lua, filetype &18C */
 };
 const unsigned ros_native_module_count = sizeof ros_native_modules / sizeof ros_native_modules[0];
 struct ros_module *const ros_native_wimp = &wimp_module;

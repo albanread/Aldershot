@@ -149,12 +149,17 @@ os_error *pty_open(const char *cmdline, int cols, int rows, struct pty **out)
         return ros_error(PTY_ERR_CANNOT_RUN, "%s: not found", argv[0]);
 
     static char env_term[] = "TERM=vt100", env_lang[] = "LANG=C.UTF-8";
+    /* The box's rustc is a bootstrap build (deps/build-rust-box.sh: the
+     * stable channel, so it reads the dist's rlibs), and its -Z flags --
+     * *Rust's -Zfixed-x18 among them -- need this, as rust's own build
+     * gives its compilers it.  No other program reads it. */
+    static char env_bootstrap[] = "RUSTC_BOOTSTRAP=1";
     char env_home[600], env_path[1024], env_user[128];
     snprintf(env_home, sizeof env_home, "HOME=%s", home_dir());
     snprintf(env_path, sizeof env_path, "PATH=%s", search_path());
     struct passwd *pw = getpwuid(getuid());
     snprintf(env_user, sizeof env_user, "USER=%s", pw ? pw->pw_name : "root");
-    char *envp[] = { env_term, env_lang, env_home, env_path, env_user, NULL };
+    char *envp[] = { env_term, env_lang, env_bootstrap, env_home, env_path, env_user, NULL };
 
     int m = posix_openpt(O_RDWR | O_NOCTTY);
     if (m < 0 || grantpt(m) < 0 || unlockpt(m) < 0) {

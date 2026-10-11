@@ -345,6 +345,7 @@ int ros_selftest(struct ros_selftest *result)
     ros_selftest_deskmeter();
     ros_selftest_speakers();
     ros_selftest_machine();
+    ros_selftest_luajit();
     ros_selftest_desktop();
     ros_selftest_resfiler();
     ros_selftest_sprutils();

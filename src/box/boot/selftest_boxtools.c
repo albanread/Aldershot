@@ -234,9 +234,10 @@ void ros_selftest_boxtools(void)
           "*RosBas -- bas.greet made an " BT_ABI " application (rosbas, clang, roscc); run by its name, it "
           "wrote its file and QUIT 5 is Sys$ReturnCode",
           "&%X, app %d, run &%X, Sys$ReturnCode %d, \"%s\"", rbas, bapp, brun, rc, there ? got : "(no file)");
-#if defined(__aarch64__)
     /* *RosBasRun: the same program compiled by rosbas's JIT to an image
-     * in memory and run at once; -o keeps the image */
+     * in memory and run at once; -o keeps the image.  Both boxes have the
+     * JIT now -- the Apple Silicon one generates A64X32 and the Intel one
+     * x32 (rosbas's llvm-box feature) -- so both are checked. */
     remove(out);
     int jrun = cli("RosBasRun HostFS::BTTest.$.bas.greet -o HostFS::BTTest.$.jgreet");
     rc = return_code();
@@ -250,7 +251,6 @@ void ros_selftest_boxtools(void)
           "*RosBasRun -- bas.greet compiled by rosbas's JIT (no C) and run: its file written, QUIT 5 is "
           "Sys$ReturnCode, the image kept by -o; a program that does not compile is &C0123",
           "&%X, image %d, Sys$ReturnCode %d, \"%s\", bad &%X", jrun, japp, rc, there ? got : "(no file)", jbad);
-#endif
     cli("WimpSlot -next 1024K");
     /* task 0 had no application space before these applications: given
      * back, as the tasks' checks expect */
@@ -405,6 +405,72 @@ void ros_selftest_boxtools(void)
             if (unlink(p))
                 rmdir(p);
         }
+
+        /* *Rust (the Apple Silicon box): the box's rustc emits the program
+         * alone as IR, roscc mojo-ir fits it, the box's clang compiles it,
+         * and roscc links it with the fitted crates and the runtime: an
+         * application beside the rs directory, run by its name. With
+         * --linux it makes a static Linux program against the kit's std,
+         * run by *RunBox, its arguments and files as the *CC one's are. */
+#if defined(__aarch64__)
+        int rhad_slot = ros_slot_current != NULL;
+        struct ros_environment renv;
+        ros_env_save(&renv);
+        snprintf(p, sizeof p, "%s/rs", dir);
+        mkdir(p, 0755);
+        snprintf(p, sizeof p, "%s/rs/rhi", dir);
+        put(p, "#![no_std]\n#![no_main]\n\nunsafe extern \"C\" {\n    fn os_write0(s: *const u8);\n}\n\n"
+               "#[unsafe(no_mangle)]\npub extern \"C\" fn main() {\n"
+               "    let mut s: u32 = 0;\n    for i in 0..10u32 {\n        s = s.wrapping_mul(3).wrapping_add(i);\n    }\n"
+               "    unsafe { os_write0(b\"hello from *Rust\\r\\n\".as_ptr()); }\n"
+               "    let _ = s;\n}\n\n"
+               "#[panic_handler]\nfn panic(_: &core::panic::PanicInfo) -> ! {\n    loop {}\n}\n");
+        snprintf(p, sizeof p, "%s/rs/rbad", dir);
+        put(p, "#![no_std]\n#![no_main]\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn main() {\n    undeclared();\n}\n\n"
+               "#[panic_handler]\nfn panic(_: &core::panic::PanicInfo) -> ! {\n    loop {}\n}\n");
+        snprintf(p, sizeof p, "%s/rs/lr", dir);
+        put(p, "fn main() {\n    let a: Vec<String> = std::env::args().collect();\n"
+               "    std::fs::write(&a[2], format!(\"r {}\\n\", a[1])).unwrap();\n    std::process::exit(7);\n}\n");
+        int rj = cli("Rust HostFS::BTTest.$.rs.rhi");
+        snprintf(p, sizeof p, "%s/rhi,ff8", dir);
+        int rapp = access(p, F_OK) == 0;
+        snprintf(p, sizeof p, "%s/rhi.rs.o", dir);
+        int rtidy = access(p, F_OK) != 0;
+        snprintf(p, sizeof p, "%s/rhi.rs.ll", dir);
+        rtidy = rtidy && access(p, F_OK) != 0;
+        int rrun = cli("HostFS::BTTest.$.rhi");
+        int rbad = cli("Rust HostFS::BTTest.$.rs.rbad");
+        int rnoname = cli("Rust HostFS::BTTest.$.src.main");
+        check(!rj && rapp && rtidy && !rrun && rbad == 0xC0123 && rnoname == 0xC0122,
+              "*Rust -- rs.rhi compiled by the box's rustc to IR (roscc mojo-ir's fitting) and the box's "
+              "clang, linked by roscc with the fitted crates: the application rhi beside rs, typed &FF8, "
+              "its object and IR gone, runs by its name; rs.rbad refused, &C0123; a source not rs.<name> "
+              "refused, &C0122",
+              "&%X, app %d, tidy %d, run &%X, bad &%X, noname &%X", rj, rapp, rtidy, rrun, rbad, rnoname);
+        int rl = cli("Rust --linux HostFS::BTTest.$.rs.lr -o HostFS::BTTest.$.lrust");
+        snprintf(p, sizeof p, "%s/lrust,e1f", dir);
+        int rlapp = access(p, X_OK) == 0;
+        snprintf(out, sizeof out, "%s/out4", dir);
+        snprintf(line, sizeof line, "RunBox HostFS::BTTest.$.lrust 42 %s", out);
+        int rrb = cli(line);
+        rc = return_code();
+        there = get(out, got, sizeof got);
+        check(!rl && rlapp && !rrb && rc == 7 && there && !strcmp(got, "r 42\n"),
+              "*Rust --linux -- rs.lr compiled and linked by the box's rustc against the kit's std "
+              "(static, aarch64-unknown-linux-musl): the Linux program lrust runs by *RunBox with its "
+              "arguments, its file written, exit(7) Sys$ReturnCode",
+              "&%X, app %d, run &%X, Sys$ReturnCode %d, \"%s\"", rl, rlapp, rrb, rc, there ? got : "(no file)");
+        if (!rhad_slot && ros_slot_current) {
+            ros_task_resize_own(0);
+            ros_env_load(&renv);
+        }
+        const char *rfiles[] = { "rhi,ff8", "lrust,e1f", "out4", "rs/rhi", "rs/rbad", "rs/lr", "rs", NULL };
+        for (int i = 0; rfiles[i]; i++) {
+            snprintf(p, sizeof p, "%s/%s", dir, rfiles[i]);
+            if (unlink(p))
+                rmdir(p);
+        }
+#endif
     }
 
     ros_hostfs_unmount("BTTest");

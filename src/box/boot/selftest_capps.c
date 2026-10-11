@@ -1582,6 +1582,8 @@ void ros_selftest_capps(void)
     put(dir, "faults,ff8", capp_faults, CAPP_FAULTS_SIZE);
 #else
     put(dir, "clibapp,ff8", capp_clibapp, CAPP_CLIBAPP_SIZE);
+    if (CAPP_LUAJIT_SIZE)
+        put(dir, "luajit,ff8", capp_luajit, CAPP_LUAJIT_SIZE);
 #endif
     put(dir, "modmalloc,ff8", capp_modmalloc, CAPP_MODMALLOC_SIZE);
     put_variant(dir, "linux,ff8", 0, 7, 0, 0);                  /* EI_OSABI: SysV */
@@ -1723,6 +1725,26 @@ void ros_selftest_capps(void)
      * stdio), main, and its ways out. */
     clib_app(dir);
     mod_malloc();
+
+    /* The A64X32 LuaJIT application (kind 2, .cache/luajit-a64x32): the
+     * hand-translated interpreter and the JIT, running a script through
+     * both.  The sums prove the loops ran to the end. */
+    if (!CAPP_LUAJIT_SIZE) {
+        ros_console_printf("  skip  A64X32, kind 2: the LuaJIT application -- not built "
+                           "(make LUAJIT_APP=1, with .cache/luajit-a64x32)\n");
+    } else {
+        run("AppSlot 32M");
+        const os_error *e = run("Run HostFS::CAppTest.$.luajit");
+        ros_console_printf("%s", out);
+        check(!e && strstr(out, "hello from LuaJIT ") &&
+                        strstr(out, "interpreted+traced sum: 12500002500000") &&
+                        strstr(out, "interpreted sum: 500000500500") &&
+                        strstr(out, "luajit-app: done"),
+              "A64X32, kind 2: the LuaJIT application -- the interpreter "
+              "and the JIT in the arena as a RISC OS task",
+              "%s: [%s]", e ? e->errmess : "ran", out);
+        run("AppSlot 1024K");
+    }
 
     /* Faults in A64X32 code (fault.h, arch/aarch64/fault.c.inc): each the
      * error RISC OS 5.30 gives, to the program's error handler.  Here that

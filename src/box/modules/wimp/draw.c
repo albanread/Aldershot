@@ -143,6 +143,10 @@ static void window_colours(const struct wimp_window *win)
     d->titlebg = P[c[1] & 15];
     d->workfg = P[c[2] & 15];
     d->workbg = c[3] == 0xFF ? P[0] : P[c[3] & 15];
+    if (c[3] == 0 && wimp_menu_themed(win))
+        d->workbg = w->style.menu_bg;           /* a menu the theme draws (design 35) */
+    if (wimp_iconbar_themed(win) && w->style.iconbar_bg != 0xFFFFFFFFu)
+        d->workbg = w->style.iconbar_bg;
     d->scout = P[c[4] & 15];
     d->scin = P[c[5] & 15];
     d->titlebg2 = P[c[6] & 15];
@@ -250,14 +254,37 @@ static uint32_t munge(uint32_t flags)
     struct wimp_draw *d = dr();
     const uint32_t *P = w->palette;
     uint32_t T = d->border_type, g = 0xFFFFFFFFu, *tc = d->tc;
+    /* A menu the theme draws (design 35): an item in the standard colours,
+     * black on white, in the theme's text and background, and highlighted
+     * in its highlight; an item the application coloured keeps its own */
+    int themed = wimp_menu_themed(d->win);
     if (tc[TC_FG] == 0xFFFFFFFFu) {
         uint32_t i = ((flags & IF_FONT) ? d->fontfg : flags >> 24) & 15;
         g = i;
-        tc[TC_FG] = P[i];
+        tc[TC_FG] = themed && i == 7 ? w->style.menu_text : P[i];
     }
     if (tc[TC_BG] == 0xFFFFFFFFu) {
         uint32_t j = ((flags & IF_FONT) ? d->fontbg : flags >> 28) & 15;
-        tc[TC_BG] = ((flags & IF_BORDER) && T != 0 && j == 1 && g == 7) ? BUTTON_BG : P[j];
+        tc[TC_BG] = themed && j == 0 ? w->style.menu_bg
+                  : ((flags & IF_BORDER) && T != 0 && j == 1 && g == 7) ? BUTTON_BG : P[j];
+    }
+    /* a dialogue button in the standard colours: its text the theme's */
+    if (g == 7 && (flags & IF_BORDER) && T != 0 && ((flags >> 28) & 15) == 1 && w->style.button_text != 0xFFFFFFFFu)
+        tc[TC_FG] = w->style.button_text;
+    /* the theme's icon bar: labels in its text colour, filled icons on its background */
+    if (wimp_iconbar_themed(d->win)) {
+        if (g == 7 && w->style.iconbar_text != 0xFFFFFFFFu)
+            tc[TC_FG] = w->style.iconbar_text;
+        if (((flags >> 28) & 15) == 1 && !(flags & IF_BORDER) && w->style.iconbar_bg != 0xFFFFFFFFu)
+            tc[TC_BG] = w->style.iconbar_bg;
+    }
+    if (themed && (flags & IF_SELECTED)) {
+        if (tc[TC_SELFG] == 0xFFFFFFFFu)
+            tc[TC_SELFG] = w->style.menu_hl_text;
+        if (tc[TC_SELBG] == 0xFFFFFFFFu)
+            tc[TC_SELBG] = w->style.menu_hl;
+        if (!(flags & IF_SPRITE))
+            flags |= IF_FILLED;
     }
     if (tc[TC_BG2] == 0xFFFFFFFFu) {
         uint32_t h = d->border_highlight & 15;
@@ -1452,7 +1479,9 @@ static void icontext(uint32_t *flags, uint32_t text, struct wimp_box b)
                 if (bx > b.x1) bx = b.x1;
                 int32_t by = tp.ty + tp.temp_height < b.y1 ? tp.ty + tp.temp_height : b.y1;
                 uint32_t ibg = ((*flags & IF_FONT) ? d->fontbg : *flags >> 28) & 15;
-                if (!(*flags & IF_SELECTED) && (d->threed & 0x08u) && d->win && ibg == d->win->def[35]) {
+                /* (not on a themed icon bar: its labels are on the theme's background) */
+                if (!(*flags & IF_SELECTED) && (d->threed & 0x08u) && d->win && ibg == d->win->def[35] &&
+                    !wimp_iconbar_themed(d->win)) {
                     *flags &= ~IF_FILLED;           /* the window's tile goes behind it */
                     plot_icon_background((struct wimp_box){ ax, ay, bx, by });
                 } else {
@@ -2025,7 +2054,7 @@ static void title_bar(const struct wimp_window *win, uint32_t F, struct wimp_box
     if (s < w->furn.T || (tool(TOOL_TBARMIDT) & 1u))
         drawicon_system(F & ~(IF_SPRITE | IF_TEXT), data, T);
     int32_t ytop = T.y1 - w->dy - t->title_top;
-    uint32_t scale = ros_addr(t->scale), table = wimp_tool_table(d->titlecolour);
+    uint32_t scale = ros_addr(t->scale), table = wimp_title_tool_table(d->titlecolour, d->titlefg);
     uint32_t l = tool(TOOL_TBARLCAP), mt = tool(TOOL_TBARMIDT), mb = tool(TOOL_TBARMIDB);
     uint32_t r = tool(TOOL_TBARRCAP);
     if (l || mt || mb || r) {
@@ -2318,6 +2347,469 @@ static void horizontal_bar(const struct wimp_window *win, uint32_t f, struct wim
         flat_bar(wl, (struct wimp_box){ sx0, wl.y0 + 8, sx1, wl.y1 - 8 });
 }
 
+/* ---- painted chrome (RISCOSGrandDesign design 35, P2) ---------------------------------------------- */
+
+/* A theme whose Theme file says Chrome.Style: painted is drawn here, not
+ * with the tool sprites: the title row as a fill or a two-colour gradient,
+ * the buttons as glyphs or coloured dots, the scroll bars in one of three
+ * styles, the outline in the theme's colour and width.  Every piece is in
+ * the box border_rect gives it, and the sliders are where vslider and
+ * hslider put them, so what is drawn is what the pointer finds.  A window
+ * that asks for title colours of its own (not grey 2, cream 12, black 7)
+ * keeps them.  Colours are &BBGGRR00. */
+
+enum { PB_BACK, PB_CLOSE, PB_ICONISE, PB_TOGGLE, PB_TOGGLED, PB_SIZE, PB_UP, PB_DOWN, PB_LEFT, PB_RIGHT };
+
+static uint32_t rgb(uint32_t v)                 /* &RRGGBB as &BBGGRR00 */
+{
+    return (v >> 16 & 0xFFu) << 8 | (v >> 8 & 0xFFu) << 16 | (v & 0xFFu) << 24;
+}
+
+static uint32_t mix(uint32_t a, uint32_t b, int32_t i, int32_t n)
+{
+    if (n <= 0)
+        return a;
+    uint32_t out = 0;
+    for (int sh = 8; sh <= 24; sh += 8) {
+        int32_t x = (int32_t)(a >> sh & 0xFFu), y = (int32_t)(b >> sh & 0xFFu);
+        out |= (uint32_t)(x + (y - x) * i / n) << sh;
+    }
+    return out;
+}
+
+static uint32_t shade(uint32_t c, int32_t by)    /* lighter (by > 0) or darker */
+{
+    uint32_t out = 0;
+    for (int sh = 8; sh <= 24; sh += 8) {
+        int32_t x = (int32_t)(c >> sh & 0xFFu) + by;
+        out |= (uint32_t)(x < 0 ? 0 : x > 255 ? 255 : x) << sh;
+    }
+    return out;
+}
+
+static void pfill(struct wimp_box b, uint32_t c)
+{
+    if (!meets(b))
+        return;
+    bg(c);
+    solid(b);
+}
+
+static void pgradient(struct wimp_box b, uint32_t top, uint32_t bottom)
+{
+    struct wimp_ws *w = wimp_ws();
+    if (top == bottom) {
+        pfill(b, top);
+        return;
+    }
+    int32_t rows = (b.y1 - b.y0) / w->dy;
+    for (int32_t i = 0; i < rows; i++) {
+        int32_t y1 = b.y1 - i * w->dy;
+        pfill((struct wimp_box){ b.x0, y1 - w->dy, b.x1, y1 }, mix(top, bottom, i, rows - 1));
+    }
+}
+
+/* A fill of alternating rows, a pixel each: a pinstriped title bar */
+static void pstripes(struct wimp_box b, uint32_t c0, uint32_t c1)
+{
+    struct wimp_ws *w = wimp_ws();
+    pfill(b, c0);
+    for (int32_t y = b.y1 - 2 * w->dy; y >= b.y0; y -= 2 * w->dy)
+        pfill((struct wimp_box){ b.x0, y, b.x1, y + w->dy }, c1);
+}
+
+/* 3D edges on a box, raised: the theme's light colour along the top and
+ * left, its dark along the bottom and right, Chrome.Bevel pixels deep */
+static void pbevel(struct wimp_box b, uint32_t depth)
+{
+    struct wimp_ws *w = wimp_ws();
+    const struct wimp_style *st = &w->style;
+    if (!meets(b))
+        return;
+    for (uint32_t k = 0; k < depth; k++) {
+        int32_t x0 = b.x0 + (int32_t)k * w->dx, y0 = b.y0 + (int32_t)k * w->dy;
+        int32_t x1 = b.x1 - (int32_t)(k + 1) * w->dx, y1 = b.y1 - (int32_t)(k + 1) * w->dy;
+        if (x1 <= x0 || y1 <= y0)
+            break;
+        fg(st->bevel_light);
+        plot(4, x0, y0);
+        plot(5, x0, y1);
+        plot(5, x1, y1);
+        fg(st->bevel_dark);
+        plot(4, x1, y1 - w->dy);
+        plot(5, x1, y0);
+        plot(5, x0 + w->dx, y0);
+    }
+}
+
+/* A stroke two pixels wide */
+static void pline(int32_t x0, int32_t y0, int32_t x1, int32_t y1)
+{
+    struct wimp_ws *w = wimp_ws();
+    plot(4, x0, y0);
+    plot(5, x1, y1);
+    plot(4, x0 + w->dx, y0);
+    plot(5, x1 + w->dx, y1);
+}
+
+static void ptriangle(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2)
+{
+    plot(4, x0, y0);
+    plot(4, x1, y1);
+    plot(0x55, x2, y2);
+}
+
+static void pdot(int32_t cx, int32_t cy, int32_t r, uint32_t c)
+{
+    fg(c);
+    plot(4, cx, cy);
+    plot(0x9D, cx + r, cy);
+}
+
+/* A button's glyph (or dot) in its box, in colour c.  With Buttons.Set
+ * boxes, a bevelled square inside the box first, the glyph within it. */
+static void pbutton(int kind, struct wimp_box b, uint32_t c, int dots)
+{
+    struct wimp_ws *w = wimp_ws();
+    const struct wimp_style *st = &w->style;
+    if (!meets(b))
+        return;
+    if (st->buttons == STYLE_BUTTONS_BOXES && kind <= PB_TOGGLED) {
+        int32_t side = (b.x1 - b.x0) < (b.y1 - b.y0) ? b.x1 - b.x0 : b.y1 - b.y0;
+        int32_t in = (side / 6) & ~(w->dx - 1);
+        int32_t cx = ((b.x0 + b.x1) / 2) & ~(w->dx - 1), cy = ((b.y0 + b.y1) / 2) & ~(w->dy - 1);
+        int32_t half = (side / 2 - in) & ~(w->dx - 1);
+        struct wimp_box box = { cx - half, cy - half, cx + half, cy + half };
+        pfill(box, st->button_face);
+        pbevel(box, st->bevel ? st->bevel : 1);
+        b = (struct wimp_box){ box.x0 + 2 * w->dx, box.y0 + 2 * w->dy, box.x1 - 2 * w->dx, box.y1 - 2 * w->dy };
+        dots = 0;
+    }
+    int32_t cx = ((b.x0 + b.x1) / 2) & ~(w->dx - 1), cy = ((b.y0 + b.y1) / 2) & ~(w->dy - 1);
+    int32_t side = (b.x1 - b.x0) < (b.y1 - b.y0) ? b.x1 - b.x0 : b.y1 - b.y0;
+    int32_t s = (side * 2 / 9) & ~(w->dx - 1);
+    if (s < 2 * w->dx)
+        s = 2 * w->dx;
+    if (dots && kind <= PB_TOGGLED) {
+        static const uint32_t dot[] = { 0x61AFEF, 0xE06C75, 0xE5C07B, 0x98C379, 0x98C379 };
+        pdot(cx, cy, side * 2 / 9, rgb(dot[kind]));
+        return;
+    }
+    fg(c);
+    switch (kind) {
+    case PB_BACK:
+        hollow((struct wimp_box){ cx - s, cy - s, cx + s / 3, cy + s / 3 });
+        hollow((struct wimp_box){ cx - s / 3, cy - s / 3, cx + s, cy + s });
+        break;
+    case PB_CLOSE:
+        pline(cx - s, cy - s, cx + s, cy + s);
+        pline(cx - s, cy + s, cx + s, cy - s);
+        break;
+    case PB_ICONISE:
+        pline(cx - s, cy - s, cx + s, cy - s);
+        break;
+    case PB_TOGGLE:
+        hollow((struct wimp_box){ cx - s, cy - s, cx + s + w->dx, cy + s + w->dy });
+        hollow((struct wimp_box){ cx - s + w->dx, cy - s + w->dy, cx + s, cy + s });
+        break;
+    case PB_TOGGLED:
+        hollow((struct wimp_box){ cx - s, cy - s, cx + s / 2, cy + s / 2 });
+        hollow((struct wimp_box){ cx - s / 2, cy - s / 2, cx + s, cy + s });
+        break;
+    case PB_SIZE:
+        for (int k = 1; k <= 3; k++)
+            pline(cx + s - k * s * 2 / 3, cy - s, cx + s, cy - s + k * s * 2 / 3);
+        break;
+    case PB_UP: ptriangle(cx - s, cy - s / 2, cx + s, cy - s / 2, cx, cy + s / 2); break;
+    case PB_DOWN: ptriangle(cx - s, cy + s / 2, cx + s, cy + s / 2, cx, cy - s / 2); break;
+    case PB_LEFT: ptriangle(cx + s / 2, cy - s, cx + s / 2, cy + s, cx - s / 2, cy); break;
+    case PB_RIGHT: ptriangle(cx - s / 2, cy - s, cx - s / 2, cy + s, cx + s / 2, cy); break;
+    }
+}
+
+/* The track of a scroll bar and its thumb.  N is the whole bar, wl the
+ * well between its arrows, th the thumb from vslider/hslider. */
+static int32_t textop_width(uint32_t text, int32_t n);
+
+static void pscroll(struct wimp_box N, struct wimp_box wl, struct wimp_box th, int vertical, int arrows_fit)
+{
+    struct wimp_ws *w = wimp_ws();
+    const struct wimp_style *st = &w->style;
+    int32_t across = vertical ? N.x1 - N.x0 : N.y1 - N.y0;
+    pfill(N, st->track);
+    if (st->scroll == STYLE_SCROLL_CLASSIC) {
+        struct wimp_box a, b;
+        if (vertical) {
+            a = (struct wimp_box){ N.x0, wl.y1, N.x1, N.y1 };
+            b = (struct wimp_box){ N.x0, N.y0, N.x1, wl.y0 };
+        } else {
+            a = (struct wimp_box){ N.x0, N.y0, wl.x0, N.y1 };
+            b = (struct wimp_box){ wl.x1, N.y0, N.x1, N.y1 };
+        }
+        pfill(a, st->bevel ? st->button_face : shade(st->track, -12));
+        pfill(b, st->bevel ? st->button_face : shade(st->track, -12));
+        if (st->bevel) {
+            pbevel(a, st->bevel);
+            pbevel(b, st->bevel);
+        }
+        pbutton(vertical ? PB_UP : PB_LEFT, a, st->bevel ? st->bevel_dark : st->thumb, 0);
+        pbutton(vertical ? PB_DOWN : PB_RIGHT, b, st->thumb, 0);
+    }
+    if (!arrows_fit)
+        return;
+    int32_t in = st->scroll == STYLE_SCROLL_SLIM ? across * 3 / 10 : st->scroll == STYLE_SCROLL_CHANNEL ? across / 4 : 6;
+    in &= ~(w->dx - 1);
+    if (st->scroll == STYLE_SCROLL_CHANNEL) {
+        struct wimp_box g = vertical ? (struct wimp_box){ N.x0 + in - 2 * w->dx, wl.y0, N.x1 - in + 2 * w->dx, wl.y1 }
+                                     : (struct wimp_box){ wl.x0, N.y0 + in - 2 * w->dy, wl.x1, N.y1 - in + 2 * w->dy };
+        pfill(g, shade(st->track, -28));
+    }
+    struct wimp_box t = vertical ? (struct wimp_box){ N.x0 + in, th.y0, N.x1 - in, th.y1 }
+                                 : (struct wimp_box){ th.x0, N.y0 + in, th.x1, N.y1 - in };
+    pfill(t, st->thumb);
+    if (st->bevel)
+        pbevel(t, st->bevel);
+}
+
+static int own_title_colours(const struct wimp_window *win)
+{
+    const uint8_t *c = win->def + 32;
+    if (wimp_menu_themed(win))                  /* a menu's title: the standard black on grey */
+        return !(c[0] == 7 && c[1] == 2);
+    return !((c[0] == 7 || c[0] == 0xFF) && c[1] == 2 && c[6] == 12);
+}
+
+/* ---- the theme's title font (Title.Font) ------------------------------------------------ */
+
+void wimp_title_font_forget(struct wimp_style *st)
+{
+    if (st->title_font_handle) {
+        struct ros_cpu c;
+        ros_cpu_enter(&c);
+        c.r[0] = st->title_font_handle;
+        ros_swi(&c, XFont_LoseFont);
+    }
+    st->title_font_handle = 0;
+}
+
+/* The title font's handle, found the first time; 0 if there is none, or
+ * it is not to be had (the desktop font is used then) */
+static uint32_t title_font(void)
+{
+    struct wimp_style *st = &wimp_ws()->style;
+    if (!st->title_font[0])
+        return 0;
+    if (!st->title_font_handle) {
+        struct ros_cpu c;
+        ros_cpu_enter(&c);
+        c.r[1] = ros_addr(st->title_font), c.r[2] = c.r[3] = st->title_font_size, c.r[4] = c.r[5] = 0;
+        if (call(XFont_FindFont, &c))
+            st->title_font_handle = c.r[0];
+        else
+            st->title_font[0] = 0;              /* not again */
+    }
+    return st->title_font_handle;
+}
+
+/* A title's text (to its control character) in d->fontstr, for the Font
+ * Manager; its width in OS units */
+static int32_t title_string(uint32_t h, uint32_t txt, unsigned max)
+{
+    struct wimp_draw *d = dr();
+    unsigned n = 0;
+    d->fontstr[n++] = 26;                       /* the font, as a code, as fontstring() gives it */
+    d->fontstr[n++] = (uint8_t)h;
+    if (max > sizeof d->fontstr - 3)
+        max = sizeof d->fontstr - 3;
+    for (uint32_t p = txt; ros_ld8(p) >= 32 && n < max + 2; p++)
+        d->fontstr[n++] = (uint8_t)ros_ld8(p);
+    d->fontstr[n] = 0;
+    struct ros_cpu c;
+    ros_cpu_enter(&c);
+    c.r[0] = h, c.r[1] = ros_addr(d->fontstr), c.r[2] = 0, c.r[3] = c.r[4] = 0x0FFFFFFFu;
+    if (!call(XFont_ScanString, &c))
+        return 0;
+    uint32_t mp = c.r[3];
+    ros_cpu_enter(&c);
+    c.r[1] = mp, c.r[2] = 0;
+    return call(XFont_ConverttoOS, &c) ? (int32_t)c.r[1] : 0;
+}
+
+/* The title in the theme's font, in box b: centred or at the left, and
+ * centred on the bar's middle by the font's bounding box */
+static void title_in_font(uint32_t h, uint32_t txt, unsigned max, struct wimp_box b, int left, uint32_t fg,
+                          uint32_t bg)
+{
+    struct wimp_draw *d = dr();
+    int32_t tw = title_string(h, txt, max);
+    int32_t x = left ? b.x0 : (b.x0 + b.x1 - tw) / 2;
+    if (x < b.x0)
+        x = b.x0;
+    struct ros_cpu c;
+    ros_cpu_enter(&c);
+    c.r[0] = h;
+    int32_t y0 = 0, y1 = 0;
+    if (call(XFont_ReadInfo, &c))
+        y0 = (int32_t)c.r[2], y1 = (int32_t)c.r[4];
+    int32_t y = (b.y0 + b.y1) / 2 - (y0 + y1) / 2;
+    struct wimp_box old = d->clip;
+    gw(meet(b, old));
+    ros_cpu_enter(&c);
+    c.r[0] = h, c.r[1] = bg, c.r[2] = fg, c.r[3] = 14;
+    ros_swi(&c, XColourTrans_SetFontColours);
+    ros_cpu_enter(&c);
+    c.r[1] = ros_addr(d->fontstr), c.r[2] = 0x10, c.r[3] = (uint32_t)x, c.r[4] = (uint32_t)y;
+    ros_swi(&c, XFont_Paint);
+    gw(old);
+}
+
+static void painted_border(const struct wimp_window *win, uint32_t f, struct wimp_box O)
+{
+    struct wimp_ws *w = wimp_ws();
+    struct wimp_draw *d = dr();
+    struct wimp_furniture *fu = &w->furn;
+    const struct wimp_style *st = &w->style;
+    const struct wimp_place *p = &win->s[APP];
+    int focus = (p->flags & (1u << 20)) != 0;
+    uint32_t f0, f1, text;
+    if (own_title_colours(win)) {
+        f0 = f1 = d->titlecolour & ~0xFFu;
+        text = d->titlefg & ~0xFFu;
+    } else if (wimp_menu_themed(win)) {
+        f0 = st->menu_title[0], f1 = st->menu_title[1];
+        text = st->menu_title_text;
+    } else {
+        f0 = focus ? st->focus_fill[0] : st->unfocus_fill[0];
+        f1 = focus ? st->focus_fill[1] : st->unfocus_fill[1];
+        text = focus ? st->focus_text : st->unfocus_text;
+    }
+    uint32_t gc = st->button_colour != 0xFFFFFFFFu ? st->button_colour : text;
+    int dots = st->buttons == STYLE_BUTTONS_DOTS;
+    int32_t T1 = fu->T + w->dy, V1 = fu->V + w->dx;
+    int stripes = !own_title_colours(win) &&
+                  (wimp_menu_themed(win) ? st->menu_title_stripes : focus ? st->focus_stripes : st->unfocus_stripes);
+    struct wimp_box strip = { O.x0, O.y1 - T1, O.x1, O.y1 };
+    if (f & (F_BACK | F_CLOSE | F_TITLE | F_TOGGLE)) {
+        if (stripes)
+            pstripes(strip, f0, f1);
+        else
+            pgradient(strip, f0, f1);
+        if (st->bevel)
+            pbevel(strip, st->bevel);
+    }
+    int32_t left = O.x0;
+    if (f & F_BACK) {
+        pbutton(PB_BACK, (struct wimp_box){ O.x0, O.y1 - T1, O.x0 + fu->B + w->dx, O.y1 }, gc, dots);
+        left += fu->B;
+    }
+    if (f & F_CLOSE) {
+        pbutton(PB_CLOSE, (struct wimp_box){ left, O.y1 - T1, left + fu->C + w->dx, O.y1 }, gc, dots);
+        left += fu->C;
+    }
+    int iconise = (f & F_CLOSE) && p->parent == NO_WINDOW;
+    int32_t right = O.x1 - ((f & F_TOGGLE) ? fu->V : 0);
+    if (f & F_TITLE) {
+        struct wimp_box b = { left, O.y1 - T1, right - (iconise ? fu->I : 0), O.y1 };
+        uint32_t tf;
+        memcpy(&tf, win->def + 56, 4);
+        uint32_t F = (tf & ~(IF_BORDER | IF_FILLED | IF_RJUST | 0xF000u)) | 0xF000u | IF_VCENTRE;
+        if (st->align_left) {
+            F &= ~IF_HCENTRE;
+            b.x0 += 12;
+        } else {
+            F |= IF_HCENTRE;
+        }
+        if (stripes && (tf & IF_TEXT)) {
+            /* a plain gap in the stripes behind the text, as a pinstriped title has */
+            uint32_t txt = (tf & IF_INDIRECT) ? ros_ld32(ros_addr((void *)(win->def + 72)))
+                                              : ros_addr((void *)(win->def + 72));
+            uint32_t fh = title_font();
+            int32_t tw = (fh ? title_string(fh, txt, (tf & IF_INDIRECT) ? 255 : 12) : textop_width(txt, 0)) + 32;
+            int32_t gx0 = st->align_left ? b.x0 - 8 : (b.x0 + b.x1 - tw) / 2;
+            struct wimp_box gap = { gx0 < b.x0 ? b.x0 : gx0, b.y0 + (int32_t)(st->bevel + 1) * w->dy,
+                                    gx0 + tw > b.x1 ? b.x1 : gx0 + tw, b.y1 - (int32_t)(st->bevel + 1) * w->dy };
+            pfill(gap, f0);
+        }
+        uint32_t fh = (tf & IF_TEXT) && !(tf & IF_SPRITE) ? title_font() : 0;
+        if (fh) {
+            uint32_t txt = (tf & IF_INDIRECT) ? ros_ld32(ros_addr((void *)(win->def + 72)))
+                                              : ros_addr((void *)(win->def + 72));
+            title_in_font(fh, txt, (tf & IF_INDIRECT) ? 255 : 12, b, st->align_left, text, stripes ? f0 : mix(f0, f1, 1, 2));
+        } else {
+            uint32_t keep_fg = d->titlefg, keep_bg = d->titlecolour;
+            d->titlefg = text, d->titlecolour = stripes ? f0 : mix(f0, f1, 1, 2);
+            drawicon_system(F, ros_addr((void *)(win->def + 72)), b);
+            d->titlefg = keep_fg, d->titlecolour = keep_bg;
+        }
+    }
+    if (f & F_TOGGLE) {
+        int toggled = (f & ((1u << 18) | (1u << 22))) != 0;
+        pbutton(toggled ? PB_TOGGLED : PB_TOGGLE, (struct wimp_box){ O.x1 - V1, O.y1 - T1, O.x1, O.y1 }, gc, dots);
+    }
+    if (iconise)
+        pbutton(PB_ICONISE, (struct wimp_box){ right - fu->I - w->dx, O.y1 - T1, right, O.y1 }, gc, dots);
+    if (f & F_VBAR) {
+        struct wimp_box N = { O.x1 - (fu->V + w->dx), O.y0 + ((f & (F_SIZE | F_HBAR)) ? fu->H : 0), O.x1,
+                              O.y1 - ((f & (F_TOGGLE | F_TITLE)) ? fu->T : 0) };
+        int32_t len = N.y1 - N.y0;
+        if (len > w->dy) {
+            struct wimp_box wl = { N.x0, N.y0 + fu->D, N.x1, N.y1 - fu->U };
+            int fit = fu->U + fu->D <= len;
+            int32_t sy0 = 0, sy1 = 0;
+            if (fit)
+                vslider(win, wl, &sy0, &sy1);
+            pscroll(N, wl, (struct wimp_box){ 0, sy0, 0, sy1 }, 1, fit);
+        }
+    }
+    struct wimp_box sz = { O.x1 - V1, O.y0, O.x1, O.y0 + fu->H + w->dy };
+    if (f & F_SIZE) {
+        pfill(sz, st->bevel ? st->button_face : st->track);
+        if (st->bevel)
+            pbevel(sz, st->bevel);
+        pbutton(PB_SIZE, sz, st->bevel ? st->bevel_dark : st->thumb, 0);
+    } else if ((f & F_VBAR) && (f & F_HBAR)) {
+        pfill(sz, st->track);
+    }
+    if (f & F_HBAR) {
+        struct wimp_box N = { O.x0, O.y0, O.x1 - ((f & (F_SIZE | F_VBAR)) ? fu->V : 0), O.y0 + fu->H + w->dy };
+        int32_t len = N.x1 - N.x0;
+        if (len > w->dx) {
+            struct wimp_box wl = { N.x0 + fu->L, N.y0, N.x1 - fu->R, N.y1 };
+            int fit = fu->L + fu->R <= len;
+            int32_t sx0 = 0, sx1 = 0;
+            if (fit)
+                hslider(win, wl, &sx0, &sx1);
+            pscroll(N, wl, (struct wimp_box){ sx0, 0, sx1, 0 }, 0, fit);
+        }
+    }
+    wimp_draw_corner_edges(win);
+}
+
+/* Round corners (shape.c): the window stops short of its notches, so its
+ * edge follows the arc, in the outline's colour.  Drawn with the border,
+ * and again over each work area rectangle (a corner can be in the work
+ * area, which the task draws after the border), in the graphics window
+ * set. */
+/* The colour of a round corner's edge, &BBGGRR00 */
+uint32_t wimp_corner_edge_colour(const struct wimp_window *win)
+{
+    window_colours(win);
+    return own_title_colours(win) ? dr()->titlefg & ~0xFFu : wimp_ws()->style.outline;
+}
+
+void wimp_draw_corner_edges(const struct wimp_window *win)
+{
+    struct wimp_ws *w = wimp_ws();
+    if (!wimp_corner_radius(win, APP))
+        return;
+    window_colours(win);
+    struct wimp_box eb[128];
+    unsigned ne = wimp_corner_edges(win, APP, eb, sizeof eb / sizeof eb[0]);
+    uint32_t c = own_title_colours(win) ? dr()->titlefg & ~0xFFu : w->style.outline;
+    for (unsigned i = 0; i < ne; i++)
+        pfill(eb[i], c);
+}
+
 /* ---- the border pass --------------------------------------------------------------------------------- */
 
 static void border_rect(const struct wimp_window *win, struct wimp_box R)
@@ -2334,6 +2826,12 @@ static void border_rect(const struct wimp_window *win, struct wimp_box R)
         return;
     if (win->def[32] == 0xFF) {
         fg(d->titlefg);
+    } else if (w->style.painted) {
+        /* the outline in the theme's colour, as wide as it says */
+        fg(own_title_colours(win) ? d->titlefg : w->style.outline);
+        for (uint32_t k = 0; k < w->style.outline_w; k++)
+            hollow((struct wimp_box){ p->vis.x0 - (int32_t)(k + 1) * w->dx, p->vis.y0 - (int32_t)(k + 1) * w->dy,
+                                      p->vis.x1 + (int32_t)(k + 1) * w->dx, p->vis.y1 + (int32_t)(k + 1) * w->dy });
     } else {
         struct wimp_box B = { p->vis.x0 - w->dx, p->vis.y0 - w->dy, p->vis.x1 + w->dx, p->vis.y1 + w->dy };
         fg(d->titlefg == 0 ? OUTLINE_COLOUR : d->titlefg);
@@ -2345,6 +2843,10 @@ static void border_rect(const struct wimp_window *win, struct wimp_box R)
     if (!w->tl.built && w->tools)
         wimp_tools_refresh();
     struct wimp_box O = p->outline;
+    if (w->style.painted) {
+        painted_border(win, f, O);
+        return;
+    }
     int32_t T1 = fu->T + w->dy, V1 = fu->V + w->dx;
     uint32_t sc = ros_addr(w->tl.scale);
     int32_t left = O.x0;

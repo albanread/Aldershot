@@ -1040,19 +1040,45 @@ const char *ros_display_driver(int *direct)
     return driver[0] ? driver : "none";
 }
 
+/* rosgd.maxsize=WxH: no mode larger than the window the box is shown in
+ * (the Mac apps' BOX_SIZE, VZ's --size).  The display may offer more --
+ * virtio-gpu's list, the compositor's -- and a larger mode draws off the
+ * window's edge. */
+static void cap_display(struct ros_display *d)
+{
+    const char *v = ros_cmdline_value("rosgd.maxsize");
+    unsigned w, h;
+    if (!v || sscanf(v, "%ux%u", &w, &h) != 2 || w < 320 || h < 200)
+        return;
+    if (d->max_width > w)
+        d->max_width = w;
+    if (d->max_height > h)
+        d->max_height = h;
+    unsigned k = 0;
+    for (unsigned i = 0; i < d->nmodes; i++)
+        if (d->modes[i].width <= w && d->modes[i].height <= h)
+            d->modes[k++] = d->modes[i];
+    d->nmodes = k;
+}
+
 int ros_display_init(struct ros_display *d)
 {
     dirtyfb = ros_cmdline_has("rosgd.dirtyfb");
     const char *how = ros_cmdline_value("rosgd.display");
+    int e;
     if (how && strcmp(how, "compositor") == 0) {
         compositor = 1;                 /* the compositor owns the display */
-        return memory_display(d);
-    }
-    if (hal_display(d) == 0)
-        return 0;
-    int e = drm_display(d);
-    if (e == -ENOENT || e == -ENODEV)   /* no device, or nothing connected */
         e = memory_display(d);
+    } else {
+        e = hal_display(d);
+        if (e) {
+            e = drm_display(d);
+            if (e == -ENOENT || e == -ENODEV)   /* no device, or nothing connected */
+                e = memory_display(d);
+        }
+    }
+    if (!e)
+        cap_display(d);
     return e;
 }
 

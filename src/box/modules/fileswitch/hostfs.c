@@ -93,6 +93,7 @@ static struct {
     int nine_p;                         /* on a 9p share (nine_p_disc) */
     int flush;                          /* so, and written: fsync at the close */
     uint32_t extent;                    /* the last seen, for a file gone */
+    uint64_t checked;                   /* when still_there last compared the file with its name */
     char path[PATH_MAX];
 } open_files[MAX_OPEN];
 
@@ -217,25 +218,34 @@ static int io_lstat(const char *p, struct stat *st)
     return d ? io_ret(d->io->stat(d->ctx, r, st)) : lstat(p, st);
 }
 
+static void names_changed(void);
+static void names_edited(const char *path, int add);
+
 static int io_mkdir(const char *p)
 {
     const char *r;
     const struct disc *d = io_disc(p, &r);
-    return d ? io_ret(d->io->mkdir(d->ctx, r)) : mkdir(p, 0755);
+    int ret = d ? io_ret(d->io->mkdir(d->ctx, r)) : mkdir(p, 0755);
+    ret ? names_changed() : names_edited(p, 1);
+    return ret;
 }
 
 static int io_rmdir(const char *p)
 {
     const char *r;
     const struct disc *d = io_disc(p, &r);
-    return d ? io_ret(d->io->rmdir(d->ctx, r)) : rmdir(p);
+    int ret = d ? io_ret(d->io->rmdir(d->ctx, r)) : rmdir(p);
+    ret ? names_changed() : names_edited(p, 0);
+    return ret;
 }
 
 static int io_unlink(const char *p)
 {
     const char *r;
     const struct disc *d = io_disc(p, &r);
-    return d ? io_ret(d->io->unlink(d->ctx, r)) : unlink(p);
+    int ret = d ? io_ret(d->io->unlink(d->ctx, r)) : unlink(p);
+    ret ? names_changed() : names_edited(p, 0);
+    return ret;
 }
 
 static int io_rename(const char *from, const char *to)
@@ -246,7 +256,14 @@ static int io_rename(const char *from, const char *to)
         errno = EXDEV;
         return -1;
     }
-    return d1 ? io_ret(d1->io->rename(d1->ctx, r1, r2)) : rename(from, to);
+    int ret = d1 ? io_ret(d1->io->rename(d1->ctx, r1, r2)) : rename(from, to);
+    if (ret) {
+        names_changed();
+    } else {
+        names_edited(from, 0);
+        names_edited(to, 1);
+    }
+    return ret;
 }
 
 /* A listing: Linux's, or a disc's.  "." and ".." are left out; with st,
@@ -326,9 +343,13 @@ static int hf_open(const char *p, int flags, struct hf *f)
     if (d) {
         int h = d->io->open(d->ctx, r, flags);
         f->fd = h;
+        if (flags & O_CREAT)
+            h < 0 ? names_changed() : names_edited(p, 1);
         return io_ret(h);
     }
     f->fd = open(p, flags, 0644);
+    if (flags & O_CREAT)
+        f->fd < 0 ? names_changed() : names_edited(p, 1);
     return f->fd < 0 ? -1 : 0;
 }
 
@@ -695,6 +716,188 @@ static int path_is_open(const char *hp, int write_only)
 
 /* ---- paths ------------------------------------------------------------------- */
 
+/* The names in a directory, kept for a second.  Looking for "name,ffd" when
+ * "name" is not there means going through every name in the directory, and
+ * over 9p each name costs a request.  So the names are read once and the
+ * scan runs on the copy.  A listing is dropped when HostFS itself changes a
+ * name anywhere (names_changed), when the directory's own times differ from
+ * those it had when the listing was read, and when it is a second old.
+ *
+ * A name found in the copy is checked with lstat, so only a miss can be
+ * stale: a name another program has just added (the Mac's Finder, a test
+ * harness writing the file a polling program waits for) that the copy
+ * does not have.  The directory's times do not always tell -- a Linux
+ * guest's kernel keeps a share's attributes for a while -- so a miss on a
+ * copy more than DN_MISS_MS old reads the directory again and looks once
+ * more.  A run of lookups (the Filer opening a directory) still shares one
+ * read; a name added elsewhere shows within DN_MISS_MS. */
+#define DN_SLOTS 8
+#define DN_LIFE_MS 1000
+#define DN_MISS_MS 100
+#define DN_MAX_BYTES (8u << 20)         /* a larger directory is not kept */
+
+static struct dnames {
+    char dir[PATH_MAX];
+    uint64_t made;                      /* milliseconds, monotonic */
+    uint64_t used;                      /* a count, to find the one used longest ago */
+    dev_t dev;
+    ino_t ino;
+    struct timespec mtime;
+    size_t n, bytes;
+    char *names;                        /* n names, each ended by a 0 */
+} dn[DN_SLOTS];
+static uint64_t dn_use;
+unsigned ros_hostfs_dir_reads;          /* directories read for a scan (for the self-test) */
+
+static uint64_t now_ms(void)
+{
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    return (uint64_t)t.tv_sec * 1000 + (uint64_t)t.tv_nsec / 1000000;
+}
+
+static void dn_drop(struct dnames *c)
+{
+    free(c->names);
+    c->names = NULL;
+    c->dir[0] = 0;
+    c->n = c->bytes = 0;
+}
+
+/* HostFS has made, removed or renamed something: no listing can be trusted */
+static void names_changed(void)
+{
+    for (int i = 0; i < DN_SLOTS; i++)
+        if (dn[i].names)
+            dn_drop(&dn[i]);
+}
+
+static struct timespec mtime_of(const struct stat *st);
+
+/* HostFS made (add) or removed the name at host path p.  A listing of that
+ * directory is kept right by making the same change to it, so that a run of
+ * creates or deletes does not read the directory again for each.  A listing
+ * of the same directory under another name (another case, on a host that
+ * ignores it) is not edited, but it fails its check against the directory's
+ * times at its next use. */
+static void names_edited(const char *p, int add)
+{
+    const char *slash = strrchr(p, '/');
+    if (!slash) {
+        names_changed();
+        return;
+    }
+    size_t dl = (size_t)(slash - p), ll = strlen(slash + 1) + 1;
+    for (int i = 0; i < DN_SLOTS; i++) {
+        struct dnames *c = &dn[i];
+        if (!c->names)
+            continue;
+        if (strlen(c->dir) != dl || memcmp(c->dir, p, dl))
+            continue;
+        char *e = c->names, *end = c->names + c->bytes;
+        while (e < end && strcmp(e, slash + 1))
+            e += strlen(e) + 1;
+        if (add && e == end) {
+            char *m = realloc(c->names, c->bytes + ll);
+            if (!m) {
+                dn_drop(c);
+                continue;
+            }
+            c->names = m;
+            memcpy(m + c->bytes, slash + 1, ll);
+            c->bytes += ll, c->n++;
+        } else if (!add && e < end) {
+            size_t k = strlen(e) + 1;
+            memmove(e, e + k, (size_t)(end - e - k));
+            c->bytes -= k, c->n--;
+        }
+        /* the change moved the directory's times: they are the copy's now */
+        struct stat st;
+        if (io_stat(c->dir, &st) == 0) {
+            c->dev = st.st_dev, c->ino = st.st_ino, c->mtime = mtime_of(&st);
+        } else {
+            dn_drop(c);
+        }
+    }
+}
+
+/* The listing of dir: a copy not yet a second old, or one made now.  NULL
+ * if the directory cannot be read. */
+static const struct dnames *dn_get(const char *dir)
+{
+    struct stat st;
+    int have = io_stat(dir, &st) == 0;
+    uint64_t now = now_ms();
+    struct dnames *free_slot = NULL;
+    for (int i = 0; i < DN_SLOTS; i++) {
+        struct dnames *c = &dn[i];
+        if (!c->names) {
+            free_slot = c;
+            continue;
+        }
+        if (strcmp(c->dir, dir))
+            continue;
+        struct timespec mt = have ? mtime_of(&st) : c->mtime;
+        if (have && now - c->made < DN_LIFE_MS && c->dev == st.st_dev && c->ino == st.st_ino &&
+            c->mtime.tv_sec == mt.tv_sec && c->mtime.tv_nsec == mt.tv_nsec) {
+            c->used = ++dn_use;
+            return c;
+        }
+        dn_drop(c);
+        free_slot = c;
+    }
+    struct hdir *d = io_opendir(dir);
+    if (!d)
+        return NULL;
+    ros_hostfs_dir_reads++;
+    size_t n = 0, bytes = 0, cap = 4096;
+    char *names = malloc(cap);
+    const char *e;
+    while (names && (e = io_readdir(d, NULL)) != NULL) {
+        size_t l = strlen(e) + 1;
+        if (bytes + l > cap) {
+            while (bytes + l > cap)
+                cap *= 2;
+            char *m = realloc(names, cap);
+            if (!m) {
+                free(names);
+                names = NULL;
+                break;
+            }
+            names = m;
+        }
+        memcpy(names + bytes, e, l);
+        bytes += l;
+        n++;
+    }
+    io_closedir(d);
+    if (!names)
+        return NULL;
+    if (bytes > DN_MAX_BYTES) {         /* too large to keep: use it once */
+        static struct dnames once;
+        if (once.names)
+            dn_drop(&once);
+        once.names = names, once.n = n, once.bytes = bytes;
+        once.dir[0] = 0;
+        return &once;
+    }
+    if (!free_slot) {
+        free_slot = &dn[0];
+        for (int i = 1; i < DN_SLOTS; i++)
+            if (dn[i].used < free_slot->used)
+                free_slot = &dn[i];
+        dn_drop(free_slot);
+    }
+    snprintf(free_slot->dir, sizeof free_slot->dir, "%s", dir);
+    free_slot->made = now;
+    free_slot->used = ++dn_use;
+    free_slot->dev = have ? st.st_dev : 0;
+    free_slot->ino = have ? st.st_ino : 0;
+    free_slot->mtime = have ? mtime_of(&st) : (struct timespec){ 0, 0 };
+    free_slot->names = names, free_slot->n = n, free_slot->bytes = bytes;
+    return free_slot;
+}
+
 /* The host leaf in dir that RISC OS would call want: one stat, then the
  * directory forward-mapped entry by entry.  1 found; 0 and the literal
  * translation, for a create. */
@@ -708,10 +911,19 @@ static int resolve_leaf_link(const char *dir, const char *want, char *out, size_
         *link = S_ISLNK(st.st_mode);
         return 1;
     }
-    struct hdir *d = io_opendir(dir);
-    if (d) {
-        const char *e;
-        while ((e = io_readdir(d, NULL)) != NULL) {
+    const struct dnames *d = dn_get(dir);
+    for (int pass = 0; d && pass < 2; pass++) {
+        if (pass) {
+            /* a miss: read the directory again if the copy is not new */
+            if (!d->dir[0] || now_ms() - d->made < DN_MISS_MS)
+                break;
+            dn_drop((struct dnames *)d);
+            d = dn_get(dir);
+            if (!d)
+                break;
+        }
+        const char *e = d->names;
+        for (size_t k = 0; k < d->n; k++, e += strlen(e) + 1) {
             char one[PATH_MAX], leaf[256];
             uint32_t type;
             /* The name is read first both ways.  As a file, its ",xxx" is a type.
@@ -736,11 +948,9 @@ static int resolve_leaf_link(const char *dir, const char *want, char *out, size_
             if (strcasecmp(leaf, want) == 0) {
                 snprintf(out, max, "%s", one);
                 *link = islink;
-                io_closedir(d);
                 return 1;
             }
         }
-        io_closedir(d);
     }
     snprintf(out, max, "%s/%s", dir, naive);
     *link = 0;
@@ -971,6 +1181,7 @@ static os_error *h_open(const char *disc, const char *path, int write, uint32_t 
     struct stat st;                     /* the extent, until h_extent asks again */
     open_files[slot].extent = hf_fstat(&open_files[slot].f, &st) == 0 ? (uint32_t)st.st_size : 0;
     open_count++;
+    open_files[slot].checked = now_ms();
     open_files[slot].write = write;
     open_files[slot].flush = 0;
     struct disc *dp = (struct disc *)find_disc(disc);
@@ -987,12 +1198,25 @@ static void changed_at(const char *p);
 /* The file a handle is open on, still there: a host that deletes or
  * replaces it underneath an open handle (Finder, a script) leaves the
  * descriptor on the old file, and reading or writing that would quietly
- * use data no longer anyone's.  "Not found" instead, as the suite asks. */
+ * use data no longer anyone's.  "Not found" instead, as the suite asks.
+ *
+ * Whether the name still leads somewhere is asked at every access: one
+ * access() of the path, which a kernel or the HAL answers from what it
+ * knows.  Whether it still leads to this file (the file replaced by
+ * another of the same name) is asked when the handle is a second old, and
+ * then once a second.  A fstat and a stat at every read and write were most
+ * of what a small read cost over 9p. */
+#define CHECK_MS 1000
+
 static os_error *still_there(uint32_t h)
 {
     struct stat fst, pst;
     if (open_files[h].f.io)             /* the server keeps a file open whole */
         return NULL;
+    uint64_t now = now_ms();
+    if (now - open_files[h].checked < CHECK_MS)
+        return access(open_files[h].path, F_OK) == 0 ? NULL : err_not_found();
+    open_files[h].checked = now;
     if (fstat(open_files[h].f.fd, &fst) != 0 || stat(open_files[h].path, &pst) != 0 ||
         fst.st_dev != pst.st_dev || fst.st_ino != pst.st_ino)
         return err_not_found();
@@ -1154,7 +1378,7 @@ static void changed_in(const char *dir)
 }
 
 /* The object at host path p changed: its directory's listing is stale */
-static void changed_at(const char *p)
+static void changed_in_dir_of(const char *p)
 {
     char dir[PATH_MAX];
     snprintf(dir, sizeof dir, "%s", p);
@@ -1164,9 +1388,17 @@ static void changed_at(const char *p)
     changed_in(dir);
 }
 
+/* A name at host path p is being made, removed or renamed (the listing of
+ * names for the scan is kept right by the io_ calls that do it) */
+static void changed_at(const char *p)
+{
+    changed_in_dir_of(p);
+}
+
+/* An open file's contents changed: its names did not */
 static void changed(uint32_t h)
 {
-    changed_at(open_files[h].path);
+    changed_in_dir_of(open_files[h].path);
 }
 
 static struct timespec mtime_of(const struct stat *st)

@@ -527,6 +527,123 @@ static void put_host(const char *leaf, const char *data)
     }
 }
 
+/* OS_File 5 of a name: the object type (0 none, 1 file, 2 directory), and
+ * the load address in *load */
+static uint32_t cat5(const char *n, uint32_t *load)
+{
+    uint32_t q[8] = { 5, name(n) };
+    int v = swi(XOS_File, q);
+    if (load)
+        *load = v ? 0 : q[2];
+    return v ? 0xFFFFFFFFu : q[0];
+}
+
+static void touch_host(const char *dir, const char *leaf)
+{
+    char p[1100];
+    snprintf(p, sizeof p, "%s/%s", dir, leaf);
+    FILE *f = fopen(p, "wb");
+    if (f) {
+        fputs("x", f);
+        fclose(f);
+    }
+}
+
+/* Whether OS_File 5 of n gives type want within ms milliseconds (HostFS
+ * looks for "name,xxx" on a listing that it keeps for a second) */
+static int becomes(const char *n, uint32_t want, int ms)
+{
+    for (int t = 0;; t += 50) {
+        if (cat5(n, NULL) == want)
+            return 1;
+        if (t >= ms)
+            return 0;
+        usleep(50000);
+    }
+}
+
+/* Looking for "name,xxx" when "name" is not there goes through the
+ * directory.  HostFS keeps the names it read, so a run of such lookups
+ * reads the directory once.  A change that HostFS itself makes shows at
+ * once; a change made by another program shows within about a second. */
+static void dircache(void)
+{
+    char dir[1024], leaf[64];
+    snprintf(dir, sizeof dir, "%s/Names", root);
+    mkdir(dir, 0777);
+    for (int i = 0; i < 120; i++) {
+        snprintf(leaf, sizeof leaf, "n%03d,ffd", i);
+        touch_host(dir, leaf);
+    }
+    uint32_t load;
+    unsigned r0 = ros_hostfs_dir_reads;
+    uint32_t t = cat5("HostFS::Test.$.Names.n007", &load);
+    check(t == 1 && ((load >> 8) & 0xFFF) == 0xFFD, "HostFS -- a name found in a directory by its ,ffd suffix",
+          "a suffixed name: type %u load &%X", t, load);
+    unsigned r1 = ros_hostfs_dir_reads;
+    int ok = 1;
+    for (int i = 0; i < 40; i++) {
+        snprintf(leaf, sizeof leaf, "HostFS::Test.$.Names.n%03d", i * 3);
+        ok &= cat5(leaf, NULL) == 1;
+    }
+    check(ok && ros_hostfs_dir_reads == r1 && r1 == r0 + 1,
+          "HostFS -- forty more suffixed lookups read no directory again",
+          "reads: %u, then %u, then %u (found: %d)", r0, r1, ros_hostfs_dir_reads, ok);
+
+    /* what HostFS itself changes shows at once, and keeps the listing right
+     * without reading the directory again for each change (once in a while the
+     * listing is a second old) */
+    unsigned r2 = ros_hostfs_dir_reads;
+    strcpy(ros_ptr(text + 1024), "data");
+    uint32_t sv[8] = { 10, name("HostFS::Test.$.Names.fresh"), 0xFFD, 0, text + 1024, text + 1028 };
+    swi(XOS_File, sv);
+    check(host_exists("Names/fresh,ffd") && cat5("HostFS::Test.$.Names.fresh", NULL) == 1,
+          "HostFS -- a file saved by HostFS is found at once by the scan", "a saved file is not found");
+    uint32_t dl[8] = { 6, name("HostFS::Test.$.Names.n010") };
+    swi(XOS_File, dl);
+    check(cat5("HostFS::Test.$.Names.n010", NULL) == 0 && !host_exists("Names/n010,ffd"),
+          "HostFS -- a file deleted by HostFS is gone at once", "a deleted file is still found");
+    uint32_t rn[8] = { 25, name("HostFS::Test.$.Names.n011"), name2("HostFS::Test.$.Names.moved") };
+    swi(XOS_FSControl, rn);
+    uint32_t old_t = cat5("HostFS::Test.$.Names.n011", NULL), new_t = cat5("HostFS::Test.$.Names.moved", &load);
+    check(old_t == 0 && new_t == 1 && ((load >> 8) & 0xFFF) == 0xFFD,
+          "HostFS -- a file renamed by HostFS has its new name at once, with its type",
+          "a renamed file: old name type %u, new name type %u, load &%X", old_t, new_t, load);
+    uint32_t ty[8] = { 18, name("HostFS::Test.$.Names.n012"), 0xFFB };
+    swi(XOS_File, ty);
+    check(host_exists("Names/n012,ffb") && cat5("HostFS::Test.$.Names.n012", &load) == 1 &&
+              ((load >> 8) & 0xFFF) == 0xFFB,
+          "HostFS -- a type set by HostFS shows at once", "a new type is not seen (load &%X)", load);
+    uint32_t md[8] = { 8, name("HostFS::Test.$.Names.sub") };
+    swi(XOS_File, md);
+    check(cat5("HostFS::Test.$.Names.sub", NULL) == 2, "HostFS -- a directory made by HostFS is found at once",
+          "a made directory is not found");
+    uint32_t dd[8] = { 6, name("HostFS::Test.$.Names.sub") };
+    swi(XOS_File, dd);
+    check(cat5("HostFS::Test.$.Names.sub", NULL) == 0, "HostFS -- a directory removed by HostFS is gone at once",
+          "a removed directory is still found");
+    check(ros_hostfs_dir_reads - r2 <= 3, "HostFS -- seven changes and their lookups read the directory at most three times",
+          "the directory was read %u times", ros_hostfs_dir_reads - r2);
+
+    /* what another program changes shows within about a second */
+    touch_host(dir, "late,ffd");
+    check(becomes("HostFS::Test.$.Names.late", 1, 2500),
+          "HostFS -- a file added behind HostFS's back is found within 2.5 seconds", "an added file is not found");
+    char p[1100];
+    snprintf(p, sizeof p, "%s/n020,ffd", dir);
+    unlink(p);
+    check(becomes("HostFS::Test.$.Names.n020", 0, 2500),
+          "HostFS -- a file removed behind HostFS's back is gone within 2.5 seconds", "a removed file is still found");
+    snprintf(p, sizeof p, "%s/n030,ffd", dir);
+    char q[1100];
+    snprintf(q, sizeof q, "%s/n030,fff", dir);
+    rename(p, q);
+    check(becomes("HostFS::Test.$.Names.n030", 1, 2500) &&
+              (cat5("HostFS::Test.$.Names.n030", &load), ((load >> 8) & 0xFFF) == 0xFFF),
+          "HostFS -- a type changed behind HostFS's back is seen within 2.5 seconds", "a renamed file's type (load &%X)", load);
+    remove_tree(dir);
+}
+
 static void utilities(void)
 {
     uint32_t data = text + 1024;
@@ -1574,6 +1691,38 @@ static void symlinks(void)
         uint32_t cl[8] = { 0, op[0] };
         swi(XOS_Find, cl);
     }
+
+    /* #234: a relative link that climbs out of the disc is refused too, and
+     * one that stays inside it is followed */
+    const char *base = strrchr(root, '/');
+    char rel[700], inside[700], real[700];
+    snprintf(rel, sizeof rel, "../%s-outside/secret", base ? base + 1 : root);
+    snprintf(linkpath, sizeof linkpath, "%s/Rel", root);
+    int rmade = symlink(rel, linkpath) == 0;
+    snprintf(real, sizeof real, "%s/Real", root);
+    if ((f = fopen(real, "w")))
+        fputs("inside", f), fclose(f);
+    snprintf(inside, sizeof inside, "%s/Inside", root);
+    rmade = rmade && symlink("Real", inside) == 0;
+    uint32_t ro[8] = { 0x40, name("HostFS::Test.$.Rel") };
+    int rv = swi(XOS_Find, ro);
+    if (rv == 0 && ro[0]) {
+        uint32_t cl[8] = { 0, ro[0] };
+        swi(XOS_Find, cl);
+    }
+    uint32_t io[8] = { 0x40, name("HostFS::Test.$.Inside") };
+    int iv = swi(XOS_Find, io);
+    if (iv == 0 && io[0]) {
+        uint32_t cl[8] = { 0, io[0] };
+        swi(XOS_Find, cl);
+    }
+    check(rmade && (rv == 1 || ro[0] == 0) && iv == 0 && io[0],
+          "HostFS -- a relative link out of the disc is not opened; one to a file in the disc is",
+          "links %s; out of the disc: %d handle %u; inside: %d handle %u", rmade ? "made" : "not made",
+          rv, ro[0], iv, io[0]);
+    unlink(linkpath);
+    unlink(inside);
+    unlink(real);
     unlink(target);
     unlink(secret);
     rmdir(out);
@@ -1608,6 +1757,7 @@ void ros_selftest_files(void)
     upcalls();
     free_entry();
     symlinks();
+    dircache();
     wildcards();
     messages();
     resources();

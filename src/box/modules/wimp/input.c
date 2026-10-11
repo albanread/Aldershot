@@ -408,6 +408,8 @@ static struct wimp_window *hit_in(struct wimp_window *first, int32_t x, int32_t 
     for (struct wimp_window *win = first; win; win = wimp_window_below(win, APP)) {
         if (!win->s[APP].open || !inside(win->s[APP].outline, x, y))
             continue;
+        if (!wimp_in_shape(win, APP, x, y))
+            continue;                           /* a round corner's notch: what is below */
         if (border_only && !(win->s[APP].flags & F_INBORDER))
             continue;
         int work = in_work(win, x, y);

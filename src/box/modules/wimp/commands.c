@@ -183,17 +183,19 @@ os_error *wimp_cmd_wimpvisualflags(struct ros_module *m, uint32_t tail, uint32_t
 
 /* ---- *ToolSprites ------------------------------------------------------------------- */
 
+/* *ToolSprites <file> uses the file's tool sprites, as RISC OS does; with
+ * no file, WindowManager:Tools again (theme.c, wimp_tools_use). */
 os_error *wimp_cmd_toolsprites(struct ros_module *m, uint32_t tail, uint32_t argc)
 {
-    (void)m, (void)tail, (void)argc;
-    struct wimp_ws *w = wimp_ws();
-    if (w->tools)
-        xos_module_free(ros_ptr(w->tools));
-    w->tools = 0;                               /* WindowManager:Tools is loaded afresh */
-    wimp_tools_refresh();
-    if (w->ntasks)
-        wimp_invalidate_box(wimp_screen_box());
-    return NULL;
+    (void)m;
+    char file[200] = "";
+    if (argc) {
+        unsigned n = 0;
+        for (uint32_t p = tail; ros_ld8(p) > ' ' && n < sizeof file - 1; p++)
+            file[n++] = (char)ros_ld8(p);
+        file[n] = 0;
+    }
+    return wimp_tools_use(file);
 }
 
 /* ---- Wimp_SetMode and *WimpMode -------------------------------------------------------- */

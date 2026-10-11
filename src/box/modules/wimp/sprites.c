@@ -28,7 +28,7 @@ static uint32_t load_file(const char *name)
 {
     struct wimp_ws *w = wimp_ws();
     char *n = (char *)w->scratch;
-    snprintf(n, 128, "%s", name);
+    snprintf(n, 250, "%s", name);
     struct ros_cpu c;
     ros_cpu_enter(&c);
     c.r[0] = 17;
@@ -66,7 +66,7 @@ static int file_exists(const char *name)
 {
     struct wimp_ws *w = wimp_ws();
     char *n = (char *)w->scratch;
-    snprintf(n, 128, "%s", name);
+    snprintf(n, 250, "%s", name);
     struct ros_cpu c;
     ros_cpu_enter(&c);
     c.r[0] = 17, c.r[1] = ros_addr(n);
@@ -78,7 +78,23 @@ static int file_exists(const char *name)
  * screen's mode before the Wimp has one. The suffixes are then tried in
  * 5.30's order, leaving out the alpha forms because the box's files have
  * none. The name of the first file that exists is returned in *name. */
+static int rom_chain(const char *base, char *name, size_t size);
+
+/* ROSGD (design 35): a theme's Sprites take the ROM area's place, as RISC
+ * OS 5's !ThemeDefs puts them over Resources.Wimp.Sprites in ResourceFS,
+ * found through the same suffixes; the ROM's own if the theme has none. */
 static void rom_name(char *name, size_t size)
+{
+    struct wimp_ws *w = wimp_ws();
+    if (w->theme_sprites[0] && rom_chain(w->theme_sprites, name, size))
+        return;
+    if (!rom_chain("WindowManager:Sprites", name, size))
+        snprintf(name, size, "WindowManager:Sprites");
+}
+
+/* The first of base<x><y>, down the suffix chain, then base, that exists:
+ * 1 and its name in *name, or 0 */
+static int rom_chain(const char *base, char *name, size_t size)
 {
     struct wimp_ws *w = wimp_ws();
     uint32_t mode = w->mode;
@@ -87,9 +103,9 @@ static void rom_name(char *name, size_t size)
         y = 3;                                  /* a 1 bpp 2 x 2 mode: 23 */
     w->rom_suffix[0] = (char)('0' + x), w->rom_suffix[1] = (char)('0' + y), w->rom_suffix[2] = 0;
     for (;;) {
-        snprintf(name, size, "WindowManager:Sprites%u%u", x, y);
+        snprintf(name, size, "%s%u%u", base, x, y);
         if (file_exists(name))
-            return;
+            return 1;
         if (y == 3)
             y = 2;
         else if (x != y) {
@@ -101,7 +117,8 @@ static void rom_name(char *name, size_t size)
             break;
         }
     }
-    snprintf(name, size, "WindowManager:Sprites");
+    snprintf(name, size, "%s", base);
+    return file_exists(name);
 }
 
 static uint32_t load_rom_area(void)
@@ -117,7 +134,7 @@ static uint32_t load_rom_area(void)
 void wimp_sprites_choose(void)
 {
     struct wimp_ws *w = wimp_ws();
-    char name[48];
+    char name[200];
     rom_name(name, sizeof name);
     if (w->rom_sprites && w->rom_sprites != ros_addr(w->empty_area) && !strcmp(name, w->rom_name))
         return;

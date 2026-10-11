@@ -363,6 +363,16 @@ def packages():
         "!NetSurf (Unicode)", "MIT, and the Unicode data licence",
         [("LICENSE.md", T(utf8, "utf8proc-%s/LICENSE.md" % utf8_v))])
 
+    add("LuaJIT", "LuaJIT", "2.1 (c6ffc14)", "https://luajit.org/",
+        "*LuaJIT, the Lua language, linked into /init and built by deps/build-luajit.sh",
+        "MIT", [("COPYRIGHT", F(os.path.join(CACHE, "luajit-c6ffc14/COPYRIGHT")))])
+    add("RiscLua", "RiscLua", "8.6", "https://github.com/RISC-OS-Community/RiscLua",
+        "The riscos library of *LuaJIT (modules/luajit/riscos.c), a port of RiscLua's riscoslib. "
+        "BOX's port is under RiscLua's licence. RiscLua's Readme says: Changes to Lua "
+        "port for RISC OS are copyright Gavin Wraith and distributed under the same "
+        "license as Lua original code (MIT license)",
+        "MIT", [("RiscLua's LICENSE", F(os.path.join(TP, "RiscLua/LICENSE")))])
+
     add("Paige", "Paige (HERMES-Paige)", "3.0b (%s)" % gitrev(os.path.join(TP, "Paige")),
         "https://github.com/nmatavka/HERMES-Paige",
         "!Write's text engine. BOX's changes to Paige are under Paige's licence",

@@ -142,6 +142,7 @@ struct ros_hostio {
 /* Mounts such a disc; ros_hostfs_unmount removes it.  -1 when HostFS has
  * no room for another disc. */
 int ros_hostfs_mount_io(const char *name, const struct ros_hostio *io, void *ctx);
+extern unsigned ros_hostfs_dir_reads;     /* directories HostFS has read to scan for a name (self-test) */
 
 /* The Linux path a RISC OS name resolves to, on HostFS (or LanMan) */
 os_error *ros_hostfs_linux_path(const char *name, char *out, size_t max);

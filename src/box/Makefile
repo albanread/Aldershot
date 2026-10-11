@@ -15,6 +15,8 @@
 #                     the ROM; its CFSI module is in /init
 #   make graphtask    !GraphTask, a graphical screen in a window (apps/graphtask),
 #                     which make builds into the ROM
+#   make appearance   !Appearance, the desktop's look (apps/appearance), which make
+#                     builds into the ROM
 #   make kernel       the kernel, built in the Alpine build VM
 #
 #   HAND=1            use T0Demo's hand translation, not the compiler's
@@ -72,7 +74,7 @@ CFLAGS := -std=c11 -O2 -g -Wall -Wextra -Werror=implicit-function-declaration -f
           -Imodules/resourcefs -Imodules/messagetrans -Imodules/fileswitch -Imodules/unixbridge -Imodules/vfpsupport -Imodules/spriteextend -Imodules/colourtrans -Imodules/draw -Imodules/gdraw -Imodules/smooth -Imodules/supersample \
           -Imodules/fontmanager -Imodules/screenblanker -Imodules/spriteutils -Imodules/squash -Imodules/sharedsnd -Imodules/sound -Imodules/soundsched -Imodules/portable -Imodules/fpemulator -Imodules/basicname -Imodules/systemdevs -Imodules/wimp -Imodules/territory -Imodules/taskwindow -Imodules/sharedclib \
           -Imodules/shellcli -Imodules/modulewrap -Imodules/zlibmod -Imodules/compresspng -Imodules/compressjpeg -Imodules/mimemap -Imodules/worker -Imodules/pdriver \
-          -Iports/changefsi/module -Iruntime/armrun
+          -Iports/changefsi/module -Iruntime/armrun -Imodules/luajit
 
 # /init is a static PIE -- zig links musl statically, and -fPIE makes that
 # a static PIE -- which the kernel loads far above 4 GB, leaving the low
@@ -114,9 +116,17 @@ IMG_LIBS    = $(1)/lib/libpng16.a $(1)/lib/libjpeg.a $(1)/lib/libz.a
 GUEST_CC   += -I$(OSSL_GUEST)/include -I$(CURL_GUEST)/include -DCURL_STATICLIB -I$(IMG_GUEST)/include
 GUEST_LIBS := $(CURL_GUEST)/lib/libcurl.a $(OSSL_GUEST)/lib/libssl.a $(OSSL_GUEST)/lib/libcrypto.a \
               $(call IMG_LIBS,$(IMG_GUEST))
-HOST_SSL   := -I$(OSSL_HOST)/include -I$(IMG_HOST)/include
+# LuaJIT, for the Lua language module (modules/luajit): the interpreter
+# only, to begin with; the box's, static for musl, built by
+# deps/build-luajit.sh, and the hosted test's, the same source built for
+# this machine
+LUAJIT_GUEST ?= $(DEPS)/luajit-musl
+LUAJIT_HOST  ?= .cache/luajit-host
+GUEST_CC   += -I$(LUAJIT_GUEST)/include
+GUEST_LIBS += $(LUAJIT_GUEST)/lib/libluajit.a
+HOST_SSL   := -I$(OSSL_HOST)/include -I$(IMG_HOST)/include -I$(LUAJIT_HOST)/include
 HOST_IMG_LIBS := $(call IMG_LIBS,$(IMG_HOST))
-HOST_LIBS  := $(HOST_IMG_LIBS) $(OSSL_HOST)/lib/libssl.a $(OSSL_HOST)/lib/libcrypto.a -lcurl
+HOST_LIBS  := $(HOST_IMG_LIBS) $(LUAJIT_HOST)/lib/libluajit.a $(OSSL_HOST)/lib/libssl.a $(OSSL_HOST)/lib/libcrypto.a -lcurl
 # The ARM container's engine (runtime/armrun): dynarmic, built by deps/build-dynarmic.sh with our patches
 # (runtime/armrun/patches) -- the box's for its machine, the hosted test's
 # for this one -- and armrun.cpp, its C face, the one C++ in /init.  The
@@ -160,7 +170,7 @@ NATIVE   := modules/buffers/buffers.c modules/drmvideo/drmvideo.c modules/intern
             modules/inetres/sysctl.c modules/inetres/misc.c modules/inetres/files.c modules/inetres/digest.c \
             modules/inetres/md5.c modules/inetres/tftp.c modules/inetres/utils.c modules/dhcp/dhcp.c \
             modules/acornssl/acornssl.c modules/urlfetcher/urlfetcher.c modules/urlfetcher/parseurl.c \
-            modules/acornhttp/acornhttp.c modules/acornhttp/cookie.c modules/acornhttp/dates.c modules/pty/pty.c modules/pty/term.c modules/sshd/sshd.c modules/sshd/session.c modules/sshd/relay.c modules/lanmanfs/lanmanfs.c modules/smbserver/smbserver.c modules/boxtools/boxtools.c modules/bootcmds/bootcmds.c modules/international/international.c modules/intkey/intkey.c modules/input/input.c \
+            modules/acornhttp/acornhttp.c modules/acornhttp/cookie.c modules/acornhttp/dates.c modules/pty/pty.c modules/pty/term.c modules/sshd/sshd.c modules/sshd/session.c modules/sshd/relay.c modules/lanmanfs/lanmanfs.c modules/smbserver/smbserver.c modules/boxtools/boxtools.c modules/luajit/luajit.c modules/luajit/riscos.c modules/luajit/sys_box.c modules/bootcmds/bootcmds.c modules/international/international.c modules/intkey/intkey.c modules/input/input.c \
             modules/resourcefs/resourcefs.c modules/messagetrans/messagetrans.c \
             modules/territory/territorymanager.c modules/territory/uk.c modules/territory/timecalc.c \
             modules/fileswitch/fileswitch.c modules/fileswitch/fsutils.c modules/fileswitch/hostfs.c modules/fileswitch/modfs.c \
@@ -176,7 +186,7 @@ NATIVE   := modules/buffers/buffers.c modules/drmvideo/drmvideo.c modules/intern
             modules/draw/draw.c modules/draw/process.c modules/draw/output.c modules/draw/arith.c \
             modules/gdraw/gdraw.c modules/gdraw/aa.c modules/smooth/smooth.c \
             modules/supersample/supersample.c modules/screenblanker/screenblanker.c modules/spriteutils/spriteutils.c \
-            modules/squash/squash.c modules/sharedsnd/sharedsnd.c modules/sound/sound.c modules/sound/voices.c modules/soundsched/soundsched.c modules/squash/fast.c modules/portable/portable.c modules/fpemulator/fpemulator.c modules/basicname/basicname.c modules/systemdevs/systemdevs.c modules/wimp/wimp.c modules/wimp/task.c modules/wimp/message.c modules/wimp/window.c modules/wimp/redraw.c modules/wimp/region.c modules/wimp/screen.c modules/wimp/tools.c modules/wimp/icons.c modules/wimp/draw.c modules/wimp/font.c modules/wimp/caret.c modules/wimp/templates.c modules/wimp/input.c modules/wimp/filters.c modules/wimp/iconbar.c modules/wimp/errorbox.c modules/wimp/commands.c modules/wimp/menus.c modules/wimp/cmdwin.c modules/wimp/clipboard.c modules/wimp/sprites.c modules/wimp/surface.c modules/taskwindow/taskwindow.c \
+            modules/squash/squash.c modules/sharedsnd/sharedsnd.c modules/sound/sound.c modules/sound/voices.c modules/soundsched/soundsched.c modules/squash/fast.c modules/portable/portable.c modules/fpemulator/fpemulator.c modules/basicname/basicname.c modules/systemdevs/systemdevs.c modules/wimp/wimp.c modules/wimp/task.c modules/wimp/message.c modules/wimp/window.c modules/wimp/redraw.c modules/wimp/region.c modules/wimp/screen.c modules/wimp/tools.c modules/wimp/icons.c modules/wimp/draw.c modules/wimp/font.c modules/wimp/caret.c modules/wimp/templates.c modules/wimp/input.c modules/wimp/filters.c modules/wimp/iconbar.c modules/wimp/errorbox.c modules/wimp/commands.c modules/wimp/menus.c modules/wimp/cmdwin.c modules/wimp/clipboard.c modules/wimp/sprites.c modules/wimp/surface.c modules/wimp/theme.c modules/wimp/shape.c modules/wimp/shadow.c modules/taskwindow/taskwindow.c \
             modules/sharedclib/sharedclib.c modules/shellcli/shellcli.c modules/modulewrap/modulewrap.c \
             modules/zlibmod/zlibmod.c modules/zlibmod/gz.c modules/compresspng/compresspng.c modules/compressjpeg/compressjpeg.c \
             modules/mimemap/mimemap.c modules/worker/worker.c modules/worker/kcheck.c \
@@ -188,7 +198,7 @@ BOOT     := boot/selftest.c boot/selftest_imagefs.c boot/selftest_basicvfp.c boo
             boot/selftest_ticker.c boot/selftest_tasks.c boot/selftest_amb.c boot/selftest_dynarea.c boot/selftest_wimpswis.c boot/selftest_callback.c \
             boot/selftest_taskmanager.c boot/selftest_drag.c boot/selftest_filer.c boot/selftest_pinboard.c \
             boot/selftest_armrun.c boot/selftest_shadow.c boot/selftest_filterhourglass.c boot/selftest_desktop.c boot/selftest_resfiler.c boot/selftest_sprutils.c boot/selftest_gdraw.c boot/selftest_smooth.c boot/selftest_fontfiles.c boot/selftest_squash.c boot/selftest_zlib.c boot/selftest_compresspng.c boot/selftest_compressjpeg.c boot/selftest_worker.c boot/selftest_pdriver.c boot/selftest_jpegplot.c boot/selftest_mimemap.c boot/selftest_portable.c boot/selftest_sharedsnd.c boot/selftest_sound.c \
-            boot/selftest_territory.c boot/selftest_international.c boot/selftest_taskwindow.c boot/selftest_shellcli.c boot/selftest_hostfsfiler.c boot/selftest_bootcmds.c boot/selftest_display.c boot/selftest_deskclock.c boot/selftest_deskmeter.c boot/selftest_speakers.c boot/selftest_machine.c \
+            boot/selftest_territory.c boot/selftest_international.c boot/selftest_taskwindow.c boot/selftest_shellcli.c boot/selftest_hostfsfiler.c boot/selftest_bootcmds.c boot/selftest_display.c boot/selftest_deskclock.c boot/selftest_deskmeter.c boot/selftest_speakers.c boot/selftest_machine.c boot/selftest_luajit.c \
             boot/selftest_environment.c boot/selftest_input.c \
             boot/selftest_osbyte.c boot/selftest_convert.c boot/selftest_sysvars.c boot/selftest_args.c boot/selftest_oscli.c boot/selftest_modules.c boot/selftest_messagetrans.c boot/selftest_files.c boot/selftest_program.c boot/selftest_sclib.c boot/selftest_capps.c boot/selftest_vdu.c boot/selftest_vdisplay.c boot/vduplay.c \
             boot/hfstest.c boot/rom_contents.c
@@ -242,6 +252,7 @@ HEADERS  := $(wildcard include/rosgd/*.h) boot/selftest.h runtime/vdu/vduws.h ru
             modules/resourcefs/resourcefs.h modules/messagetrans/messagetrans.h modules/territory/territory.h \
             modules/fileswitch/fileswitch.h modules/fileswitch/fsw.h modules/unixbridge/unixbridge.h modules/unixbridge/ubsys.h modules/hostfsfiler/hostfsfiler.h modules/scrmodes/scrmodes.h modules/display/display.h modules/deskclock/deskclock.h modules/deskmeter/deskmeter.h modules/waylandwin/waylandwin.h modules/waylandwin/wwin.h modules/vfpsupport/vfpsupport.h modules/vfpsupport/vfpmath.h modules/vfpsupport/elementary.h modules/spriteextend/sprext.h modules/spriteextend/spriteextend.h modules/colourtrans/ct.h modules/colourtrans/colourtrans.h modules/fontmanager/fm.h modules/fontmanager/fontmanager.h modules/draw/draw.h modules/draw/drawmodule.h modules/gdraw/gd.h modules/gdraw/gdraw.h modules/smooth/smooth.h modules/supersample/supersample.h modules/screenblanker/screenblanker.h modules/spriteutils/spriteutils.h modules/squash/squash.h modules/zlibmod/zlibmod.h modules/compresspng/compresspng.h modules/compressjpeg/compressjpeg.h modules/mimemap/mimemap.h modules/worker/worker.h modules/sharedsnd/sharedsnd.h modules/sound/sound.h modules/soundsched/soundsched.h modules/squash/sq.h modules/portable/portable.h modules/fpemulator/fpemulator.h modules/basicname/basicname.h modules/systemdevs/systemdevs.h modules/wimp/wimp.h \
             ports/changefsi/module/cfsi.h modules/taskwindow/taskwindow.h modules/sharedclib/sharedclib.h modules/shellcli/shellcli.h modules/modulewrap/modulewrap.h $(GEN)/modwrap_edit.h $(GEN)/modwrap_draw.h $(GEN)/modwrap_paint.h $(GEN)/modwrap_fileract.h $(GEN)/romapps_stamps.h $(SQUASHHDRS) $(GEN)/rosgd/api.h $(GEN)/rom_t0demo.h $(GEN)/rom_basicvfp.h $(GEN)/rom_blendtable.h $(GEN)/rom_itable.h $(GEN)/rom_wimp.h modules/speakers/speakers.h modules/machine/machine.h modules/worker/kcheck.h modules/pdriver/pdriver.h modules/pdriver/ipp.h \
+            modules/luajit/luamodule.h modules/luajit/riscos_sys.h \
             $(GEN)/rom_desktop.h $(GEN)/rom_taskmanager.h $(GEN)/rom_dragasprite.h $(GEN)/rom_draganobj.h $(GEN)/rom_filer.h $(GEN)/rom_filerswis.h $(GEN)/rom_hourglass.h $(GEN)/rom_pinboard.h $(GEN)/rom_windowutils.h $(GEN)/rom_filtermgr.h \
             $(GEN)/rom_free.h $(GEN)/rom_resfiler.h $(GEN)/rom_fptest.h $(GEN)/rom_ctxtest.h $(GEN)/rom_inttest.h \
             $(GEN)/rom_inttest0.h $(GEN)/rom_picker.h $(GEN)/capp_images.h $(GEN)/sclib_probe.h $(SPARKFS_ROMH) $(TOOLBOX_ROMH) $(GEN)/rom_drawfile.h
@@ -401,15 +412,17 @@ $(GEN)/modwrap_fileract.h: tools/mkromapps.py $(shell find $(ROMAPPSSRC)/Desktop
 # !SparkFS (ports/sparkfs/sparkfs.mk, which make builds), Apps.!SparkFS;
 # $(B)/ports/changefsi/rom is !ChangeFSI (ports/changefsi/changefsi.mk),
 # Apps.!ChangeFSI.  $(B)/graphtask/rom is !GraphTask (apps/graphtask/
-# graphtask.mk), Apps.!GraphTask.  $(B)/stronghelp/rom is !StrongHlp
+# graphtask.mk), Apps.!GraphTask; $(B)/appearance/rom is !Appearance
+# (apps/appearance/appearance.mk), Apps.!Appearance.  $(B)/stronghelp/rom is !StrongHlp
 # (ports/stronghelp/stronghelp.mk), Apps.!StrongHlp; its manuals are the
 # disc's Utilities.!Manuals.
 $(GEN)/resources.c: tools/mkresources.py $(shell find resources -type f) $(COLOURTABLES)/Tables/8desktop,ffd $(DESKTOPSPRITES) $(ROMAPPSDIR)/.made $(GEN)/stronged-rom/.made \
-                    $(B)/ports/sparkfs/.made $(B)/ports/changefsi/.made $(B)/graphtask/.made $(B)/stronghelp/.made
+                    $(B)/ports/sparkfs/.made $(B)/ports/changefsi/.made $(B)/graphtask/.made $(B)/stronghelp/.made \
+                    $(B)/appearance/.made
 	@mkdir -p $(GEN)
 	$(PYTHON) tools/mkresources.py resources $(GEN)/restables --dated $(ROMAPPSDIR) --dated $(GEN)/stronged-rom \
 	    --dated $(B)/ports/sparkfs/rom --dated $(B)/ports/changefsi/rom --dated $(B)/graphtask/rom \
-	    --dated $(B)/stronghelp/rom $@
+	    --dated $(B)/stronghelp/rom --dated $(B)/appearance/rom $@
 
 # The default CMOS: the team emulator's seed for a HostFS share (runtime/cmos.c).
 $(GEN)/cmos_default.c: tools/mkcmosdefault.py runtime/cmos_default.bin
@@ -881,11 +894,29 @@ $(GEN)/capps/mandelk.wk: tests/worker/mandelk.c $(ROSCC)
 	@mkdir -p $(GEN)/capps
 	$(CAPP_CC) -fno-jump-tables -ffp-contract=off -c -o $(GEN)/capps/mandelk.o $<
 	$(ROSCC) link --kernel -o $@ $(GEN)/capps/mandelk.o
+# The A64X32 LuaJIT application (kind 2, .cache/luajit-a64x32): the
+# interpreter and JIT compiled and linked by its do-app.sh; the gate runs
+# it as a RISC OS task through the C library.  It is work in progress (its
+# first script still faults) and the cache is one tree's, so the gate is
+# off unless asked for: make LUAJIT_APP=1.  Otherwise the image is empty
+# and the self-test says that it skipped the check.
+ifeq ($(LUAJIT_APP),1)
+LUAJIT_APP_ELF := $(GEN)/capps/luajit.elf
+$(LUAJIT_APP_ELF): .cache/luajit-a64x32/app/luajit-a64x32.elf .cache/luajit-a64x32/do-app.sh
+	@mkdir -p $(GEN)/capps
+	cp $< $@
+else
+LUAJIT_APP_ELF := $(GEN)/capps/luajit-none.elf
+$(LUAJIT_APP_ELF):
+	@mkdir -p $(GEN)/capps
+	: > $@
+endif
+
 $(GEN)/capp_images.h: $(GEN)/capps/probe.elf $(GEN)/capps/bigprobe.elf $(GEN)/capps/clibapp.elf \
-                      $(GEN)/capps/modmalloc.elf $(GEN)/capps/mandelk.wk tools/bin2c.py
+                      $(GEN)/capps/modmalloc.elf $(GEN)/capps/mandelk.wk $(LUAJIT_APP_ELF) tools/bin2c.py
 	$(PYTHON) tools/bin2c.py $@ capp_probe=$(GEN)/capps/probe.elf capp_bigprobe=$(GEN)/capps/bigprobe.elf \
 	    capp_clibapp=$(GEN)/capps/clibapp.elf capp_modmalloc=$(GEN)/capps/modmalloc.elf \
-	    capp_mandelk=$(GEN)/capps/mandelk.wk
+	    capp_mandelk=$(GEN)/capps/mandelk.wk capp_luajit=$(LUAJIT_APP_ELF)
 endif
 
 # SharedCLibrary's module surface (package R5): the BASIC probe and RISC OS
@@ -1018,6 +1049,7 @@ $(ROSBAS_HOST): $(ROSBAS_SRC)
 	cd ../rosbas && PATH="$(abspath $(dir $(CARGO))):$$PATH" $(CARGO) build --release --bin rosbas
 	@touch $@
 ifeq ($(ARCH),x86_64)
+ROSBAS_BOX_CRT0 := $(GEN)/capps/rt/crt0_x32.o
 $(ROSBAS_KIT)/librb.a: $(wildcard ../rosbas/runtime/*.c ../rosbas/runtime/*.h ../rosbas/runtime/x32/*) \
                        $(wildcard modules/basicvfp/asmlib/*.c modules/basicvfp/asmlib/*.h) \
                        ../rosbas/tools/rbbuild.py $(GEN)/capps/rt/crt0_x32.o | clib-image-built
@@ -1055,26 +1087,31 @@ $(CLANG_BOX)/usr/bin/llvm: deps/build-clang-box.sh $(ABIDIR)/clang-a64x32.patch 
 	sh deps/build-clang-box.sh $(CLANG_BOX)
 	@touch $@
 
-# The Apple Silicon box's rosbas has LLVM's code generator in it (rosbas's
-# llvm-box feature): it can compile a program to machine code in the box.
-# It does all the plain rosbas does, so it replaces it as /usr/bin/rosbas.
-# LLVM's static libraries are deps/build-llvm-libs-box.sh's
-# (.cache/llvm-libs-box, about 5 minutes the first time); zig 0.15
-# cross-compiles them and links rosbas, with its libc++.
-# ROSBAS_BOX_ZIG names that zig 0.15 alone, since the rest of the build
-# may use another (ZIG).  By default it is ~/zig015/zig, where the Studio
-# keeps its zig 0.15, else ZIG.
+ROSBAS_BOX_CRT0 := $(CAPPS)/rt/crt0_a64x32.o
+endif
+
+# Both boxes' rosbas have LLVM's code generator in them (rosbas's llvm-box
+# feature): they compile a program to machine code in the box -- A64X32 on
+# the Apple Silicon box, x32 on the Intel one, chosen by the target rosbas
+# is built for (rosbas build.rs).  It does all the plain rosbas does, so it
+# replaces it as /usr/bin/rosbas.  LLVM's static libraries are
+# deps/build-llvm-libs-box.sh's (.cache/llvm-libs-box[-x86_64], about five
+# minutes the first time); zig 0.15 cross-compiles them and links rosbas,
+# with its libc++.
+# ROSBAS_BOX_ZIG names that zig 0.15 alone, since the rest of the build may
+# use another (ZIG).  By default it is ~/zig015/zig, where the Studio keeps
+# its zig 0.15, else ZIG.
 ROSBAS_BOX_ZIG ?= $(firstword $(wildcard $(HOME)/zig015/zig) $(ZIG))
 ROSBAS_BOX_LLVM := ../rosbas/target/llvm-box/$(RUST_TARGET)/release/rosbas
-# It holds the A64X32 runtime compiled beforehand, as the kit's librb.a is,
+# It holds the box's runtime compiled beforehand, as the kit's librb.a is,
 # and its small functions as bitcode to inline (rosbas build.rs,
 # tools/rbllsplit.c), and links its images with roscc's linker as a library.
 $(ROSBAS_BOX_LLVM): $(ROSBAS_SRC) ../rosbas/build.rs ../rosbas/tools/build-box-rosbas.sh ../rosbas/tools/rbllsplit.c deps/build-llvm-libs-box.sh \
                     $(wildcard ../rosbas/runtime/*.c ../rosbas/runtime/*.h ../rosbas/runtime/jit/*.c) \
-                    $(wildcard ../roscc/src/*.rs) $(ABIDIR)/flags.mk $(CAPPS)/rt/crt0_a64x32.o | clib-image-built
-	cd ../rosbas && PATH="$(abspath $(dir $(CARGO))):$$PATH" ZIG="$(ROSBAS_BOX_ZIG)" sh tools/build-box-rosbas.sh
+                    $(wildcard ../roscc/src/*.rs) $(ABIDIR)/flags.mk $(ROSBAS_BOX_CRT0) | clib-image-built
+	cd ../rosbas && PATH="$(abspath $(dir $(CARGO))):$$PATH" ZIG="$(ROSBAS_BOX_ZIG)" \
+	    ROSBAS_BOX_ARCH=$(ARCH) sh tools/build-box-rosbas.sh
 	@touch $@
-endif
 
 # The ROM C library's image (package R5): make capps's library, linked by
 # roscc --clib-image (capps.mk's clib-image-built: RISC OS's C staged, the
@@ -1204,6 +1241,10 @@ $(SMB2_HOST)/lib/libsmb2.a: deps/build-libsmb2.sh deps/libsmb2/config.h
 $(OSSL_GUEST)/lib/libssl.a:
 	TARGET=$(TARGET) sh deps/build-openssl.sh $(OSSL_GUEST)
 $(OSSL_GUEST)/lib/libcrypto.a: $(OSSL_GUEST)/lib/libssl.a ;
+$(LUAJIT_GUEST)/lib/libluajit.a:
+	TARGET=$(TARGET) sh deps/build-luajit.sh $(LUAJIT_GUEST) $(TARGET)
+$(LUAJIT_HOST)/lib/libluajit.a:
+	sh deps/build-luajit.sh $(LUAJIT_HOST) host
 $(CURL_GUEST)/lib/libcurl.a: $(OSSL_GUEST)/lib/libcrypto.a
 	TARGET=$(TARGET) sh deps/build-curl.sh $(CURL_GUEST) $(OSSL_GUEST)
 $(SSH_GUEST)/bin/ssh: $(OSSL_GUEST)/lib/libcrypto.a
@@ -1214,7 +1255,7 @@ SSH_PROGS := $(addprefix $(SSH_GUEST)/bin/,ssh ssh-keygen sshd sshd-session sshd
 # One run makes all four compilers; the box's x32-tcc is the last it
 # writes.  A change to the script or the patch builds them again.
 TCC_ALL := $(TCC_GUEST)/box/usr/bin/x32-tcc
-$(TCC_ALL): deps/build-tcc.sh $(ABIDIR)/tcc-x32.patch
+$(TCC_ALL): deps/build-tcc.sh abi/x32/tcc-x32.patch
 	sh deps/build-tcc.sh $(TCC_GUEST)
 $(TCC_GUEST)/host/bin/tcc $(TCC_GUEST)/host/bin/x32-tcc $(TCC_GUEST)/box/usr/bin/tcc: $(TCC_ALL) ;
 
@@ -1311,6 +1352,56 @@ $(MOJO_STAGE)/.made: $(MOJO_ARCHIVE)/.sha256 $(MOJO_PKGS) $(MOJO_RT_O) $(GEN)/mo
 	    $(MOJO_LINKER) > $(MOJO_STAGE)/etc/modular/modular.cfg
 	@touch $@
 
+# Rust, BoxTools' *Rust (modules/boxtools): the compiler as a Linux
+# program behind the * command, as mojo, clang, rosbas and roscc are.
+# The compiler is not built here: deps/get-rust-box.sh fetches the
+# machine's archive (the private release rust-box-1, checked by SHA-256,
+# which deps/build-rust-box.sh makes) into .cache.  It is one static
+# program against musl -- Rust 1.97.1, the LLVM 22 release, so the box's
+# LLVM 22 libraries (deps/build-llvm-libs-box.sh) are what it links, and
+# rustc_driver is an rlib inside it (the box has no dynamic loader).
+# Around it, as the box has it under /usr/lib/rust:
+#   bin/rustc              the compiler (the archive); /usr/bin/rustc a
+#                          link to it
+#   lib/rustlib/...        the sysroot: std's rlibs for aarch64-unknown-
+#                          linux-musl (*Rust --linux) and core, alloc and
+#                          compiler_builtins for A64X32 (an application,
+#                          &FF8) -- the rlibs the compiler reads and, in
+#                          ilp32-fit/, the same three as mojo-ir-fitted
+#                          objects, which roscc links the application with
+#   rt_a64x32/rust_rt_a64x32.o
+#                          made here from roscc/rostrt (malloc and its kin
+#                          over rostrt's OS_Heap heap, and alloc's two
+#                          compiler-side symbols), compiled as the Mojo
+#                          runtime is.  The rest of the runtime a Rust
+#                          application links is Mojo's own rt_a64x32
+#                          (/usr/lib/mojo): crt0, rostrt, the SWI shims,
+#                          the maths
+# aarch64 only: the Apple Silicon box (A64X32 is its ABI, and --linux's
+# target there).  The Intel box's Rust is not built yet.
+ifeq ($(ARCH),aarch64)
+RUSTBOX_ARCHIVE := $(DEPS)/rust-box-musl-$(ARCH)
+RUSTBOX_STAGE   := $(GEN)/rust-stage
+RUSTBOX_RT_SRC  := ../roscc/rostrt
+RUSTBOX_RT_CC    = $(LLVM_BIN)/clang --target=aarch64-unknown-linux-gnu_ilp32 -march=armv8-a -ffixed-x18 \
+    -fwrapv-pointer
+RUSTBOX_RT_FLAGS := $(MOJO_RT_FLAGS)
+$(RUSTBOX_ARCHIVE)/.sha256: deps/get-rust-box.sh
+	sh deps/get-rust-box.sh $(ARCH) $(RUSTBOX_ARCHIVE)
+	@touch $@
+$(GEN)/rust-rt/rust_rt_a64x32.o: $(RUSTBOX_RT_SRC)/rust_rt_a64x32.c $(wildcard $(RUSTBOX_RT_SRC)/*.h)
+	@mkdir -p $(@D)
+	$(RUSTBOX_RT_CC) $(RUSTBOX_RT_FLAGS) -c $< -o $@
+$(RUSTBOX_STAGE)/.made: $(RUSTBOX_ARCHIVE)/.sha256 $(GEN)/rust-rt/rust_rt_a64x32.o
+	rm -rf $(RUSTBOX_STAGE)
+	mkdir -p $(RUSTBOX_STAGE)/usr/bin $(RUSTBOX_STAGE)/usr/lib
+	cp -R $(RUSTBOX_ARCHIVE)/rust $(RUSTBOX_STAGE)/usr/lib/rust
+	ln -s ../lib/rust/bin/rustc $(RUSTBOX_STAGE)/usr/bin/rustc
+	mkdir -p $(RUSTBOX_STAGE)/usr/lib/rust/rt_a64x32
+	cp $(GEN)/rust-rt/rust_rt_a64x32.o $(RUSTBOX_STAGE)/usr/lib/rust/rt_a64x32/
+	@touch $@
+endif
+
 # The Intel box's ROM: /init, ssh and sshd, ksmbd-tools, clang and ld.lld
 # with musl and compiler-rt's builtins (above), rosbas, roscc and their
 # kits, pdfsvc, and Mojo's compiler and kit (above)
@@ -1326,7 +1417,7 @@ $(B)/initramfs.cpio: $(B)/init $(B)/wperun initramfs/mkcpio.py $(SSH_PROGS) $(KS
 	    --file /usr/sbin/ksmbd.tools=$(KSMBD_GUEST)/bin/ksmbd.tools:0755 \
 	    --file /usr/bin/wperun=$(B)/wperun:0755 \
 	    --tree /usr=$(CLANG_BOX_X86)/usr \
-	    --file /usr/bin/rosbas=$(ROSBAS_BOX):0755 --file /usr/bin/roscc=$(ROSCC_BOX):0755 \
+	    --file /usr/bin/rosbas=$(ROSBAS_BOX_LLVM):0755 --file /usr/bin/roscc=$(ROSCC_BOX):0755 \
 	    --file /usr/bin/pdfsvc=$(PDFSVC_BOX):0755 \
 	    --tree /usr/lib/rosbas=$(ROSBAS_KIT) --dir /usr/lib/capps --dir /usr/lib/capps/inc \
 	    --tree /usr/lib/capps/inc/C=$(CAPPS)/inc/C --dir /usr/lib/roscc --tree /usr/lib/roscc/x32=$(GEN)/capps/rt \
@@ -1344,7 +1435,7 @@ else
 # simplicity.
 $(B)/initramfs.cpio: $(B)/init $(B)/wperun initramfs/mkcpio.py $(SSH_PROGS) $(KSMBD_GUEST)/bin/ksmbd.tools \
                     $(CLANG_BOX)/usr/bin/llvm $(ROSBAS_BOX_LLVM) $(ROSCC_BOX) $(ROSBAS_KIT)/librb.a $(PDFSVC_BOX) \
-                    $(MOJO_STAGE)/.made
+                    $(MOJO_STAGE)/.made $(RUSTBOX_STAGE)/.made
 	$(PYTHON) initramfs/mkcpio.py $@ --dir /dev --dir /proc --dir /sys \
 	    --char /dev/console=5,1 --file /init=$(B)/init:0755 --dir /usr --dir /usr/bin \
 	    --file /usr/bin/ssh=$(SSH_GUEST)/bin/ssh:0755 --file /usr/bin/ssh-keygen=$(SSH_GUEST)/bin/ssh-keygen:0755 \
@@ -1358,7 +1449,7 @@ $(B)/initramfs.cpio: $(B)/init $(B)/wperun initramfs/mkcpio.py $(SSH_PROGS) $(KS
 	    --file /usr/bin/pdfsvc=$(PDFSVC_BOX):0755 \
 	    --tree /usr/lib/rosbas=$(ROSBAS_KIT) --dir /usr/lib/capps --dir /usr/lib/capps/inc \
 	    --tree /usr/lib/capps/inc/C=$(CAPPS)/inc/C --dir /usr/lib/roscc --tree /usr/lib/roscc/a64x32=$(CAPPS)/rt \
-	    --tree /usr=$(MOJO_STAGE)/usr --dir /etc --tree /etc=$(MOJO_STAGE)/etc
+	    --tree /usr=$(MOJO_STAGE)/usr --tree /usr=$(RUSTBOX_STAGE)/usr --dir /etc --tree /etc=$(MOJO_STAGE)/etc
 endif
 
 # wperun (ports/wpe): the WPE edition's root mounted and a program run in
@@ -1397,9 +1488,11 @@ usershare:
 	@if [ -d '$(B)/usershare/Apps/!SparkFS' ]; then \
 	    rm -rf '$(B)/usershare/Apps/!SparkFS' && \
 	    echo "usershare: Apps.!SparkFS taken away (the ROM's is Resources:\$$.Apps.!SparkFS)"; fi
-	@if [ -d '$(B)/stronged/!StrongED' ]; then \
+	@if [ -f '$(B)/stronged/.made-app' ]; then \
 	    rm -rf '$(B)/usershare/Apps/!StrongED' && cp -R '$(B)/stronged/!StrongED' '$(B)/usershare/Apps/!StrongED' && \
-	    echo "usershare: Apps.!StrongED (make stronged's)"; fi
+	    echo "usershare: Apps.!StrongED (make stronged's)"; \
+	elif [ -d '$(B)/stronged/!StrongED' ]; then \
+	    echo "usershare: Apps.!StrongED left as it is: built before its last change (make stronged)"; fi
 	@if [ -d '$(B)/usershare/Apps/!StrongHlp' ]; then \
 	    rm -rf '$(B)/usershare/Apps/!StrongHlp' && \
 	    echo "usershare: Apps.!StrongHlp taken away (the ROM's is Resources:\$$.Apps.!StrongHlp)"; fi
@@ -1651,3 +1744,5 @@ include ports/changefsi/changefsi.mk
 
 # !GraphTask (G2): apps/graphtask/graphtask.mk
 include apps/graphtask/graphtask.mk
+# !Appearance (design 35, P4): apps/appearance/appearance.mk
+include apps/appearance/appearance.mk

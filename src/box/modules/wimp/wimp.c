@@ -494,6 +494,12 @@ static const struct ros_command commands[] = {
       "*Pointer turns the mouse pointer on or off.", wimp_cmd_pointer },
     { "ToolSprites", ROS_CMD_INFO(0, 1, 0, 0), "Syntax: *ToolSprites [<filename>]",
       "*ToolSprites loads the sprites used for the window borders.", wimp_cmd_toolsprites },
+    { "WimpTheme", ROS_CMD_INFO(0, 1, 0, 0), "Syntax: *WimpTheme [<name>]",
+      "*WimpTheme changes the desktop's theme at once: Classic, or a theme on Themes:. "
+      "With no name it says which theme is in use.", wimp_cmd_wimptheme },
+    { "WimpThemeSet", ROS_CMD_INFO(2, 255, 0, 0), "Syntax: *WimpThemeSet <Section.Key> <value>",
+      "*WimpThemeSet changes one setting of the current theme at once, as its Theme file "
+      "would give it: Title.Focus.Fill &3A3D44, Scroll.Style slim and the rest.", wimp_cmd_wimpthemeset },
     { "WimpMode", ROS_CMD_INFO(1, 255, 0, 0), "Syntax: *WimpMode <mode>",
       "*WimpMode changes the screen mode the desktop uses.", wimp_cmd_wimpmode },
     { "WimpWriteDir", ROS_CMD_INFO(1, 1, 0, 0), "Syntax: *WimpWriteDir 0|1",
@@ -598,6 +604,7 @@ static os_error *init(struct ros_module *m, const char *tail)
     ros_cpu_enter(&c);
     c.r[0] = ros_addr(w->scratch);
     ros_swi(&c, XOS_CLI);
+    wimp_theme_init();                          /* Themes$Path (design 35) */
     ros_vector_claim_native(0x1Eu, changeenv, 0);   /* ChangeEnvironmentV (initptrs) */
     void *sv;
     if (!xos_module_claim(40, &sv)) {           /* two LDR PC, [PC, #0], the entries, and the answers */

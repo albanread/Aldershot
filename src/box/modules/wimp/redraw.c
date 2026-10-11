@@ -142,6 +142,8 @@ void wimp_flush(void)
         wimp_visible(win, r->outline, REQ, nv);
         wimp_rl_union(add, ov);                 /* old and new areas are both made invalid */
         wimp_rl_union(add, nv);
+        wimp_shadow_add(win, APP, add);         /* and its shadows, old and new */
+        wimp_shadow_add(win, REQ, add);
         if (!ov->n || !nv->n)
             continue;                           /* opened or closed: nothing to copy */
         int linked = ((a->flags ^ r->flags) & (F_FURNITURE | ST_SHIFT_TOGGLED | (1u << 20))) == 0 &&
@@ -164,8 +166,18 @@ void wimp_flush(void)
             wimp_inner(win, REQ, dst);
         }
         wimp_rl_minus(src, i0);
+        struct wimp_rlist *sh = wimp_rl_new();
+        if (sh) {                               /* shadowed pixels are not copied, but redrawn */
+            wimp_shadows_above(win, APP, sh);
+            wimp_rl_minus(src, sh);
+        }
         wimp_rl_translate(src, dx, dy);
         wimp_rl_and(src, dst);
+        if (sh) {
+            wimp_shadows_above(win, REQ, sh);
+            wimp_rl_minus(src, sh);
+            wimp_rl_free(sh);
+        }
         for (uint32_t k = 0; k < src->n && ncopies < WIMP_RL_MAX; k++)
             copies[ncopies++] = (struct copy){ src->b[k], dx, dy, win->handle };
     }
@@ -195,6 +207,10 @@ out:
 
 static uint32_t work_bg(const struct wimp_window *win)
 {
+    if (win->def[35] == 0 && wimp_menu_themed(win))
+        return wimp_ws()->style.menu_bg;        /* a menu the theme draws (design 35) */
+    if (wimp_iconbar_themed(win) && wimp_ws()->style.iconbar_bg != 0xFFFFFFFFu)
+        return wimp_ws()->style.iconbar_bg;     /* the theme's icon bar */
     return win->def[35] == 0xFF ? 0xFFFFFF00u : wimp_colour(win->def[35]);
 }
 
@@ -213,6 +229,9 @@ static int next_rectangle(struct wimp_window *win, uint32_t block)
         wimp_filter_posticon(win->handle, task, w->dr.clip);   /* the post-icon filters */
         wimp_caret_paint(win);                  /* the caret, over the icons */
         wimp_draw_3d_border(win);
+        wimp_draw_corner_edges(win);            /* round corners' edges over the work area */
+        if (!w->pending_update)
+            wimp_shadows_over(win, w->pending_rect);    /* the shadows of windows above */
         if (win->owner == NO_WINDOW)
             wimp_menu_separators(win);          /* a menu's separator lines */
     }
@@ -241,8 +260,9 @@ static int next_rectangle(struct wimp_window *win, uint32_t block)
     wimp_filter_rect(win->handle, task, r);     /* the rectangle filters */
     wimp_graphics_window(r);                    /* clip to the rectangle */
     if (!w->pending_update && win->def[35] != 0xFF && !win->surface) {   /* surface.c fills it */
-        wimp_gcol(wimp_colour(win->def[35]), 1);    /* clear to the background, or tile it */
-        if (!wimp_draw_tile(win))
+        wimp_gcol(work_bg(win), 1);             /* clear to the background, or tile it */
+        if (wimp_menu_themed(win) || (wimp_iconbar_themed(win) && wimp_ws()->style.iconbar_bg != 0xFFFFFFFFu) ||
+            !wimp_draw_tile(win))
             wimp_clg();
     }
     wimp_gcol(wimp_colour(win->def[34]), 0);    /* the work area colours for the task */
@@ -291,6 +311,8 @@ static int start_redraw(struct wimp_window *win, uint32_t block)
         wimp_rl_copy(border, &w->pending);
         wimp_rl_subtract(border, win->s[APP].vis);
         wimp_rl_minus(&w->invalid, border);
+        for (uint32_t k = 0; k < border->n; k++)
+            wimp_shadows_over(win, border->b[k]);       /* the shadows over the border */
         wimp_rl_free(border);
     }
     /* What is left to hand out is the work area, less open children. */
@@ -374,6 +396,7 @@ void wimp_swi_UpdateWindow(struct ros_cpu *s)
     wimp_inner(win, APP, &w->pending);
     wimp_rl_minus(&w->pending, &w->invalid);
     wimp_rl_clip(&w->pending, box);
+    wimp_shadows_out(win, &w->pending);         /* shadowed parts are redrawn, not updated */
     w->pending_window = win->handle;
     w->pending_update = 1;
     w->pending_first = 1;
@@ -456,6 +479,12 @@ void wimp_swi_BlockCopy(struct ros_cpu *s)
     if (part && inner && dest) {
         wimp_inner(win, APP, inner);
         wimp_rl_copy(part, inner);
+        struct wimp_rlist *sh = wimp_rl_new();
+        if (sh) {                               /* shadowed pixels are not copied, but redrawn */
+            wimp_shadows_above(win, APP, sh);
+            wimp_rl_minus(part, sh);
+            wimp_rl_free(sh);
+        }
         wimp_rl_minus(part, &w->invalid);
         wimp_rl_clip(part, from);
         wimp_rl_translate(part, dx, dy);
@@ -497,6 +526,8 @@ void wimp_icon_changed(struct wimp_window *win, uint32_t i, int in_place)
     wimp_inner(win, APP, l);
     wimp_rl_minus(l, &w->invalid);
     wimp_rl_clip(l, box);
+    if (in_place)
+        wimp_shadows_out(win, l);               /* shadowed parts are redrawn, not drawn over */
     if (!in_place) {
         wimp_invalidate(l);
     } else if (l->n) {
@@ -560,6 +591,7 @@ static void clear_uncovered(void)
     for (uint32_t i = 0; i < w->invalid.n; i++) {
         wimp_graphics_window(w->invalid.b[i]);
         wimp_clg();
+        wimp_shadows_over(NULL, w->invalid.b[i]);
     }
     w->invalid.n = 0;
     wimp_default_windows();
@@ -583,9 +615,14 @@ int wimp_redraw_scan(struct wimp_task **to, struct wimp_event *ev)
              x = wimp_window_below(x, APP)) {
             if (!x->s[APP].open || !wimp_rl_meets(&w->invalid, x->s[APP].outline))
                 continue;
-            chosen = x;
             wimp_rl_copy(l, &w->invalid);
             wimp_rl_clip(l, x->s[APP].outline);
+            if (wimp_corner_radius(x, APP)) {
+                wimp_rl_subtract_notches(l, x, APP);    /* its notches are for what is below */
+                if (!l->n)
+                    continue;
+            }
+            chosen = x;
         }
         if (!chosen) {
             wimp_rl_free(l);

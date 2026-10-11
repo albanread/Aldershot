@@ -23,6 +23,9 @@ void ros_selftest_buffers(void);
 void ros_selftest_speakers(void);
 void ros_selftest_machine(void);
 
+/* LuaJIT, the Lua language module (selftest_luajit.c). */
+void ros_selftest_luajit(void);
+
 /* Floating point, lifted from FPA and VFP to C (selftest_fp.c). */
 void ros_selftest_fp(void);
 

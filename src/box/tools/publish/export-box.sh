@@ -3,7 +3,8 @@
 #
 # Run it from rosgd/. It copies the tracked files of the directories /init is built
 # from, with the Makefile and the generators, and leaves out compiled RISC OS
-# modules (,ffa files) the publication pass's briefs, and the ARM container's sprint log. DEST is
+# modules (,ffa files) the publication pass's briefs, the ARM container's sprint log, and
+# tools/articles-redact.txt, whose list of people's names must never be public. DEST is
 # emptied first, except its README.md (written by hand), so a file removed here is removed there. Nothing is committed or pushed.
 set -eu
 dest=${1:?usage: export-box.sh DEST}
@@ -19,8 +20,16 @@ git ls-files runtime platform boot include modules api tools Makefile docs/publi
     | grep -v ',ffa$' \
     | grep -v '^tools/publish/.*BRIEF' \
     | grep -v '^runtime/armrun/SPRINTS.md$' \
+    | grep -v '^tools/articles-redact.txt$' \
     | while IFS= read -r f; do
         mkdir -p "$dest/$(dirname "$f")"
         cp -p "$f" "$dest/$f"
     done
+# The list of names to redact must not leave this repository: if it has
+# reached DEST all the same, take it out and fail the export
+if [ -e "$dest/tools/articles-redact.txt" ]; then
+    echo "export-box: tools/articles-redact.txt reached $dest; removed, check the filter" >&2
+    rm -f "$dest/tools/articles-redact.txt"
+    exit 1
+fi
 echo "export-box: $(find "$dest" -type f | wc -l | tr -d ' ') files in $dest"

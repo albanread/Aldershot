@@ -204,7 +204,9 @@ void ros_selftest_osbyte(void)
     wait_ms(100);
     word(1, block);
     t = ld5(block);
-    check(t >= 1008 && t <= 1013, "OS_Word 2 / 1 -- the system clock counts centiseconds",
+    /* The wait is at least 100 ms, but may run long when the machine is busy
+     * (another VM on the host made it 170 ms once), so the upper bound is wide. */
+    check(t >= 1008 && t <= 1030, "OS_Word 2 / 1 -- the system clock counts centiseconds",
           "%llu", (unsigned long long)t);
 
     /* ---- the real-time clock: the host's ---- */

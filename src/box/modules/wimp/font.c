@@ -154,6 +154,7 @@ void wimp_find_font(void)
     struct wimp_ws *w = wimp_ws();
     struct wimp_draw *d = &w->dr;
     lose_font();
+    wimp_title_font_forget(&w->style);          /* found again, for the mode, when next drawn */
     struct ros_cpu c;
     ros_cpu_enter(&c);
     c.r[0] = 161, c.r[1] = 0x8C;
