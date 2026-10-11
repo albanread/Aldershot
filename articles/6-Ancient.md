@@ -139,9 +139,17 @@ kernel underneath will be Linux, and the hardware will be driven by code
 written this year. There is no use arguing with it.
 
 But software can run anywhere. That is the whole point of writing it in a
-language rather than in machine code. If the program is moved properly —
-translated, recompiled, kept honest against its old behaviour — then what
-runs on that inevitable modern layer can be as ancient as you like.
+language rather than in machine code — and a macro assembler counts as a
+language. RISC OS is the proof of it. It was written in ObjAsm, which has
+symbolic names, macros, conditional assembly and structure, so the source
+says what the code means and not merely what bytes to emit. That is why it
+can be read by a program and turned into C at all. Had it been hand
+assembled, there would be nothing to translate and no way to recover the
+intent.
+
+If the program is moved properly — translated, recompiled, kept honest
+against its old behaviour — then what runs on that inevitable modern layer
+can be as ancient as you like.
 
 So BOX is a Linux kernel with RISC OS on top, and RISC OS is C now. The
 bottom is as modern as I can make it, because that is where the speed and
