@@ -12,7 +12,7 @@
  * and xdg-output protocols, so that a test can capture what it composites
  * (grim), and a size for an output with no modes (headless).  It is
  * the starting point the RISC OS layers and the Wimp's policy replace,
- * step by step (README.md).
+ * step by step (README.md, "How it works").
  */
 #define _GNU_SOURCE                     /* accept4 */
 #include <assert.h>
@@ -613,6 +613,8 @@ static void server_cursor_frame(struct wl_listener *listener, void *data) {
 	wlr_seat_pointer_notify_frame(server->seat);
 }
 
+static void screen_tag_output(struct wlr_output *out, struct wlr_buffer *buf);
+
 static void output_frame(struct wl_listener *listener, void *data) {
 	/* This function is called every time an output is ready to display a frame,
 	 * generally at the output's refresh rate (e.g. 60Hz). */
@@ -622,8 +624,20 @@ static void output_frame(struct wl_listener *listener, void *data) {
 	struct wlr_scene_output *scene_output = wlr_scene_get_scene_output(
 		scene, output->wlr_output);
 
-	/* Render the scene if needed and commit the output */
-	wlr_scene_output_commit(scene_output, NULL);
+	/* Render the scene if needed and commit the output -- what
+	 * wlr_scene_output_commit does, with ROSGD's step between: the
+	 * desktop's "below" tags put back in the frame (screen_tag_output) */
+	if (wlr_scene_output_needs_frame(scene_output)) {
+		struct wlr_output_state state;
+		wlr_output_state_init(&state);
+		if (wlr_scene_output_build_state(scene_output, &state, NULL)) {
+			if ((state.committed & WLR_OUTPUT_STATE_BUFFER) && state.buffer) {
+				screen_tag_output(output->wlr_output, state.buffer);
+			}
+			wlr_output_commit_state(output->wlr_output, &state);
+		}
+		wlr_output_state_finish(&state);
+	}
 
 	struct timespec now;
 	clock_gettime(CLOCK_MONOTONIC, &now);
@@ -1073,6 +1087,8 @@ static struct {
 	struct ros_ext ext;             /* the last whole table read */
 	struct ros_ext ext_drawn;       /* the table the buffer was made with */
 	int ox, oy;                     /* the desktop's top left, layout */
+	uint8_t *tag;                   /* per RISC OS pixel: tagged "below" in the key colour */
+	size_t tag_size;
 	uint8_t *raw;                   /* the RISC OS rows as last converted */
 	size_t raw_size;
 	uint32_t raw_pal[256];
@@ -1186,6 +1202,62 @@ static void screen_ext(void) {
 	screen.ext = copy;
 }
 
+/* The Metal window's backdrop (QEMU's ui/metal.m, tools/mkbacktile.py):
+ * RISC OS tags the pixels a layer beneath may show through -- the key
+ * colour, #B7C0B4, with the transfer byte's top bits 10 -- and the host
+ * reads the tag from the frame it is given.  The compositor's frame is
+ * rendered from an opaque copy, which loses the top byte, so the tags are
+ * noted here as each row is converted, and put back into the rendered
+ * frame (screen_tag_output) before it is shown: there the top byte is
+ * &80 where the desktop is tagged and still the key colour (nothing drawn
+ * over it), and &FF elsewhere. */
+#define ROS_BACKDROP_KEY 0xB7C0B4u      /* as XRGB */
+
+static void screen_row_tags(const struct ros_block *b, int y, const uint32_t *out, int w) {
+	uint8_t *t = screen.tag ? screen.tag + (size_t)y * w : NULL;
+	if (!t) {
+		return;
+	}
+	if (b->bpp != 32) {
+		memset(t, 0, (size_t)w);
+		return;
+	}
+	const uint32_t *row = (const uint32_t *)(screen.map + (size_t)(b->yoffset + y) * b->pitch) + b->xoffset;
+	for (int x = 0; x < w; x++) {
+		t[x] = (row[x] >> 24 & 0xc0) == 0x80 && (out[x] & 0xffffff) == ROS_BACKDROP_KEY;
+	}
+}
+
+static void screen_tag_output(struct wlr_output *out, struct wlr_buffer *buf) {
+	void *data;
+	uint32_t format;
+	size_t stride;
+	if (!screen.tag || !screen.width || !screen.height) {
+		return;
+	}
+	if (!wlr_buffer_begin_data_ptr_access(buf, WLR_BUFFER_DATA_PTR_ACCESS_READ |
+			WLR_BUFFER_DATA_PTR_ACCESS_WRITE, &data, &format, &stride)) {
+		return;
+	}
+	if (format == DRM_FORMAT_XRGB8888 || format == DRM_FORMAT_ARGB8888) {
+		struct wlr_box ob;
+		wlr_output_layout_get_box(screen.server->output_layout, out, &ob);
+		int sc = out->scale >= 1.0f ? (int)out->scale : 1;
+		for (int py = 0; py < buf->height; py++) {
+			uint32_t *row = (uint32_t *)((uint8_t *)data + (size_t)py * stride);
+			int ry = py / sc + ob.y - screen.oy;
+			const uint8_t *t = ry >= 0 && ry < screen.height ? screen.tag + (size_t)ry * screen.width : NULL;
+			for (int px = 0; px < buf->width; px++) {
+				int rx = px / sc + ob.x - screen.ox;
+				uint32_t v = row[px] & 0xffffff;
+				bool below = t && rx >= 0 && rx < screen.width && t[rx] && v == ROS_BACKDROP_KEY;
+				row[px] = v | (below ? 0x80000000u : 0xff000000u);
+			}
+		}
+	}
+	wlr_buffer_end_data_ptr_access(buf);
+}
+
 /* clear where an external window is seen through the desktop */
 static void screen_holes(int y, uint32_t *out, int w) {
 	for (uint32_t k = 0; k < screen.ext.nrects; k++) {
@@ -1272,6 +1344,12 @@ static int screen_tick(void *data) {
 	 * every fifth tick (ten a second); a change puts it back at fifty for
 	 * as long as changes come.  (The pointer is a node of its own, moved
 	 * every tick whatever this does.) */
+	if ((size_t)w * h != screen.tag_size) {
+		free(screen.tag);
+		screen.tag = calloc((size_t)w * h, 1);
+		screen.tag_size = screen.tag ? (size_t)w * h : 0;
+		full = true;
+	}
 	size_t need = (size_t)b->pitch * h;
 	if (need != screen.raw_size) {
 		free(screen.raw);
@@ -1306,6 +1384,7 @@ static int screen_tick(void *data) {
 		memcpy(was, src, b->pitch);
 		uint32_t *out = next->data + (size_t)y * w;
 		screen_row(b, y, out);
+		screen_row_tags(b, y, out, w);
 		for (int x = 0; x < w; x++) {
 			out[x] |= 0xff000000u;
 		}
@@ -1443,12 +1522,26 @@ static void wm_geometry(struct tinywl_toplevel *t, int *w, int *h) {
 	*h = g->height > 0 ? g->height : t->xdg_toplevel->base->surface->current.height;
 }
 
+/* The title is the client's, and the line channel to the Wimp ends a message
+ * at a newline. A control character in a title could start a message of the
+ * client's own, so each one is replaced by a space. The result is in a
+ * static buffer and is used at once by the caller. */
 static const char *wm_title_of(struct tinywl_toplevel *t) {
+	static char clean[256];
 	const char *title = t->xdg_toplevel->title;
 	if (!title || !*title) {
 		title = t->xdg_toplevel->app_id;
 	}
-	return title && *title ? title : "Linux";
+	if (!title || !*title) {
+		return "Linux";
+	}
+	size_t n = 0;
+	for (; title[n] && n < sizeof clean - 1; n++) {
+		unsigned char c = (unsigned char)title[n];
+		clean[n] = c < 0x20 || c == 0x7f ? ' ' : (char)c;
+	}
+	clean[n] = 0;
+	return clean;
 }
 
 static void wm_new(struct tinywl_toplevel *t) {

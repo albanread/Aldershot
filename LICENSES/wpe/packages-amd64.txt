@@ -37,9 +37,9 @@ libblkid1                                2.42.4-1                         util-l
 libbrotli1                               1.2.0-4+b1                       brotli 1.2.0-4
 libbsd0                                  0.12.2-3                         libbsd 0.12.2-3
 libbz2-1.0                               1.0.8-6+b2                       bzip2 1.0.8-6
-libc-bin                                 2.43-6                           glibc 2.43-6
-libc-gconv-modules-extra                 2.43-6                           glibc 2.43-6
-libc6                                    2.43-6                           glibc 2.43-6
+libc-bin                                 2.43-7                           glibc 2.43-7
+libc-gconv-modules-extra                 2.43-7                           glibc 2.43-7
+libc6                                    2.43-7                           glibc 2.43-7
 libcap2                                  1:2.78-1+b1                      libcap2 1:2.78-1
 libcap2-bin                              1:2.78-1+b1                      libcap2 1:2.78-1
 libcom-err2                              1.47.4-1+b2                      e2fsprogs 1.47.4-1
@@ -61,11 +61,11 @@ libelf1t64                               0.196-1                          elfuti
 libenchant-2-2                           2.8.16+dfsg-4                    enchant 2.8.16+dfsg-4
 libepoxy0                                1.5.10-2+b2                      libepoxy 1.5.10-2
 libevdev2                                1.13.7+dfsg-1                    libevdev 1.13.7+dfsg-1
-libexpat1                                2.8.4-2                          expat 2.8.4-2
+libexpat1                                2.9.0-1                          expat 2.9.0-1
 libffi8                                  3.8.0-2                          libffi 3.8.0-2
 libflite1                                2.2-7+b2                         flite 2.2-7
 libfontconfig1                           2.17.1-5                         fontconfig 2.17.1-5
-libfreetype6                             2.14.3+dfsg-2                    freetype 2.14.3+dfsg-2
+libfreetype6                             2.14.3+dfsg-3                    freetype 2.14.3+dfsg-3
 libgav1-2                                0.20.0-2+b2                      libgav1 0.20.0-2
 libgbm1                                  26.1.6-1                         mesa 26.1.6-1
 libgcc-s1                                16.2.0-3                         gcc-16 16.2.0-3
@@ -125,7 +125,7 @@ libpng16-16t64                           1.6.59-1                         libpng
 libproc2-1                               2:4.0.7-1                        procps 2:4.0.7-1
 libproxy1v5                              0.5.12-3                         libproxy 0.5.12-3
 libpsl5t64                               0.23.3-1                         libpsl 0.23.3-1
-librav1e0.8                              0.8.1-11                         rust-rav1e 0.8.1-11
+librav1e0.8                              0.8.1-12                         rust-rav1e 0.8.1-12
 libsasl2-2                               2.1.28+dfsg1-11                  cyrus-sasl2 2.1.28+dfsg1-11
 libsasl2-modules-db                      2.1.28+dfsg1-11                  cyrus-sasl2 2.1.28+dfsg1-11
 libseat1                                 0.9.3-1                          seatd 0.9.3-1
@@ -138,7 +138,7 @@ libsoup-3.0-0                            3.6.6-1                          libsou
 libsoup-3.0-common                       3.6.6-1                          libsoup3 3.6.6-1
 libsqlite3-0                             3.53.4-2                         sqlite3 3.53.4-2
 libssh2-1t64                             1.11.1-6                         libssh2 1.11.1-6
-libssl3t64                               3.6.4-1                          openssl 3.6.4-1
+libssl3t64                               3.6.5-1                          openssl 3.6.5-1
 libstdc++6                               16.2.0-3                         gcc-16 16.2.0-3
 libsvtav1enc4                            4.1.0+dfsg-1                     svt-av1 4.1.0+dfsg-1
 libsystemd0                              262-1                            systemd 262-1
@@ -194,7 +194,7 @@ libyuv0                                  0.0.1971.20260904-2              libyuv
 libz3-4                                  4.13.3-1.1                       z3 4.13.3-1.1
 libzstd1                                 1.5.7+dfsg-4                     libzstd 1.5.7+dfsg-4
 mesa-libgallium                          26.1.6-1                         mesa 26.1.6-1
-openssl-provider-legacy                  3.6.4-1                          openssl 3.6.4-1
+openssl-provider-legacy                  3.6.5-1                          openssl 3.6.5-1
 pci.ids                                  0.0~2026.09.23-1                 pci.ids 0.0~2026.09.23-1
 procps                                   2:4.0.7-1                        procps 2:4.0.7-1
 seatd                                    0.9.3-1                          seatd 0.9.3-1

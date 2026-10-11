@@ -96,6 +96,23 @@ CONFIG_ADVISE_SYSCALLS=y
 CONFIG_MEMBARRIER=y
 CONFIG_RSEQ=y
 
+# ---- DeskMeter's Linux window and *LinuxStats ------------------------------
+# VM event counters: /proc/vmstat's pgfault, pgmajfault, pswpin and pswpout.
+# On by default everywhere but a tiny config; a per-CPU increment where the
+# kernel already counts.  perf events and the tracing core: the system calls
+# a second, counted exactly by perf_event_open on raw_syscalls:sys_enter (its
+# id from tracefs).  The tracepoint needs only the core (ENABLE_DEFAULT_TRACERS),
+# not a tracer: no function tracer, so no code is patched, and not
+# FTRACE_SYSCALLS, which brings KALLSYMS (2 MB more kernel).  A system call
+# pays nothing for the tracepoint until a counter is open on it, which is
+# only while the window is open or *LinuxStats runs.
+CONFIG_VM_EVENT_COUNTERS=y
+CONFIG_PERF_EVENTS=y
+CONFIG_FTRACE=y
+CONFIG_ENABLE_DEFAULT_TRACERS=y
+# CONFIG_FTRACE_SYSCALLS is not set
+# CONFIG_FUNCTION_TRACER is not set
+
 # ---- Linux programs: sandboxes (design 23 R10) -------------------------------
 # Namespaces, for bubblewrap: WebKit's web and network processes run in its
 # sandbox, and GTK's image loaders (glycin) in theirs.  Each process gets its

@@ -73,6 +73,7 @@ grep -q ROSC_PLATFORM "$PAIGE/PGHEADER/PGMTRAPS.H" || {
 LINE=$(make -s -f capps.mk ABI=$ABI capps-cflags)
 case "$LINE" in
 "zig clang "*) CC="zig clang"; CFLAGS=${LINE#zig clang } ;;
+*"/zig clang "*) CC="${LINE%% clang *} clang"; CFLAGS=${LINE#* clang } ;;   # ZIG given as a path
 *)             CC=$ROSGD/${LINE%% *}; CFLAGS=${LINE#* } ;;
 esac
 # the engine is 1990s C; its warnings are its own

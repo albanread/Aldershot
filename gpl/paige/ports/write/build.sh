@@ -43,6 +43,7 @@ ARCH=${ARCH:-x86_64} PAIGE=$PAIGE_SET sh "$ROSGD/ports/paige/build.sh"
 LINE=$(make -s -f capps.mk ABI=$ABI capps-cflags)
 case "$LINE" in
 "zig clang "*) CC="zig clang"; CFLAGS=${LINE#zig clang } ;;
+*"/zig clang "*) CC="${LINE%% clang *} clang"; CFLAGS=${LINE#* clang } ;;   # ZIG given as a path
 *)             CC=$ROSGD/${LINE%% *}; CFLAGS=${LINE#* } ;;
 esac
 CFLAGS="$CFLAGS -I$CAPPS/inc/C -Wno-shift-op-parentheses -Wno-shift-negative-value"

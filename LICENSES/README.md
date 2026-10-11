@@ -9,7 +9,7 @@ OS Open's, at <https://gitlab.riscosopen.org/RiscOS/Sources>).*
 
 The licence of everything the BOX releases are made from: the Mac releases
 (`BOX-arm64-mac`, `BOX-x64-mac`) and the PC image (`BOX-x64-pc`), as of the
-releases of 7 October 2026.
+releases of 11 October 2026.
 
 ## The BOX itself
 
@@ -110,6 +110,7 @@ files are on every BOX's disc, in `Documents.Licences`.
 | [StrongED](box/StrongED.txt) | 4.70a22 | 3-clause BSD | Apps.!StrongED: BOX's StrongED is new C, which uses StrongED's own data -- its syntax modes, help, messages, templates and key maps -- from the 4.70a22 release. BOX's StrongED is under StrongED's licence |
 | [StrongHelp](box/StrongHelp.txt) | 2.90 (its data files) | BSD 3-clause | Resources:$.Apps.!StrongHlp (in the ROM), its data: its manual, Messages, Templates, menus, sprites, configuration and tools, as RISC OS 5.30's image has them, with !Run and !Boot changed where they used 2.90's module. The program is new C (design 31), written from StrongHelp's manuals, not from its source; it is under StrongHelp's licence |
 | [SymSpell](box/SymSpell.txt) | 2025 | MIT | the spelling checker (ROSSPELL) and the word list behind Resources.Dictionaries.spelldict |
+| [Themes](box/Themes.txt) | RISC OS 5.30 | as RISC OS Open distributes them in RISC OS 5.30 | Resources.Themes: the desktop themes (window furniture and icons) for *WimpTheme |
 | [utf8proc](box/utf8proc.txt) | 2.12.0 | MIT, and the Unicode data licence | !NetSurf (Unicode) |
 | [xbyak](box/xbyak.txt) | 8c0098b69f | 3-clause BSD | the ARM container in /init, which runs ARM code (runtime/armrun), on the Intel box |
 | [Zig](box/Zig.txt) | 0.17.0 | MIT | the cross compiler /init and the Linux programs are built with; its compiler_rt is in them |

@@ -51,7 +51,7 @@ error ends the Obey file) goes on from the next.  Here:
                cannot read it deterministically (cpio-newc) -- the *Ex
                lines, any error and every copied file's SHA-1 the same as
                RISC OS 5.30's (data/farm-530.json).  Where SparkFS itself
-               gets an archive wrong (5.30 too: the README's list) only
+               gets an archive wrong (5.30 too: listed in README.md) only
                5.30's results are compared.
     write-*    each archive the box's SparkFS wrote, read back in the box,
                and unar on the Mac extracts the source tree from it

@@ -1,0 +1,20 @@
+The desktop themes (Resources.Themes)
+=====================================
+
+Version:  RISC OS 5.30
+From:     https://www.riscosopen.org/content/downloads/raspberry-pi
+Used by:  Resources.Themes: Acorn, Iyonix, Morris4, Sovereign and Ursula,
+          each its Tools (the window furniture) and Sprites (the icons), for
+          *WimpTheme; from RISC OS 5.30's HardDisc4,
+          !Boot.Resources.!ThemeDefs.Themes, unaltered
+Licence:  as RISC OS Open distributes them in RISC OS 5.30's image, with
+          RISC OS 5's boot sequence
+
+The themes are RISC OS 5's own, as its !ThemeDefs holds them; BOX uses only
+their tool and icon sprite files, which *WimpTheme loads while the desktop
+runs instead of at the next boot.  The Raspberry theme is left out.
+
+BOX's own themes in Resources.Themes -- AcornFlat, Archimedes, Cube,
+Graphite, HighContrast, Nord, Paper and Pinstripe -- are Theme files (and,
+for Cube, icon tiles drawn by tools/mkcubesprites.py over the ROM's own
+icons) written for BOX, under BOX's licence.

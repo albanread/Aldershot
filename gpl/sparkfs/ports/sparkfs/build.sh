@@ -68,6 +68,7 @@ SRC=$TP/SparkFS
 LINE=$(make -s -f capps.mk ABI=$ABI capps-cflags)
 case "$LINE" in
 "zig clang "*) CC="zig clang"; CFLAGS=${LINE#zig clang } ;;
+*"/zig clang "*) CC="${LINE%% clang *} clang"; CFLAGS=${LINE#* clang } ;;   # ZIG given as a path
 *)             CC=$ROSGD/${LINE%% *}; CFLAGS=${LINE#* } ;;
 esac
 # SparkFS's C is 1990s C: implicit int and declarations, K&R casts.  The

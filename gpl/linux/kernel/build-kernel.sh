@@ -79,6 +79,23 @@ fi
 cd "$TREE"
 K="make ARCH=$ARCH"
 
+# The arm64 vDSO with a SysV hash table (DT_HASH) as well as the GNU one
+# (#28).  Linux 6.11 dropped arm64's --hash-style=sysv, and Alpine's
+# binutils, which links it, makes only DT_GNU_HASH by default.  The box's
+# musl (zig 0.15's, musl 1.2.5) finds vDSO symbols only through DT_HASH:
+# without it __vdsosym finds nothing, and every clock_gettime -- four for
+# each SWI -- became a real system call.  x86's vDSO links with
+# --hash-style=both already.
+if [ "$ARCH" = arm64 ]; then
+    VDSOMK=arch/arm64/kernel/vdso/Makefile
+    if ! grep -q 'hash-style=both' "$VDSOMK"; then
+        sed 's/^ldflags-y := -shared -soname=linux-vdso.so.1 /&--hash-style=both /' "$VDSOMK" > "$VDSOMK.new"
+        mv "$VDSOMK.new" "$VDSOMK"
+        grep -q '^ldflags-y := -shared -soname=linux-vdso.so.1 --hash-style=both ' "$VDSOMK" ||
+            { echo "ROSGD-KERNEL-FAILED: the arm64 vDSO's --hash-style=both not patched in"; exit 1; }
+    fi
+fi
+
 echo "== configuring $FLAVOUR: tinyconfig + $FRAGMENTS"
 # Every option a fragment names must be one this Linux has: kconfig drops
 # an unknown name without a word (CONFIG_SND_VIRTIOSND, #35)
@@ -109,7 +126,7 @@ REQUIRED="BINFMT_ELF BINFMT_SCRIPT BLK_DEV_INITRD DEVTMPFS PROC_FS PROC_SYSCTL S
           SND SND_PCM SND_VIRTIO
           UNIX98_PTYS POSIX_TIMERS SECCOMP SECCOMP_FILTER CIFS SMB_SERVER NLS_UTF8
           NAMESPACES USER_NS PID_NS NET_NS UTS_NS SYSVIPC IPC_NS NO_HZ_IDLE HIGH_RES_TIMERS
-          ADVISE_SYSCALLS MEMBARRIER RSEQ"
+          ADVISE_SYSCALLS MEMBARRIER RSEQ VM_EVENT_COUNTERS PERF_EVENTS ENABLE_DEFAULT_TRACERS"
 else
 REQUIRED="BINFMT_ELF BLK_DEV_INITRD DEVTMPFS PROC_FS SYSFS SHMEM TMPFS
           MEMFD_CREATE FUTEX EPOLL TIMERFD INOTIFY_USER SERIAL_8250 SERIAL_8250_CONSOLE
@@ -118,7 +135,7 @@ REQUIRED="BINFMT_ELF BLK_DEV_INITRD DEVTMPFS PROC_FS SYSFS SHMEM TMPFS
           SOUND SND SND_PCM SND_HDA_INTEL SND_HDA_GENERIC SND_VIRTIO
           UNIX98_PTYS POSIX_TIMERS SECCOMP SECCOMP_FILTER CIFS SMB_SERVER NLS_UTF8
           NAMESPACES USER_NS PID_NS NET_NS UTS_NS SYSVIPC IPC_NS NO_HZ_IDLE HIGH_RES_TIMERS
-          ADVISE_SYSCALLS MEMBARRIER RSEQ"
+          ADVISE_SYSCALLS MEMBARRIER RSEQ VM_EVENT_COUNTERS PERF_EVENTS ENABLE_DEFAULT_TRACERS"
 fi
 [ "$FLAVOUR" = pc ] && REQUIRED="$REQUIRED EFI EFI_STUB CMDLINE_BOOL X86_X2APIC
           DRM_VMWGFX SYSFB_SIMPLEFB DRM_SIMPLEDRM SERIO_I8042 KEYBOARD_ATKBD
