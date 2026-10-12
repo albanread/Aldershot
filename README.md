@@ -6,16 +6,6 @@ A RISC OS environment for generic devices.
 
 ![BOX on a PC, booted from a USB stick](screenshots/box-on-a-pc.png)
 
-## Downloads
-
-Early previews, from the [Releases page](https://github.com/albanread/Aldershot/releases):
-
-- [BOX for Apple silicon Macs](https://github.com/albanread/Aldershot/releases/tag/BOX-arm64-mac-2026.10.11) (macOS 14 or later)
-- [BOX for Intel Macs](https://github.com/albanread/Aldershot/releases/tag/BOX-x64-mac-2026.10.11) (macOS 14 or later)
-- [BOX x64 for PCs](https://github.com/albanread/Aldershot/releases/tag/BOX-x64-pc-2026.10.11) (USB stick image, UEFI)
-- [Just BBC BASIC translated](https://github.com/albanread/Aldershot/releases/tag/BBCBASICVA64-1.2) (BBCBASICVA64, Apple silicon Macs, macOS 14 or later)
-- [Just BBC BASIC translated, for Intel Macs](https://github.com/albanread/Aldershot/releases/tag/BBCBASICVX64-1.2) (BBCBASICVX64, macOS 14 or later)
-
 ## Sunday 11th October release
 
 The same release for all three kinds of machine, built from one source.
@@ -32,7 +22,7 @@ New features:
 
 Also:
 
-- Reading the clock no longer costs a system call on Apple silicon, so SWIs run about three times faster.
+- Reading the clock no longer costs a system call on Apple silicon, so SWIs run about three times faster. Intel Macs and PCs always read it this way, so this brings Apple silicon up to the same speed rather than making it quicker than Intel.
 - Miscellaneous bug fixes and quality improvements.
 
 Fixes (2026.10.11.3):
@@ -47,6 +37,14 @@ Fixes (2026.10.11.3):
 | Apple silicon Mac | [BOX-arm64-mac-2026.10.11](https://github.com/albanread/Aldershot/releases/tag/BOX-arm64-mac-2026.10.11) | macOS 14 or later; M1 or later |
 | Intel Mac | [BOX-x64-mac-2026.10.11](https://github.com/albanread/Aldershot/releases/tag/BOX-x64-mac-2026.10.11) | macOS 14 or later |
 | Intel PC, UEFI boot | [BOX-x64-pc-2026.10.11](https://github.com/albanread/Aldershot/releases/tag/BOX-x64-pc-2026.10.11) | a 64-bit PC that boots by UEFI with Secure Boot off; a USB stick of 16 GB or more |
+
+## Other downloads
+
+BBC BASIC on its own, and every earlier preview, are on the
+[Releases page](https://github.com/albanread/Aldershot/releases):
+
+- [Just BBC BASIC translated](https://github.com/albanread/Aldershot/releases/tag/BBCBASICVA64-1.2) (BBCBASICVA64, Apple silicon Macs, macOS 14 or later)
+- [Just BBC BASIC translated, for Intel Macs](https://github.com/albanread/Aldershot/releases/tag/BBCBASICVX64-1.2) (BBCBASICVX64, macOS 14 or later)
 
 ## Ports
 
