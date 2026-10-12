@@ -8,9 +8,9 @@ the way the project has noticed things in the **original** software that are
 bugs, or quirks, or places where the manuals are wrong. This file gathers them
 in one place.
 
-None of these are faults in BOX. Where BOX reproduces an original's behaviour
-on purpose, so that programs behave as they do on 5.30, the behaviour is listed
-here under the original.
+These are things noticed while working out how to keep BOX compatible with
+the original. This was not a formal review of RISC OS, and there is no
+expectation that any of them should be fixed.
 
 **Kind** is the project's judgement:
 
