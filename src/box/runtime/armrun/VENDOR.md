@@ -83,8 +83,7 @@ path, 0 otherwise — and the runtime's handler asks it first
 
 `backend/block_range_information.{h,cpp}` and the declarations that
 name its range type (both back ends, A32 and A64). Found by A1's
-invalidation test, and the fault azahar-emu/dynarmic#15 reports
-(closed unmerged).
+invalidation test.
 
 Upstream keeps each translated block's address range in a
 `boost::icl::interval_map` and finds the blocks a range covers with
