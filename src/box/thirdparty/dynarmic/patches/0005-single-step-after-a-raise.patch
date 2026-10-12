@@ -1,0 +1,15 @@
+diff --git a/src/dynarmic/frontend/A32/translate/translate_arm.cpp b/src/dynarmic/frontend/A32/translate/translate_arm.cpp
+index 24b5797d..c5eead8b 100644
+--- a/src/dynarmic/frontend/A32/translate/translate_arm.cpp
++++ b/src/dynarmic/frontend/A32/translate/translate_arm.cpp
+@@ -65,7 +65,9 @@ IR::Block TranslateArm(LocationDescriptor descriptor, TranslateCallbacks* tcb, c
+     } while (should_continue && CondCanContinue(visitor.cond_state, visitor.ir) && !single_step);
+ 
+     if (visitor.cond_state == ConditionalState::Translating || visitor.cond_state == ConditionalState::Trailing || single_step) {
+-        if (should_continue) {
++        // ROSGD (runtime/armrun/patches/0005): not over a terminal the instruction set --
++        // single-stepping an NV-condition instruction, which raises (and sets one), asserted
++        if (should_continue && !block.HasTerminal()) {
+             if (single_step) {
+                 visitor.ir.SetTerm(IR::Term::LinkBlock{visitor.ir.current_location});
+             } else {

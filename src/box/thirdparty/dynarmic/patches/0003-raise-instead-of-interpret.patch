@@ -1,0 +1,34 @@
+diff --git a/src/dynarmic/frontend/A32/translate/impl/a32_translate_impl.cpp b/src/dynarmic/frontend/A32/translate/impl/a32_translate_impl.cpp
+index 276f8384..74826954 100644
+--- a/src/dynarmic/frontend/A32/translate/impl/a32_translate_impl.cpp
++++ b/src/dynarmic/frontend/A32/translate/impl/a32_translate_impl.cpp
+@@ -29,8 +29,12 @@ bool TranslatorVisitor::VFPConditionPassed(Cond cond) {
+ }
+ 
+ bool TranslatorVisitor::InterpretThisInstruction() {
+-    ir.SetTerm(IR::Term::Interpret(ir.current_location));
+-    return false;
++    // ROSGD (runtime/armrun/patches/0003): dynarmic has no interpreter --
++    // the AArch64 back end asserts on an Interpret terminal and the x86-64
++    // one calls InterpreterFallback -- so the few instructions sent here
++    // (LDM/STM with the user-bank ^, LDM ^ with pc, CPS, RFE, SRS) are
++    // raised to the embedder to execute, the same way on both back ends.
++    return RaiseException(Exception::InterpretRequired);
+ }
+ 
+ bool TranslatorVisitor::UnpredictableInstruction() {
+diff --git a/src/dynarmic/interface/A32/config.h b/src/dynarmic/interface/A32/config.h
+index 360df06e..24c847a7 100644
+--- a/src/dynarmic/interface/A32/config.h
++++ b/src/dynarmic/interface/A32/config.h
+@@ -55,6 +55,10 @@ enum class Exception {
+     /// Attempted to execute a code block at an address for which MemoryReadCode returned std::nullopt.
+     /// (Intended to be used to emulate memory protection faults.)
+     NoExecuteFault,
++    /// ROSGD (runtime/armrun/patches/0003): an instruction dynarmic does not translate
++    /// (LDM/STM user-bank, LDM exception return, CPS, RFE, SRS); the embedder executes it.
++    /// PC has been advanced past it, as for the other exceptions.
++    InterpretRequired,
+ };
+ 
+ /// These function pointers may be inserted into compiled code.

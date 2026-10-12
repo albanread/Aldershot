@@ -1,0 +1,85 @@
+diff --git a/src/dynarmic/backend/exception_handler_posix.cpp b/src/dynarmic/backend/exception_handler_posix.cpp
+index 2d6d6ea6..b6492e7e 100644
+--- a/src/dynarmic/backend/exception_handler_posix.cpp
++++ b/src/dynarmic/backend/exception_handler_posix.cpp
+@@ -72,6 +72,7 @@ private:
+     struct sigaction old_sa_segv;
+     struct sigaction old_sa_bus;
+ 
++public:
+     static void SigAction(int sig, siginfo_t* info, void* raw_context);
+ };
+ 
+@@ -85,6 +86,24 @@ void RegisterHandler() {
+     }
+ }
+ 
++#ifdef DYNARMIC_EXTERNAL_SIGNALS
++// ROSGD (runtime/armrun/patches/0001): the embedding program owns SIGSEGV
++// and SIGBUS and every thread's signal stack.  No handler and no stack are
++// installed here; the program's handler calls dynarmic_handle_fault()
++// first, which answers a fault in JIT code as SigAction does and reports
++// the faults it declines.
++thread_local bool declined;
++void Decline(int, siginfo_t*, void*) {
++    declined = true;
++}
++
++SigHandler::SigHandler() {
++    old_sa_segv = {};
++    old_sa_segv.sa_sigaction = &Decline;
++    old_sa_segv.sa_flags = SA_SIGINFO;
++    old_sa_bus = old_sa_segv;
++}
++#else
+ SigHandler::SigHandler() {
+     const size_t signal_stack_size = std::max<size_t>(SIGSTKSZ, 2 * 1024 * 1024);
+ 
+@@ -118,6 +137,7 @@ SigHandler::SigHandler() {
+     }
+ #endif
+ }
++#endif
+ 
+ SigHandler::~SigHandler() {
+     std::free(signal_stack_memory);
+@@ -186,7 +206,9 @@ void SigHandler::SigAction(int sig, siginfo_t* info, void* raw_context) {
+         }
+     }
+ 
++#ifndef DYNARMIC_EXTERNAL_SIGNALS
+     fmt::print(stderr, "Unhandled {} at rip {:#018x}\n", sig == SIGSEGV ? "SIGSEGV" : "SIGBUS", CTX_RIP);
++#endif
+ 
+ #elif defined(MCL_ARCHITECTURE_ARM64)
+ 
+@@ -245,7 +267,9 @@ void SigHandler::SigAction(int sig, siginfo_t* info, void* raw_context) {
+         }
+     }
+ 
++#ifndef DYNARMIC_EXTERNAL_SIGNALS
+     fmt::print(stderr, "Unhandled {} at pc {:#018x}\n", sig == SIGSEGV ? "SIGSEGV" : "SIGBUS", CTX_PC);
++#endif
+ 
+ #elif defined(MCL_ARCHITECTURE_RISCV)
+ 
+@@ -274,6 +298,19 @@ void SigHandler::SigAction(int sig, siginfo_t* info, void* raw_context) {
+ 
+ }  // anonymous namespace
+ 
++#ifdef DYNARMIC_EXTERNAL_SIGNALS
++// 1 when the fault was in JIT code and is now redirected to its slow path
++// (the context is updated: return from the signal into it); 0 when it is
++// the caller's to handle
++extern "C" int dynarmic_handle_fault(int sig, siginfo_t* info, void* raw_context) {
++    if ((sig != SIGSEGV && sig != SIGBUS) || !sig_handler)
++        return 0;
++    declined = false;
++    SigHandler::SigAction(sig, info, raw_context);
++    return !declined;
++}
++#endif
++
+ struct ExceptionHandler::Impl final {
+     Impl(u64 code_begin_, u64 code_end_)
+             : code_begin(code_begin_)

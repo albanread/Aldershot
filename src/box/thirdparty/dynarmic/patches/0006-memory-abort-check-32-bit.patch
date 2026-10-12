@@ -1,0 +1,17 @@
+diff --git a/src/dynarmic/backend/arm64/emit_arm64_a32.cpp b/src/dynarmic/backend/arm64/emit_arm64_a32.cpp
+index 909dde73..243015ac 100644
+--- a/src/dynarmic/backend/arm64/emit_arm64_a32.cpp
++++ b/src/dynarmic/backend/arm64/emit_arm64_a32.cpp
+@@ -170,8 +170,10 @@ void EmitA32CheckMemoryAbort(oaknut::CodeGenerator& code, EmitContext& ctx, IR::
+ 
+     const A32::LocationDescriptor current_location{IR::LocationDescriptor{inst->GetArg(0).GetU64()}};
+ 
+-    code.LDAR(Xscratch0, Xhalt);
+-    code.TST(Xscratch0, static_cast<u32>(HaltReason::MemoryAbort));
++    // ROSGD (runtime/armrun/patches/0006): the halt word is 32 bits, 4-aligned;
++    // a 64-bit LDAR of it faulted (LDAR needs natural alignment) in JIT code
++    code.LDAR(Wscratch0, Xhalt);
++    code.TST(Wscratch0, static_cast<u32>(HaltReason::MemoryAbort));
+     code.B(EQ, end);
+     EmitSetUpperLocationDescriptor(code, ctx, current_location, ctx.block.Location());
+     code.MOV(Wscratch0, current_location.PC());
