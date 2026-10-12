@@ -1,6 +1,6 @@
 # Bugs and quirks in RISC OS and its applications
 
-*8 October 2026*
+*8 October 2026; corrected 12 October 2026*
 
 Porting RISC OS 5.30 and its applications to BOX means reading their source
 line by line and running them side by side with 5.30 on the test farm. Along
@@ -20,10 +20,15 @@ here under the original.
 | Quirk | Surprising or undocumented, but possibly intended, and often relied on. |
 | Doc error | A manual, PRM or help text says something the software does not do. |
 | Unclear | Noticed, but the cause, or whether it is the original's fault, was not settled. |
+| Complete misunderstanding | We had it wrong. The original does what its documentation, its history or its hardware says it should. These are kept, corrected, so that the mistake is on record. |
 
 Most items were found by reading the source while translating it. Those marked
 **[M]** were also measured on the farm's RISC OS 5.30 machine. Some were seen
 only in the source and may never trouble a real program.
+
+Those marked **[H]** were corrected by the review at
+[heyrick.eu](https://heyrick.eu/blog/entry/20261009), which found the complete
+misunderstandings below and set several other entries straight. Our thanks.
 
 **Sources** say where each item was recorded, in the project's own
 repositories, which are not yet published (see *Source code* in the
@@ -76,7 +81,7 @@ Contents: [Applications](#1-applications-and-third-party-software) ·
 | What was noticed | Kind | Source |
 | --- | --- | --- |
 | The first printer driver load compares against `current_driver_name` while it is still NULL. It survives on 5.30 only because page zero is readable. | Bug | rosgd/ports/pipedream/PORT_NOTES.md; #171 |
-| The stock `!Run`'s nested If/Then/Else for seeding Choices assumes `Choices$Write` is set; under 5.30's `*If` rules (section 4) it misfires when it is not. | Quirk | #2, #7, #60 |
+| The stock `!Run`'s nested If/Then/Else for seeding Choices assumes `Choices$Write` is set. It is entitled to: the Style Guide says the Universal Boot application defines it, and `!Boot.Utils.SetChoices` sets it early in BootRun. A system on which it is unset has not booted. BOX's boot did not set it when this was noted. [H] | Complete misunderstanding | #2, #7, #60 |
 | A bare `%*` in its `!Run` is passed through literally by the kernel; `%*0` is needed. | Quirk | rosgd/ports/pipedream/PORT_NOTES.md |
 
 ### OvationPro 2.78
@@ -111,12 +116,14 @@ Contents: [Applications](#1-applications-and-third-party-software) ·
 
 | What was noticed | Kind | Source |
 | --- | --- | --- |
-| Paint: the first click in a window without the focus only takes the focus; Copy block leaves selection boxes behind; a black margin is drawn past a sprite at 1:1. | Quirk | rosgd/ports/paint/README.md |
+| Paint: Copy block leaves selection boxes behind; a black margin is drawn past a sprite at 1:1. | Quirk | rosgd/ports/paint/README.md |
+| Paint: the first click in a window without the focus only takes the focus. By design: sprite editor windows gain the input focus on the first click, and an option turns it off. [H] | Complete misunderstanding | Paint's history, [commit 6a84fc4e](https://gitlab.riscosopen.org/RiscOS/Sources/Apps/Paint/-/commit/6a84fc4e05c3250b21730dfa0c17c1d15e5ae40f) |
 | Paint depends on one case of CompressJPEG's stale longjmp (section 5) surviving. | Quirk | rosgd/modules/compressjpeg/README.md |
 | `*Help Desktop_Draw` runs on to the end of the Messages file: Draw's help text has no terminating NUL. | Bug | rosgd/modules/modulewrap/README.md |
-| Draw files hold doubles in FPA word order. | Quirk | rosgd/tools/capps.py |
+| Draw files hold doubles in FPA word order. That is the format: it dates from RISC OS 2, long before VFP, and the SharedCLibrary and the compiler use FPA. [H] | Complete misunderstanding | rosgd/tools/capps.py |
 | Edit with `Edit$Path` unset shows an OK box, then "Return code too large". | Quirk | rosgd/modules/modulewrap/README.md |
-| The Filer relies on undocumented Wimp internals: the Wimp's sprite routines through Wimp_Extend 1, 2 and 4, viewer sizing through reason 11, and the window tile being plotted behind an unselected icon's text. Filer_Action's Newer test relies on OS_File 5's undocumented result for a missing object. | Quirk | rosgd/modules/wimp/README.md; rosgd/ports/filer_action/README.md |
+| The Filer relies on undocumented Wimp internals: the Wimp's sprite routines through Wimp_Extend 1, 2 and 4, viewer sizing through reason 11, and the window tile being plotted behind an unselected icon's text. | Quirk | rosgd/modules/wimp/README.md; rosgd/ports/filer_action/README.md |
+| Filer_Action's Newer test does not rely on anything undocumented, as we said. It allows for a "not found" error, which OS_File 5 never gives for a missing object (it returns R0 = 0), and so goes on to examine a load address the call did not set. Only its check that the top 12 bits are &FFF stops it comparing nonsense; a stale R2 of &FFFxxxxx would not be stopped, and BOX's FileSwitch once left such a value, so that Newer copied nothing. A latent bug, not reliance on an undocumented result. [H] | Complete misunderstanding; Bug (latent) | rosgd/ports/filer_action/README.md |
 
 ### ArtWorks modules (GDraw 3.12, DitherExtend)
 
@@ -158,19 +165,19 @@ can be switched on with `--quirk`, for programs that depend on it.
 
 | Quirk | What was noticed | Kind | Source |
 | --- | --- | --- | --- |
-| int-add-wrap | Integer `+`, `-` and unary minus wrap modulo 2^32: `&7FFFFFFF+1` is -2147483648. Scalar `*` does not wrap. Not in the manual. | Quirk | rosbas/spec/C-quirks.md |
+| int-add-wrap | Integer `+`, `-` and unary minus wrap modulo 2^32: `&7FFFFFFF+1` is -2147483648. Integer `*` outside whole-array operations does not wrap: `&3FFFFFFF*3` gives the real 3.22122547E9, and storing that in an integer variable gives "Number too big". The manual gives the integer range, in Appendix A, but not the wrap. [H] | Quirk | rosbas/spec/C-quirks.md |
 | int-array-mul-wrap | Whole-array `*`, the integer matrix product and array MOD wrap silently. | Bug | rosbas/spec/C-quirks.md |
-| inf-leak | `2^1024` gives an infinity, printed `8E@65`, which the manual says cannot happen. | Bug | rosbas/spec/C-quirks.md |
+| inf-leak | In BASICVFP `2^1024` gives an infinity, printed `8E@65`, and `2^1025` gives "Number too big". BASIC V says "Exponent error" and BASIC64 "Floating point exception: overflow". We said the manual says this cannot happen; it does not, and says only that the range depends on the BASIC. [H] | Bug | rosbas/spec/C-quirks.md |
 | tan-reduce | TAN near odd multiples of π/2 is wrong by 10^4 to 10^11, often in sign: `TAN(PI)` is -1.2E-10 (VFPSupport, section 5). | Bug | rosbas/spec/C-quirks.md |
 | pow-odd | `(-1)^1048576` is -1: exponents from 2^20 to 2^21 are taken as odd. Very large exponents raise error 20 or give 0. | Bug | rosbas/spec/C-quirks.md |
 | cond-truncate | A real condition is truncated first: `IF 0.5` is false, and `IF 3E9` raises error 55. The manual says any non-zero value is true. | Bug | rosbas/spec/C-quirks.md |
 | for-byte-word | With a `?` control variable, NEXT reads and writes a whole word, overwriting the three bytes after it. | Bug | rosbas/spec/C-quirks.md |
 | error-keeps-locals | An error caught by ON ERROR leaves abandoned routines' LOCALs at their inner values, and RETURN parameters are not written back. | Bug | rosbas/spec/C-quirks.md |
 | array-late-fp-error | Real whole-array operations store every element, Inf and NaN included, and raise the error only at the end. | Bug | rosbas/spec/C-quirks.md |
-| dollar-no-cr | `$a` with no CR in the first 256 bytes gives "" silently. | Bug | rosbas/spec/C-quirks.md |
+| dollar-no-cr | `$a` with no CR in the first 256 bytes gives "" silently. It should give "String too long", as joining strings does. [H] | Bug | rosbas/spec/C-quirks.md |
 | five-byte-zero | INPUT# reads BASIC V's five-byte zero as 2^-129, not 0. | Bug | rosbas/spec/C-quirks.md |
-| sys-string-255 | A string returned by `SYS ... TO s$` of 255 bytes or more comes back empty. | Bug | rosbas/spec/C-quirks.md |
-| stale-local-handler | An ON ERROR LOCAL handler outlives its routine or loop; entering it later loops for ever. This wedged the farm twice. The manuals give no warning. [M] | Bug | rosbas/spec/C-quirks.md, 09-errors.md |
+| sys-string-255 | A string returned by `SYS ... TO s$` of 255 bytes or more comes back empty. It should give "String too long". [H] | Bug | rosbas/spec/C-quirks.md |
+| stale-local-handler | An ON ERROR LOCAL handler outlives its routine or loop; entering it later loops for ever. This wedged the farm twice. We said the manuals give no warning. They do: ON ERROR forgets every earlier handler, and a routine that wants the old one back must say LOCAL ERROR first, and in top-level code RESTORE ERROR after. Our test programs did not. [M] [H] | Complete misunderstanding | rosbas/spec/C-quirks.md, 09-errors.md |
 | restore-data-pop | A failing RESTORE DATA has already popped a word, so a local handler at the same level cannot return, and loops for ever. | Bug | rosbas/spec/C-quirks.md |
 | instr-start-wrap | `INSTR(s,t,p)` with p of 256 or more searches from byte 1, so a loop stepping through the matches never ends. | Bug | rosbas/spec/C-quirks.md |
 | substr-assign-range | LEFT$, MID$ or RIGHT$ assignment with a length of 0, or a start out of range, still overwrites the start of the string. | Bug | rosbas/spec/C-quirks.md |
@@ -183,13 +190,13 @@ can be switched on with `--quirk`, for programs that depend on it.
 | A numeric literal keeps at most 18 mantissa digits; the tokeniser drops a digit that takes a line number constant past 65280. | Quirk | rosgd/modules/basicvfp/tier3/units/factor_const.c, lexical_match.c |
 | Binary `%` literals have no overflow test: a 33rd digit wraps silently. Hex rejects a 9th digit, but consumes it. | Bug | rosgd/modules/basicvfp/tier3/units/factor_core.c |
 | RND(0) gives the fraction of the current state, whichever RND form set it; the manual says it repeats the last RND(1). | Doc error | rosbas/spec/05-expressions.md |
-| A fresh workspace's zero seed is replaced by "ARW!", so RND gives the same sequence at every start. | Quirk | rosgd/modules/basicvfp/tier3/units/modmain.c |
+| A fresh workspace's zero seed is replaced by "ARW!", so RND gives the same sequence at every start. Intended, and so since Arthur 1.20 at least: zero is no use as a seed, and programs seed with `RND(-TIME)`, as C programs call `srand`. [H] | Complete misunderstanding | rosgd/modules/basicvfp/tier3/units/modmain.c |
 | SWAP of byte-type variables exchanges nothing: the loop runs TYPE times, and type 0 fails the first test. The source's comment says it swaps one byte. | Bug | rosgd/modules/basicvfp/tier3/units/dispat_assign.c |
 | IF's ELSE scan steps two bytes at a time in places, so a colon before ELSE is found only at even alignments. | Bug | rosgd/modules/basicvfp/tier3/units/dispat_control.c |
 | FOR with an empty range runs its body once. | Quirk | rosgd/tests/desktop/taskwindow/README.md |
-| ON with nothing after it turns the cursor on. | Quirk | rosgd/modules/basicvfp/tier3/units/dispat_control.c |
+| ON with nothing after it turns the cursor on. As documented: `HELP ON` says "ON: cursor on." [H] | Complete misunderstanding | rosgd/modules/basicvfp/tier3/units/dispat_control.c |
 | SOUND packs channel and amplitude reading the stacked halves in the wrong rotation order. | Bug | rosgd/modules/basicvfp/tier3/units/dispat_io.c |
-| PRINT# writes numbers high byte first and strings low byte first. | Quirk | rosgd/modules/basicvfp/tier3/units/dispat_io.c |
+| PRINT# writes every item last byte first: an integer high byte first, a string its last character first. We had called the string "low byte first". [H] | Quirk | rosgd/modules/basicvfp/tier3/units/dispat_io.c |
 | ADC does not mask OS_Byte's R2, so its high bits leak in. The source says "removed since GStark claims its OK". | Bug | rosgd/modules/basicvfp/tier3/units/factor_resid.c |
 | WIDTH returns the stored value plus one; TO not followed by P errors with the P already consumed. | Quirk | rosgd/modules/basicvfp/tier3/units/factor_resid.c |
 | Out-of-range assignments to PAGE, LOMEM and HIMEM print a message and carry on instead of raising an error. | Quirk | rosgd/modules/basicvfp/tier3/units/dispat_assign.c |
@@ -197,14 +204,14 @@ can be switched on with `--quirk`, for programs that depend on it.
 | MOUSE TO passes OS_Word an unaligned block. | Bug (latent) | rosgd/modules/basicvfp/tier3/units/dispat_sys.c |
 | TAB, SPC and comma padding keep only the low byte of the space count. | Quirk | rosbas/spec/10-output.md |
 | RIGHT$ with n of -33025 or less returns the whole string, through an address wrap at &8100. | Quirk | rosbas/spec/06-strings.md |
-| `\|` at an address that is not a multiple of 4 aborts. | Quirk | rosbas/spec/12-memory.md |
+| `\|` at an address that is not a multiple of 4 aborts in BASICVFP. That is the hardware: VFP's loads and stores are coprocessor transfers, which need a word-aligned address, and BASIC64's FPA does the same. BASIC V's five-byte reals work at any address. [H] | Complete misunderstanding | rosbas/spec/12-memory.md |
 | A CR, NUL or space inside an OPENIN name ends the name: `OPENIN("data junk")` opens `data`. | Quirk | rosbas/spec/13-files.md |
 | A text file whose last line has no line end makes TEXTLOAD read past the end of the file; 5.30 said "Line too long". [M] | Bug | rosbas/spec/02-source.md |
 | A line whose tokenised form overflows the loader's 512-byte buffer hung 5.30. [M] | Bug | rosbas/spec/02-source.md |
 | A typed LOAD of a text file says "Bad program". | Quirk | *notes* |
-| `s$()=1+t$()` gives "Internal error: abort on data transfer at &FC1E1CF0". [M] | Bug | rosbas/spec/04-variables.md |
+| `s$()=1+t$()` gives "Internal error: abort on data transfer at &FC1E1CF0". It should give "Type mismatch"; the line is nonsense, and unlikely outside a test. [M] [H] | Bug | rosbas/spec/04-variables.md |
 | Overflow in a real matrix product stores every element and then aborts (&FC1DA198) instead of raising error 20; the product does not check C's dimensions; divide by zero in a whole-array operation gives a damaged message. [M] | Bug | rosbas/spec/04-variables.md |
-| RESTORE ERROR after a LOCAL ERROR that has been restored automatically raises "control status not found on stack". | Quirk | *notes* |
+| RESTORE ERROR after a LOCAL ERROR that has been restored automatically raises "control status not found on stack". That is right: there is nothing left to restore. [H] | Complete misunderstanding | *notes* |
 
 ---
 
@@ -328,7 +335,7 @@ Wimp's specification; the farm's 5.30 runs 5.87.
 | OS_ReadArgs: when an item starts with `-` but names no key, the pointer is restored one byte short. | Bug | GD/design/14-runtime.md |
 | OS_ReadUnsigned says "Number not recognised" for a bad terminator, and "(Number)" when it reads no digits: its message is translated twice. | Bug | rosgd/tests/desktop/territory/README.md |
 | OS_Convert with negative R2 counts 2 characters per nybble. | Quirk | rosgd/README.md |
-| OS_File 5 of a missing object leaves the filing system's R2 to R5 (R5 = 0); Filer_Action depends on it. | Quirk | rosgd/ports/filer_action/README.md |
+| OS_File 5 of a missing object returns R0 = 0 and no error, and leaves the filing system's R2 to R5 (R5 = 0). Filer_Action's Newer test reads R2 all the same (section 1). | Quirk | rosgd/ports/filer_action/README.md |
 | OS_Byte 20 and 25, unclaimed, leave R1 pointing into the kernel's ROM font. | Quirk | rosgd/tests/desktop/international/README.md |
 | The kernel never sets R1 or R2 on entry to the error handler, though the PRM says R1 is the error buffer. | Doc error | rosgd/runtime/armrun/ABI.md |
 | "R0 = 0 means claimed" for UpCalls is not enforced by the kernel. | Unclear | rosgd/runtime/armrun/ABI.md |
