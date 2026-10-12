@@ -36,6 +36,14 @@ repositories, which are not yet published (see *Source code* in the
 and specification documents), `rosbas/...` (the BBC BASIC compiler), `#n` and
 `P#n` (the project's issue lists) and *notes* (its working notes).
 
+Where the file is published, the source is a link. Links into
+[src/box](../src/box/README.md) lead to **translated code**: BOX's C,
+translated from the original assembler or rewritten from its documentation,
+and its notes on the translation. They are not the original source, which is
+in [RISC OS Open's repository](https://gitlab.riscosopen.org/RiscOS/Sources);
+the line an item describes is in the original, and the translation shows
+how BOX reads it. Sources without a link are not yet published.
+
 Please do not report these to the original authors on BOX's account: see
 *Ports* in the [README](../README.md).
 
@@ -88,9 +96,9 @@ Contents: [Applications](#1-applications-and-third-party-software) ·
 
 | What was noticed | Kind | Source |
 | --- | --- | --- |
-| Calls OS_SpriteOp &238 with R1 = &FF, which is not a sprite area. | Bug | rosgd/boot/selftest_jpegplot.c |
+| Calls OS_SpriteOp &238 with R1 = &FF, which is not a sprite area. | Bug | [rosgd/boot/selftest_jpegplot.c](../src/box/boot/selftest_jpegplot.c) |
 | Its Wimp_SendMessage reason 19 carries a garbage size word. | Bug | rosgd/tests/deskprobe/ovationpro.py |
-| Deselects its print job (PDriver_SelectJob 0) between bands. | Quirk | rosgd/modules/pdriver/pdriver.c |
+| Deselects its print job (PDriver_SelectJob 0) between bands. | Quirk | [rosgd/modules/pdriver/pdriver.c](../src/box/modules/pdriver/pdriver.c) |
 | Accepts Message_ClaimEntity but never sends DataRequest, so it cannot paste from another task's clipboard, on 5.30 too. | Quirk | #142 |
 | Polls about 130,000 times a second on null events while idle. Not checked on 5.30. | Unclear | #138 |
 | After printing, one character is redrawn on screen at page scale. Not checked on 5.30. | Unclear | #189 |
@@ -118,11 +126,11 @@ Contents: [Applications](#1-applications-and-third-party-software) ·
 | --- | --- | --- |
 | Paint: Copy block leaves selection boxes behind; a black margin is drawn past a sprite at 1:1. | Quirk | rosgd/ports/paint/README.md |
 | Paint: the first click in a window without the focus only takes the focus. By design: sprite editor windows gain the input focus on the first click, and an option turns it off. [H] | Complete misunderstanding | Paint's history, [commit 6a84fc4e](https://gitlab.riscosopen.org/RiscOS/Sources/Apps/Paint/-/commit/6a84fc4e05c3250b21730dfa0c17c1d15e5ae40f) |
-| Paint depends on one case of CompressJPEG's stale longjmp (section 5) surviving. | Quirk | rosgd/modules/compressjpeg/README.md |
-| `*Help Desktop_Draw` runs on to the end of the Messages file: Draw's help text has no terminating NUL. | Bug | rosgd/modules/modulewrap/README.md |
-| Draw files hold doubles in FPA word order. That is the format: it dates from RISC OS 2, long before VFP, and the SharedCLibrary and the compiler use FPA. [H] | Complete misunderstanding | rosgd/tools/capps.py |
-| Edit with `Edit$Path` unset shows an OK box, then "Return code too large". | Quirk | rosgd/modules/modulewrap/README.md |
-| The Filer relies on undocumented Wimp internals: the Wimp's sprite routines through Wimp_Extend 1, 2 and 4, viewer sizing through reason 11, and the window tile being plotted behind an unselected icon's text. | Quirk | rosgd/modules/wimp/README.md; rosgd/ports/filer_action/README.md |
+| Paint depends on one case of CompressJPEG's stale longjmp (section 5) surviving. | Quirk | [rosgd/modules/compressjpeg/README.md](../src/box/modules/compressjpeg/README.md) |
+| `*Help Desktop_Draw` runs on to the end of the Messages file: Draw's help text has no terminating NUL. | Bug | [rosgd/modules/modulewrap/README.md](../src/box/modules/modulewrap/README.md) |
+| Draw files hold doubles in FPA word order. That is the format: it dates from RISC OS 2, long before VFP, and the SharedCLibrary and the compiler use FPA. [H] | Complete misunderstanding | [rosgd/tools/capps.py](../src/box/tools/capps.py) |
+| Edit with `Edit$Path` unset shows an OK box, then "Return code too large". | Quirk | [rosgd/modules/modulewrap/README.md](../src/box/modules/modulewrap/README.md) |
+| The Filer relies on undocumented Wimp internals: the Wimp's sprite routines through Wimp_Extend 1, 2 and 4, viewer sizing through reason 11, and the window tile being plotted behind an unselected icon's text. | Quirk | [rosgd/modules/wimp/README.md](../src/box/modules/wimp/README.md); rosgd/ports/filer_action/README.md |
 | Filer_Action's Newer test does not rely on anything undocumented, as we said. It allows for a "not found" error, which OS_File 5 never gives for a missing object (it returns R0 = 0), and so goes on to examine a load address the call did not set. Only its check that the top 12 bits are &FFF stops it comparing nonsense; a stale R2 of &FFFxxxxx would not be stopped, and BOX's FileSwitch once left such a value, so that Newer copied nothing. A latent bug, not reliance on an undocumented result. [H] | Complete misunderstanding; Bug (latent) | rosgd/ports/filer_action/README.md |
 
 ### ArtWorks modules (GDraw 3.12, DitherExtend)
@@ -142,7 +150,7 @@ farm's RISC OS 5.30.
 
 | What was noticed | Kind | Source |
 | --- | --- | --- |
-| `get_angle` has two constants swapped, so a 12° italic comes out at 0.37°. | Bug | rosgd/docs/articles/tiers-of-translation.md |
+| `get_angle` has two constants swapped, so a 12° italic comes out at 0.37°. | Bug | [rosgd/docs/articles/tiers-of-translation.md](../articles/1-Tiers.md) |
 
 ### HERMES-Paige (the open source Paige text engine)
 
@@ -186,22 +194,22 @@ can be switched on with `--quirk`, for programs that depend on it.
 
 | What was noticed | Kind | Source |
 | --- | --- | --- |
-| A decimal literal is an integer only below &0CC00000: 213909503 is an integer, 213909504 a real. | Quirk | rosbas/spec/03-values.md; rosgd/modules/basicvfp/tier3/units/factor_const.c |
-| A numeric literal keeps at most 18 mantissa digits; the tokeniser drops a digit that takes a line number constant past 65280. | Quirk | rosgd/modules/basicvfp/tier3/units/factor_const.c, lexical_match.c |
-| Binary `%` literals have no overflow test: a 33rd digit wraps silently. Hex rejects a 9th digit, but consumes it. | Bug | rosgd/modules/basicvfp/tier3/units/factor_core.c |
+| A decimal literal is an integer only below &0CC00000: 213909503 is an integer, 213909504 a real. | Quirk | rosbas/spec/03-values.md; [rosgd/modules/basicvfp/tier3/units/factor_const.c](../src/box/modules/basicvfp/tier3/units/factor_const.c) |
+| A numeric literal keeps at most 18 mantissa digits; the tokeniser drops a digit that takes a line number constant past 65280. | Quirk | [rosgd/modules/basicvfp/tier3/units/factor_const.c](../src/box/modules/basicvfp/tier3/units/factor_const.c), lexical_match.c |
+| Binary `%` literals have no overflow test: a 33rd digit wraps silently. Hex rejects a 9th digit, but consumes it. | Bug | [rosgd/modules/basicvfp/tier3/units/factor_core.c](../src/box/modules/basicvfp/tier3/units/factor_core.c) |
 | RND(0) gives the fraction of the current state, whichever RND form set it; the manual says it repeats the last RND(1). | Doc error | rosbas/spec/05-expressions.md |
-| A fresh workspace's zero seed is replaced by "ARW!", so RND gives the same sequence at every start. Intended, and so since Arthur 1.20 at least: zero is no use as a seed, and programs seed with `RND(-TIME)`, as C programs call `srand`. [H] | Complete misunderstanding | rosgd/modules/basicvfp/tier3/units/modmain.c |
-| SWAP of byte-type variables exchanges nothing: the loop runs TYPE times, and type 0 fails the first test. The source's comment says it swaps one byte. | Bug | rosgd/modules/basicvfp/tier3/units/dispat_assign.c |
-| IF's ELSE scan steps two bytes at a time in places, so a colon before ELSE is found only at even alignments. | Bug | rosgd/modules/basicvfp/tier3/units/dispat_control.c |
+| A fresh workspace's zero seed is replaced by "ARW!", so RND gives the same sequence at every start. Intended, and so since Arthur 1.20 at least: zero is no use as a seed, and programs seed with `RND(-TIME)`, as C programs call `srand`. [H] | Complete misunderstanding | [rosgd/modules/basicvfp/tier3/units/modmain.c](../src/box/modules/basicvfp/tier3/units/modmain.c) |
+| SWAP of byte-type variables exchanges nothing: the loop runs TYPE times, and type 0 fails the first test. The source's comment says it swaps one byte. | Bug | [rosgd/modules/basicvfp/tier3/units/dispat_assign.c](../src/box/modules/basicvfp/tier3/units/dispat_assign.c) |
+| IF's ELSE scan steps two bytes at a time in places, so a colon before ELSE is found only at even alignments. | Bug | [rosgd/modules/basicvfp/tier3/units/dispat_control.c](../src/box/modules/basicvfp/tier3/units/dispat_control.c) |
 | FOR with an empty range runs its body once. | Quirk | rosgd/tests/desktop/taskwindow/README.md |
-| ON with nothing after it turns the cursor on. As documented: `HELP ON` says "ON: cursor on." [H] | Complete misunderstanding | rosgd/modules/basicvfp/tier3/units/dispat_control.c |
-| SOUND packs channel and amplitude reading the stacked halves in the wrong rotation order. | Bug | rosgd/modules/basicvfp/tier3/units/dispat_io.c |
-| PRINT# writes every item last byte first: an integer high byte first, a string its last character first. We had called the string "low byte first". [H] | Quirk | rosgd/modules/basicvfp/tier3/units/dispat_io.c |
-| ADC does not mask OS_Byte's R2, so its high bits leak in. The source says "removed since GStark claims its OK". | Bug | rosgd/modules/basicvfp/tier3/units/factor_resid.c |
-| WIDTH returns the stored value plus one; TO not followed by P errors with the P already consumed. | Quirk | rosgd/modules/basicvfp/tier3/units/factor_resid.c |
-| Out-of-range assignments to PAGE, LOMEM and HIMEM print a message and carry on instead of raising an error. | Quirk | rosgd/modules/basicvfp/tier3/units/dispat_assign.c |
-| AUTO stops at 65280, and LIST's default end is 65279. | Quirk | rosgd/modules/basicvfp/tier3/units/clrstk.c |
-| MOUSE TO passes OS_Word an unaligned block. | Bug (latent) | rosgd/modules/basicvfp/tier3/units/dispat_sys.c |
+| ON with nothing after it turns the cursor on. As documented: `HELP ON` says "ON: cursor on." [H] | Complete misunderstanding | [rosgd/modules/basicvfp/tier3/units/dispat_control.c](../src/box/modules/basicvfp/tier3/units/dispat_control.c) |
+| SOUND packs channel and amplitude reading the stacked halves in the wrong rotation order. | Bug | [rosgd/modules/basicvfp/tier3/units/dispat_io.c](../src/box/modules/basicvfp/tier3/units/dispat_io.c) |
+| PRINT# writes every item last byte first: an integer high byte first, a string its last character first. We had called the string "low byte first". [H] | Quirk | [rosgd/modules/basicvfp/tier3/units/dispat_io.c](../src/box/modules/basicvfp/tier3/units/dispat_io.c) |
+| ADC does not mask OS_Byte's R2, so its high bits leak in. The source says "removed since GStark claims its OK". | Bug | [rosgd/modules/basicvfp/tier3/units/factor_resid.c](../src/box/modules/basicvfp/tier3/units/factor_resid.c) |
+| WIDTH returns the stored value plus one; TO not followed by P errors with the P already consumed. | Quirk | [rosgd/modules/basicvfp/tier3/units/factor_resid.c](../src/box/modules/basicvfp/tier3/units/factor_resid.c) |
+| Out-of-range assignments to PAGE, LOMEM and HIMEM print a message and carry on instead of raising an error. | Quirk | [rosgd/modules/basicvfp/tier3/units/dispat_assign.c](../src/box/modules/basicvfp/tier3/units/dispat_assign.c) |
+| AUTO stops at 65280, and LIST's default end is 65279. | Quirk | [rosgd/modules/basicvfp/tier3/units/clrstk.c](../src/box/modules/basicvfp/tier3/units/clrstk.c) |
+| MOUSE TO passes OS_Word an unaligned block. | Bug (latent) | [rosgd/modules/basicvfp/tier3/units/dispat_sys.c](../src/box/modules/basicvfp/tier3/units/dispat_sys.c) |
 | TAB, SPC and comma padding keep only the low byte of the space count. | Quirk | rosbas/spec/10-output.md |
 | RIGHT$ with n of -33025 or less returns the whole string, through an address wrap at &8100. | Quirk | rosbas/spec/06-strings.md |
 | `\|` at an address that is not a multiple of 4 aborts in BASICVFP. That is the hardware: VFP's loads and stores are coprocessor transfers, which need a word-aligned address, and BASIC64's FPA does the same. BASIC V's five-byte reals work at any address. [H] | Complete misunderstanding | rosbas/spec/12-memory.md |
@@ -241,7 +249,7 @@ Wimp's specification; the farm's 5.30 runs 5.87.
 | The greyscale record is cleared only by `*WimpMode`, so Wimp_SetMode to a colour mode may still reprogram greys. | Unclear | GD/spec/wimp/04-icons.md |
 | `remembercurrentfont` has its test inverted: it keeps the result only when the call fails. | Bug | GD/spec/wimp/09-icon-drawing.md |
 | Glyph &98 (iconise) is never defined; a partial set of title sprites calls OS_SpriteOp with R2 = 0; with no `blank` tool, ReadSpriteSize is called on address 0. | Bug (latent) | GD/spec/wimp/08-furniture-drawing.md |
-| When the Wimp is the first task, its first window has no furniture until it is reopened: the tool list is not built until a border is drawn. | Bug | rosgd/modules/wimp/README.md |
+| When the Wimp is the first task, its first window has no furniture until it is reopened: the tool list is not built until a border is drawn. | Bug | [rosgd/modules/wimp/README.md](../src/box/modules/wimp/README.md) |
 
 ### The icon bar
 
@@ -264,7 +272,7 @@ Wimp's specification; the farm's 5.30 runs 5.87.
 | CMOS WimpFlags bit 6 alone frees only the top left from the on-screen limit; the PRM says all directions. | Doc error | GD/spec/wimp/03-windows.md |
 | PRM3 page 3-13 prints the y scroll formula with `scroll_offset_x` (page 3-127 is right). | Doc error | GD/wimp/02-windows-and-redraw.md |
 | When the rectangle pool runs out, the Wimp falls into an undocumented back-to-front redraw ("braindead" in the source). | Quirk | GD/wimp/02-windows-and-redraw.md |
-| The Toolbox relies on a fake null event after Wimp_StartTask, and on the order in which redraw rectangles are returned. | Quirk | rosgd/docs/articles/the-native-wimp.md |
+| The Toolbox relies on a fake null event after Wimp_StartTask, and on the order in which redraw rectangles are returned. | Quirk | [rosgd/docs/articles/the-native-wimp.md](../articles/3-Wimp.md) |
 
 ### Tasks, polling and messages
 
@@ -280,13 +288,13 @@ Wimp's specification; the farm's 5.30 runs 5.87.
 | Wimp_SlotSize preserves R4, which PRM3 says is corrupted. | Doc error | GD/spec/wimp/02-tasks.md |
 | Wimp_SendMessage does not keep `my_ref` positive, as PRM3 says, and updates the block for reason 19 as well as 17 and 18. | Doc error | GD/spec/wimp/06-messages-and-edges.md |
 | After acting on its own receiver's entry, the Wimp returns to whichever task polled with that code, so a task may see a spurious event. | Unclear | GD/spec/wimp/06-messages-and-edges.md |
-| When an icon's owner ignores a DataLoad, 5.30 does not load it: a recorded one bounces, an unrecorded one gets no DataLoadAck. Why is not known. [M] | Unclear | rosgd/modules/wimp/README.md |
-| Service_Reset with tasks running discards them silently. | Quirk | rosgd/modules/wimp/README.md |
+| When an icon's owner ignores a DataLoad, 5.30 does not load it: a recorded one bounces, an unrecorded one gets no DataLoadAck. Why is not known. [M] | Unclear | [rosgd/modules/wimp/README.md](../src/box/modules/wimp/README.md) |
+| Service_Reset with tasks running discards them silently. | Quirk | [rosgd/modules/wimp/README.md](../src/box/modules/wimp/README.md) |
 | Wimp_SetWatchdogState: disabling twice with the same code word turns the watchdog back on; R0 is corrupted (PRM5A: preserved). | Bug, Doc error | GD/wimp/05-messages-and-services.md |
 | Wimp_LoadTemplate writes through a null font array; with no file open it reads through handle 0 and gives &DE [M]; R1 negative other than -1 faults, though PRM3 says R1 ≤ 0 asks for the size. After a load, the window's sprite area word is set to 1. | Bug, Doc error | GD/spec/wimp/06-messages-and-edges.md |
 | Wimp_CommandWindow closes quietly only for R0 = -1, not for any R0 below 0 as PRM3 says. | Doc error | GD/spec/wimp/06-messages-and-edges.md |
 | Wimp_ReadSysInfo 17 is in centiseconds, not milliseconds; reason 13 just returns 13; reasons 10, 12 and 14 return internal addresses. | Doc error | GD/spec/wimp/06-messages-and-edges.md |
-| Wimp_Extend leaves R0 as it was for a reason it does not know, so a caller cannot tell it was refused. | Quirk | rosgd/modules/wimp/README.md |
+| Wimp_Extend leaves R0 as it was for a reason it does not know, so a caller cannot tell it was refused. | Quirk | [rosgd/modules/wimp/README.md](../src/box/modules/wimp/README.md) |
 
 ### Input, menus, the caret and drags
 
@@ -294,8 +302,8 @@ Wimp's specification; the farm's 5.30 runs 5.87.
 | --- | --- | --- |
 | The Mouse_Click block has an undocumented sixth word (the previous buttons); a click is queued behind pending messages. | Quirk | GD/wimp/04-input-menus-drags.md |
 | Wimp_GetPointerInfo is not live, despite PRM3's "instantaneous"; button types 12 and 13, reserved in PRM3, work; drag and double-click defaults are 0.5 s and 32 units, not PRM3's 1/5 s and 16. | Doc error | GD/wimp/04-input-menus-drags.md |
-| 5.30 holds Wimp_Poll for the whole of a selection (type 13) drag; a text drag that leaves the icon before the drag time is reported as a plain click. | Quirk | rosgd/modules/wimp/README.md |
-| A drag started by leaving an icon is reported, not acted on; a dragged DataSave's size is -1; the ghost caret is placed using a screen y as a work-area y. | Quirk, Bug | rosgd/modules/wimp/README.md |
+| 5.30 holds Wimp_Poll for the whole of a selection (type 13) drag; a text drag that leaves the icon before the drag time is reported as a plain click. | Quirk | [rosgd/modules/wimp/README.md](../src/box/modules/wimp/README.md) |
+| A drag started by leaving an icon is reported, not acted on; a dragged DataSave's size is -1; the ghost caret is placed using a screen y as a work-area y. | Quirk, Bug | [rosgd/modules/wimp/README.md](../src/box/modules/wimp/README.md) |
 | Dialogue handles are told from menus by the low bit; PRM3 says a handle is 1 to &7FFF. A menu title's validation string and buffer length are ignored. | Doc error | GD/wimp/04-input-menus-drags.md; GD/spec/wimp/01-interface.md |
 | With click submenus on, Return in a writable item that has a submenu returns through a stack frame the key path did not push. | Bug | GD/spec/wimp/13-menus.md |
 | The tick and arrow icons' data words are left-over register values, visible through GetIconState. | Quirk | GD/spec/wimp/13-menus.md |
@@ -337,18 +345,18 @@ Wimp's specification; the farm's 5.30 runs 5.87.
 | OS_Convert with negative R2 counts 2 characters per nybble. | Quirk | rosgd/README.md |
 | OS_File 5 of a missing object returns R0 = 0 and no error, and leaves the filing system's R2 to R5 (R5 = 0). Filer_Action's Newer test reads R2 all the same (section 1). | Quirk | rosgd/ports/filer_action/README.md |
 | OS_Byte 20 and 25, unclaimed, leave R1 pointing into the kernel's ROM font. | Quirk | rosgd/tests/desktop/international/README.md |
-| The kernel never sets R1 or R2 on entry to the error handler, though the PRM says R1 is the error buffer. | Doc error | rosgd/runtime/armrun/ABI.md |
-| "R0 = 0 means claimed" for UpCalls is not enforced by the kernel. | Unclear | rosgd/runtime/armrun/ABI.md |
+| The kernel never sets R1 or R2 on entry to the error handler, though the PRM says R1 is the error buffer. | Doc error | [rosgd/runtime/armrun/ABI.md](../src/box/runtime/armrun/ABI.md) |
+| "R0 = 0 means claimed" for UpCalls is not enforced by the kernel. | Unclear | [rosgd/runtime/armrun/ABI.md](../src/box/runtime/armrun/ABI.md) |
 | OS_UpdateMEMC is still present: it keeps a soft MEMC1 copy with the top 12 bits forced to &036, and acts on bit 10 only. | Quirk | #120 |
-| SetColours spreads a text colour with bits above the pixel width into the word's lower lanes, again on every call, so a colour can change when the other colour is set. | Bug | rosgd/runtime/vdu/README.md |
-| VDU 23,2 to 5 at 16 and 32 bpp in BBC mode reads past its table, into the LineStyle code in ROM. | Bug | rosgd/runtime/vdu/README.md |
-| VDU 23,12 to 15 at 1 bpp reads its colours from address 0: a register is reused before it is used. | Bug | rosgd/runtime/vdu/README.md |
-| Switching output back to the screen from MODE 7 with R3 = 1 aborts at the next character ("abort on instruction fetch at &FF00FFFE"): the save area is never filled in teletext. [M] | Bug | rosgd/runtime/vdu/README.md |
-| GetSpriteData takes the bits of the first on-screen word that lie outside the window from a stale register. | Bug | rosgd/runtime/vdu/sprplot.c |
-| Flipping a new-format sprite reverses an alpha mask as if it were a 1-bit mask. | Bug | rosgd/runtime/vdu/sprite.c |
-| A palette read for an index above 259 reads past the table and then uses index AND 255. | Bug | rosgd/runtime/vdu/palette.c |
+| SetColours spreads a text colour with bits above the pixel width into the word's lower lanes, again on every call, so a colour can change when the other colour is set. | Bug | [rosgd/runtime/vdu/README.md](../src/box/runtime/vdu/README.md) |
+| VDU 23,2 to 5 at 16 and 32 bpp in BBC mode reads past its table, into the LineStyle code in ROM. | Bug | [rosgd/runtime/vdu/README.md](../src/box/runtime/vdu/README.md) |
+| VDU 23,12 to 15 at 1 bpp reads its colours from address 0: a register is reused before it is used. | Bug | [rosgd/runtime/vdu/README.md](../src/box/runtime/vdu/README.md) |
+| Switching output back to the screen from MODE 7 with R3 = 1 aborts at the next character ("abort on instruction fetch at &FF00FFFE"): the save area is never filled in teletext. [M] | Bug | [rosgd/runtime/vdu/README.md](../src/box/runtime/vdu/README.md) |
+| GetSpriteData takes the bits of the first on-screen word that lie outside the window from a stale register. | Bug | [rosgd/runtime/vdu/sprplot.c](../src/box/runtime/vdu/sprplot.c) |
+| Flipping a new-format sprite reverses an alpha mask as if it were a 1-bit mask. | Bug | [rosgd/runtime/vdu/sprite.c](../src/box/runtime/vdu/sprite.c) |
+| A palette read for an index above 259 reads past the table and then uses index AND 255. | Bug | [rosgd/runtime/vdu/palette.c](../src/box/runtime/vdu/palette.c) |
 | Characters 131, 132 and 136 to 139 on the desktop are drawn by the Window Manager, not the International module. | Quirk | rosgd/tests/desktop/international/README.md |
-| Service_International 5 for UTF-8 is claimed only when there is a Latin-1 rest. | Quirk | rosgd/modules/international/international.c |
+| Service_International 5 for UTF-8 is claimed only when there is a Latin-1 rest. | Quirk | [rosgd/modules/international/international.c](../src/box/modules/international/international.c) |
 
 ---
 
@@ -366,7 +374,7 @@ Wimp's specification; the farm's 5.30 runs 5.87.
 
 | What was noticed | Kind | Source |
 | --- | --- | --- |
-| A program that never calls the OS is not pre-empted in its first slice, before the task window has polled. [M] | Quirk | rosgd/modules/taskwindow/README.md |
+| A program that never calls the OS is not pre-empted in its first slice, before the task window has polled. [M] | Quirk | [rosgd/modules/taskwindow/README.md](../src/box/modules/taskwindow/README.md) |
 | `*ShellCLI_Task` needs a space after the second handle, or reports "File '<handle>' not found". | Quirk | rosgd/tests/desktop/taskwindow/README.md |
 | `XOS_CLI "TaskWindow"` with no parameters raises its syntax error instead of returning it. | Bug | rosgd/tests/desktop/taskwindow/README.md |
 | Any task window with text handle 1 is taken for one waiting for its parent. | Bug | rosgd/tests/desktop/taskwindow/README.md |
@@ -375,68 +383,68 @@ Wimp's specification; the farm's 5.30 runs 5.87.
 
 | What was noticed | Kind | Source |
 | --- | --- | --- |
-| ReturnOppColour in 256 colours picks the worst tint of the nearest colour, not the furthest colour. | Bug | rosgd/modules/colourtrans/README.md |
-| In 8 bpp full-palette modes a cached colour's GCOL depends on whether ReturnGCOL or SetGCOL cached it first; palette changes do not invalidate the caches. | Bug | rosgd/modules/colourtrans/README.md |
-| 32K tables built at run time use an unweighted distance on truncated components; the ResourceFS tables use a weighted one. | Quirk | rosgd/modules/colourtrans/README.md |
-| "Worst" matching with every error 0 returns the colour word shifted right by 2; SetTextColour passes R3 unmasked; the Set*Colour calls ignore their lookup's error. | Bug | rosgd/modules/colourtrans/README.md |
-| SelectTable reads R5 only for sprite sources, and flag bit 1 gives the sprite mode's default palette. | Quirk | rosgd/modules/colourtrans/README.md |
-| WriteCalibrationToFile writes a truncated first line, `ColourTransMapColo...`. | Bug | rosgd/modules/colourtrans/README.md |
-| Runaways: the default palette reads its own code as palette words; 32K-to-8 bpp tables keep uninitialised heap; HSVToRGB with a hue outside 0 to 720 jumps into code; grey matching with every weight 0 never returns; calibration of more than 16 words runs away; GCOLs of 256 or more read past the table. | Bug | rosgd/modules/colourtrans/README.md |
+| ReturnOppColour in 256 colours picks the worst tint of the nearest colour, not the furthest colour. | Bug | [rosgd/modules/colourtrans/README.md](../src/box/modules/colourtrans/README.md) |
+| In 8 bpp full-palette modes a cached colour's GCOL depends on whether ReturnGCOL or SetGCOL cached it first; palette changes do not invalidate the caches. | Bug | [rosgd/modules/colourtrans/README.md](../src/box/modules/colourtrans/README.md) |
+| 32K tables built at run time use an unweighted distance on truncated components; the ResourceFS tables use a weighted one. | Quirk | [rosgd/modules/colourtrans/README.md](../src/box/modules/colourtrans/README.md) |
+| "Worst" matching with every error 0 returns the colour word shifted right by 2; SetTextColour passes R3 unmasked; the Set*Colour calls ignore their lookup's error. | Bug | [rosgd/modules/colourtrans/README.md](../src/box/modules/colourtrans/README.md) |
+| SelectTable reads R5 only for sprite sources, and flag bit 1 gives the sprite mode's default palette. | Quirk | [rosgd/modules/colourtrans/README.md](../src/box/modules/colourtrans/README.md) |
+| WriteCalibrationToFile writes a truncated first line, `ColourTransMapColo...`. | Bug | [rosgd/modules/colourtrans/README.md](../src/box/modules/colourtrans/README.md) |
+| Runaways: the default palette reads its own code as palette words; 32K-to-8 bpp tables keep uninitialised heap; HSVToRGB with a hue outside 0 to 720 jumps into code; grey matching with every weight 0 never returns; calibration of more than 16 words runs away; GCOLs of 256 or more read past the table. | Bug | [rosgd/modules/colourtrans/README.md](../src/box/modules/colourtrans/README.md) |
 
 ### Draw module
 
 | What was noticed | Kind | Source |
 | --- | --- | --- |
-| On a transform cache miss, the untransformed point is kept, so an edge goes down with its old end untransformed. | Bug | rosgd/modules/draw/README.md |
-| Draw_FillClipped returns R0 unchanged, and does not report errors from the clipping path. | Bug | rosgd/modules/draw/README.md |
-| A clipped span plots two pixels: HLine is given its ends the wrong way round. | Bug | rosgd/modules/draw/README.md |
-| Draw_Stroke's floating point forms test R4 for zero as R4<<1; a failing cap or join returns the new point's x as the error pointer. | Bug | rosgd/modules/draw/README.md |
-| Fill style bits 6 and 7, which are internal, are accepted from callers. | Quirk | rosgd/modules/draw/README.md |
+| On a transform cache miss, the untransformed point is kept, so an edge goes down with its old end untransformed. | Bug | [rosgd/modules/draw/README.md](../src/box/modules/draw/README.md) |
+| Draw_FillClipped returns R0 unchanged, and does not report errors from the clipping path. | Bug | [rosgd/modules/draw/README.md](../src/box/modules/draw/README.md) |
+| A clipped span plots two pixels: HLine is given its ends the wrong way round. | Bug | [rosgd/modules/draw/README.md](../src/box/modules/draw/README.md) |
+| Draw_Stroke's floating point forms test R4 for zero as R4<<1; a failing cap or join returns the new point's x as the error pointer. | Bug | [rosgd/modules/draw/README.md](../src/box/modules/draw/README.md) |
+| Fill style bits 6 and 7, which are internal, are accepted from callers. | Quirk | [rosgd/modules/draw/README.md](../src/box/modules/draw/README.md) |
 | The PRM's "leading" cap in Draw_Stroke's cap block is the path's end cap. [M] | Doc error | rosgd/ports/drawfile/README.md |
 
 ### Font Manager
 
 | What was noticed | Kind | Source |
 | --- | --- | --- |
-| Font_EnumerateCharacters on a directly mapped font leaves V set with R0 a handle ("returned a bad error pointer"); from a code at or below the first run's start it skips that run unless the code is 0. | Bug | rosgd/modules/fontmanager/README.md |
-| The ConverttoOS cache returns a stale result for the same y even after SetScaleFactor; only a mode change clears it. | Bug | rosgd/modules/fontmanager/README.md |
-| Font_SetThresholds writes one threshold whatever count it is given. | Bug | rosgd/modules/fontmanager/README.md |
-| Right-to-left kerning almost never swaps the pair: bit 10 of a stale R14 is tested instead of the plot type. | Bug | rosgd/modules/fontmanager/README.md |
-| Font_MakeBitmap given a handle puts its saved thresholds into the wrong font, and pads the file's header with stack garbage. | Bug | rosgd/modules/fontmanager/README.md |
-| "ROM font directory cannot contain bitmaps" can never be given: the error number compared is wrong. Scaffold lines are never cleared between characters. | Bug | rosgd/modules/fontmanager/README.md |
-| Font_ReadColourTable always rebuilds the table, so one given by SetColourTable is never read back; Font_Paint's R3 and R4 ignore the graphics origin; Font_ChangeArea has no name in the SWI table. | Quirk | rosgd/modules/fontmanager/README.md |
+| Font_EnumerateCharacters on a directly mapped font leaves V set with R0 a handle ("returned a bad error pointer"); from a code at or below the first run's start it skips that run unless the code is 0. | Bug | [rosgd/modules/fontmanager/README.md](../src/box/modules/fontmanager/README.md) |
+| The ConverttoOS cache returns a stale result for the same y even after SetScaleFactor; only a mode change clears it. | Bug | [rosgd/modules/fontmanager/README.md](../src/box/modules/fontmanager/README.md) |
+| Font_SetThresholds writes one threshold whatever count it is given. | Bug | [rosgd/modules/fontmanager/README.md](../src/box/modules/fontmanager/README.md) |
+| Right-to-left kerning almost never swaps the pair: bit 10 of a stale R14 is tested instead of the plot type. | Bug | [rosgd/modules/fontmanager/README.md](../src/box/modules/fontmanager/README.md) |
+| Font_MakeBitmap given a handle puts its saved thresholds into the wrong font, and pads the file's header with stack garbage. | Bug | [rosgd/modules/fontmanager/README.md](../src/box/modules/fontmanager/README.md) |
+| "ROM font directory cannot contain bitmaps" can never be given: the error number compared is wrong. Scaffold lines are never cleared between characters. | Bug | [rosgd/modules/fontmanager/README.md](../src/box/modules/fontmanager/README.md) |
+| Font_ReadColourTable always rebuilds the table, so one given by SetColourTable is never read back; Font_Paint's R3 and R4 ignore the graphics origin; Font_ChangeArea has no name in the SWI table. | Quirk | [rosgd/modules/fontmanager/README.md](../src/box/modules/fontmanager/README.md) |
 | Font_StringWidth needs R2, R3 and R5 = &7FFFFFFF; with -1, every width is 0. | Quirk | *notes* |
 
 ### SpriteExtend, CompressJPEG, CompressPNG and Squash
 
 | What was noticed | Kind | Source |
 | --- | --- | --- |
-| SpriteExtend's merged upsampler shifts the chroma by one pixel on an odd left clip. | Bug | rosgd/modules/spriteextend/README.md |
-| A grey JPEG at 8 bpp with no table fails "JPEG plot failed due to fatal inconsistency". | Bug | rosgd/modules/spriteextend/README.md |
-| A truncated JPEG draws whatever the workspace last held; a 1×1 JPEG error-diffused at 4 bpp reads a register never loaded. | Bug | rosgd/modules/spriteextend/README.md |
-| JPEG_PlotTransformed only scales and refuses rotation; JPEG_Info always says transformed plots are not supported. SpriteExtend's decode matches libjpeg's fast IDCT with no fancy upsampling. | Quirk | rosgd/modules/spriteextend/README.md; #121 |
-| CompressJPEG's Finish and Comment have no setjmp of their own, so a libjpeg error there longjmps into a dead frame and the next compression hangs; its warnings go to stderr from inside a module, which also hangs. [M] | Bug | rosgd/modules/compressjpeg/README.md |
+| SpriteExtend's merged upsampler shifts the chroma by one pixel on an odd left clip. | Bug | [rosgd/modules/spriteextend/README.md](../src/box/modules/spriteextend/README.md) |
+| A grey JPEG at 8 bpp with no table fails "JPEG plot failed due to fatal inconsistency". | Bug | [rosgd/modules/spriteextend/README.md](../src/box/modules/spriteextend/README.md) |
+| A truncated JPEG draws whatever the workspace last held; a 1×1 JPEG error-diffused at 4 bpp reads a register never loaded. | Bug | [rosgd/modules/spriteextend/README.md](../src/box/modules/spriteextend/README.md) |
+| JPEG_PlotTransformed only scales and refuses rotation; JPEG_Info always says transformed plots are not supported. SpriteExtend's decode matches libjpeg's fast IDCT with no fancy upsampling. | Quirk | [rosgd/modules/spriteextend/README.md](../src/box/modules/spriteextend/README.md); #121 |
+| CompressJPEG's Finish and Comment have no setjmp of their own, so a libjpeg error there longjmps into a dead frame and the next compression hangs; its warnings go to stderr from inside a module, which also hangs. [M] | Bug | [rosgd/modules/compressjpeg/README.md](../src/box/modules/compressjpeg/README.md) |
 | CompressPNG's palette entries are 4-byte words (Norcroft pads `png_color`), and gamma is passed as an FPA-ordered double. | Quirk | *notes* |
-| Squash: fast compress with R3 = 0 takes the length as 2^32-1; `zcat_ass` writes past its output and follows codes not yet made; the end test wraps on 3 or 4 byte input; `comp_ass` stores up to 7 bytes past its output; OS_ValidateAddress passes [0,100). | Bug | rosgd/modules/squash/README.md |
+| Squash: fast compress with R3 = 0 takes the length as 2^32-1; `zcat_ass` writes past its output and follows codes not yet made; the end test wraps on 3 or 4 byte input; `comp_ass` stores up to 7 bytes past its output; OS_ValidateAddress passes [0,100). | Bug | [rosgd/modules/squash/README.md](../src/box/modules/squash/README.md) |
 | RISC OS's zlib writes OS byte 13 in gzip headers and ignores `gzopen`'s "x". | Quirk | rosgd/tests/desktop/compress/README.md |
 
 ### ScreenBlanker and Territory
 
 | What was noticed | Kind | Source |
 | --- | --- | --- |
-| ScreenBlanker's flash in standby returns through the wrong exit (`LDMEQFD r13!,{R0,R2,pc}` with one word pushed); the farm machine may not survive it. | Bug | rosgd/modules/screenblanker/README.md |
-| Territory_Collate of two equal strings with R3's top bits set loops for ever. | Bug | rosgd/modules/territory/README.md |
-| Territory_NameToNumber: "Canada" ended by a NUL gives 0 (it matches Canada1 first), ended by a CR it gives 19. | Quirk | rosgd/modules/territory/README.md |
-| ReadSymbols beyond 18 reads past its table; ConvertDateAndTime with reserved flag bits, or bit 28 with an offset, corrupts the stack. | Bug | rosgd/modules/territory/README.md |
+| ScreenBlanker's flash in standby returns through the wrong exit (`LDMEQFD r13!,{R0,R2,pc}` with one word pushed); the farm machine may not survive it. | Bug | [rosgd/modules/screenblanker/README.md](../src/box/modules/screenblanker/README.md) |
+| Territory_Collate of two equal strings with R3's top bits set loops for ever. | Bug | [rosgd/modules/territory/README.md](../src/box/modules/territory/README.md) |
+| Territory_NameToNumber: "Canada" ended by a NUL gives 0 (it matches Canada1 first), ended by a CR it gives 19. | Quirk | [rosgd/modules/territory/README.md](../src/box/modules/territory/README.md) |
+| ReadSymbols beyond 18 reads past its table; ConvertDateAndTime with reserved flag bits, or bit 28 with an offset, corrupts the stack. | Bug | [rosgd/modules/territory/README.md](../src/box/modules/territory/README.md) |
 
 ### VFPSupport's elementary functions
 
 | What was noticed | Kind | Source |
 | --- | --- | --- |
-| tan's third reduction constant is wrong, so near odd multiples of π/2 it is wrong by 10^4 to 10^11, often in sign: `TAN(PI/2)` is 16455198023.8. | Bug | rosgd/modules/vfpsupport/elementary.c; rosbas/spec/C-quirks.md |
-| cos's argument reduction uses a register only sin and tan set, so it reads the caller's R6. | Bug | rosgd/modules/vfpsupport/elementary.c |
-| pow takes exponents from 2^20 to 2^21 as odd, and is odd for -INF. | Bug | rosgd/modules/vfpsupport/elementary.c |
-| Subnormals come back unchanged from sin and tan with underflow raised; log(+INF) raises invalid operation; atan2 checks x for NaN twice and y not at all. | Bug | rosgd/modules/vfpsupport/elementary.c |
+| tan's third reduction constant is wrong, so near odd multiples of π/2 it is wrong by 10^4 to 10^11, often in sign: `TAN(PI/2)` is 16455198023.8. | Bug | [rosgd/modules/vfpsupport/elementary.c](../src/box/modules/vfpsupport/elementary.c); rosbas/spec/C-quirks.md |
+| cos's argument reduction uses a register only sin and tan set, so it reads the caller's R6. | Bug | [rosgd/modules/vfpsupport/elementary.c](../src/box/modules/vfpsupport/elementary.c) |
+| pow takes exponents from 2^20 to 2^21 as odd, and is odd for -INF. | Bug | [rosgd/modules/vfpsupport/elementary.c](../src/box/modules/vfpsupport/elementary.c) |
+| Subnormals come back unchanged from sin and tan with underflow raised; log(+INF) raises invalid operation; atan2 checks x for NaN twice and y not at all. | Bug | [rosgd/modules/vfpsupport/elementary.c](../src/box/modules/vfpsupport/elementary.c) |
 
 ### Toolbox, DrawFile and the rest
 
@@ -447,7 +455,7 @@ Wimp's specification; the farm's 5.30 runs 5.87.
 | DrawFile's `callback.c` reads its varargs as `&limit + 1`, which works only under Norcroft's APCS. | Bug (latent) | *notes* |
 | PRM: Sound_QSchedule time -2 is said to be "immediate"; Sound2's code treats it as -1. Not checked on the farm. | Doc error | #72 |
 | PRM: `os_GLOBAL_NO_MEM` (&C0) and `NO_ANY` (&C1) are documented as global errors but are not in 5.30's headers. | Doc error | #22 |
-| The PRM does not say whether PDriver_GiveRectangle's origin is the paper's corner or the printable area's. | Doc error | rosgd/modules/pdriver/README.md |
+| The PRM does not say whether PDriver_GiveRectangle's origin is the paper's corner or the printable area's. | Doc error | [rosgd/modules/pdriver/README.md](../src/box/modules/pdriver/README.md) |
 | MakePSFont: see section 1. | | |
 
 ---
