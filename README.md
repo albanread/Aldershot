@@ -93,3 +93,4 @@ Published so far, in [src](src):
 - [ROSASM](src/ROSASM/README.md), the ObjAsm-compatible assembler;
 - [ROSBAS](src/ROSBAS/README.md), the BBC BASIC V compiler (the compiler only; its runtime library will follow).
 - [BBC BASIC V, translated to C](src/translated/bbcbasic/README.md): RISC OS's BBC BASIC interpreter, translated by hand from ARM assembler; under ROOL's Apache License 2.0.
+- [The Compositing Wimp](src/compositing-wimp/README.md): the Window Manager as the PC builds run it, where every window has a picture of its own, with the presenter that composites the desktop and the block format they share; under ROOL's Apache License 2.0, with the BOX project's compositing work.
