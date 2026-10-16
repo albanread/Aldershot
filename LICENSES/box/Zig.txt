@@ -1,7 +1,7 @@
 Zig
 ===
 
-Version:  0.17.0
+Version:  0.15.2
 From:     https://ziglang.org/
 Used by:  the cross compiler /init and the Linux programs are built with;
           its compiler_rt is in them

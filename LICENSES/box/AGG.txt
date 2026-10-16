@@ -1,0 +1,32 @@
+Anti-Grain Geometry
+===================
+
+Version:  2.4 (as Haiku ships it)
+From:     https://github.com/haiku/haiku (src/libs/agg);
+          http://www.antigrain.com
+Used by:  VectorIcons in /init, under Haiku's icon library: the rasteriser
+          that draws a vector icon's paths (ports/vicon/haiku/agg, its
+          headers and the eight sources the library needs). BOX's changes to
+          it are under AGG's licence
+Licence:  AGG's own terms (permissive)
+
+AGG 2.4 ships no separate licence file: its terms are the notice each of its
+files carries, which is the text below. BOX's changes, each marked BOX:,
+hold a damaged icon's coordinates and gradients inside the 32-bit range and
+limit how deep a curve is subdivided.
+
+------------------------------------------------------------------------
+The notice at the top of every AGG file
+------------------------------------------------------------------------
+
+Anti-Grain Geometry - Version 2.4
+Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+
+Permission to copy, use, modify, sell and distribute this software
+is granted provided this copyright notice appears in all copies.
+This software is provided "as is" without express or implied
+warranty, and with no claim as to its suitability for any purpose.
+
+Contact: mcseem@antigrain.com
+         mcseemagg@yahoo.com
+         http://www.antigrain.com

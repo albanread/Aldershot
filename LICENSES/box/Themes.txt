@@ -12,9 +12,12 @@ Licence:  as RISC OS Open distributes them in RISC OS 5.30's image, with
 
 The themes are RISC OS 5's own, as its !ThemeDefs holds them; BOX uses only
 their tool and icon sprite files, which *WimpTheme loads while the desktop
-runs instead of at the next boot.  The Raspberry theme is left out.
+runs instead of at the next boot. The Raspberry theme is left out.
 
 BOX's own themes in Resources.Themes -- AcornFlat, Archimedes, Cube,
 Graphite, HighContrast, Nord, Paper and Pinstripe -- are Theme files (and,
 for Cube, icon tiles drawn by tools/mkcubesprites.py over the ROM's own
 icons) written for BOX, under BOX's licence.
+
+The vector icon sets the themes can use are in the file IconArt, and the
+renderer that draws them in the files Haiku and AGG.

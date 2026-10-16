@@ -61,6 +61,7 @@ files are on every BOX's disc, in `Documents.Licences`.
 | Component | Version | Licence | In the BOX |
 | --- | --- | --- | --- |
 | [AcornFonts](box/AcornFonts.txt) | RISC OS 5.30 | Selwyn, Sidney: Apache License 2.0 (RISC OS Open's sources); the others: licence not known | RISC OS 5.30's !Fonts (Resources.!Fonts on the disc), as RISC OS Open converted them (Selwyn and Sidney are also in the ROM's sources) |
+| [AGG](box/AGG.txt) | 2.4 (as Haiku ships it) | AGG's own terms (permissive: the notice at the top of each of its files, which is all AGG 2.4 ships) | VectorIcons in /init, under Haiku's icon library: the rasteriser that draws a vector icon's paths (ports/vicon/haiku/agg). BOX's changes to it are under AGG's licence |
 | [AWViewer](box/AWViewer.txt) | 2.18 (12-Apr-2018) | Freely distributable, unaltered and complete, free of charge (Computer Concepts and MW Software) | Apps.!AWViewer, as RISC OS 5.30's image has it, unaltered (ARM code, run by the ARM container); its modules render ArtWorks pictures for it and for OvationPro |
 | [Boost](box/Boost.txt) | 1.89.0 | Boost Software License 1.0 | the ARM container in /init, which runs ARM code (runtime/armrun) (dynarmic is built with them) |
 | [BOX](box/BOX.txt) | this disc's build | MIT | only the code written new for BOX, and translated from no one else's: the runtime (/init) and the modules written for it, the glue that joins the translated modules to it, rosbas, roscc, rosasm, pdfsvc, GraphTask, !Write's own code, the Mojo riscos package, and the disc's own applications and examples. Every package BOX ports, translates or builds on keeps its own licence, and so does BOX's port of it |
@@ -76,6 +77,8 @@ files are on every BOX's disc, in `Documents.Licences`.
 | [FreeFont](box/FreeFont.txt) | 20120503 | GNU GPL 3 or later, with the font exception | RISC OS 5.30's !Fonts (Resources.!Fonts on the disc), as RISC OS Open converted them |
 | [GCC](box/GCC.txt) | 15.2.0 | GNU GPL 3 with the GCC Runtime Library Exception 3.1 | *Mojo: the compiler's C++ runtime (libstdc++ and libgcc), linked into it |
 | [GLib](box/GLib.txt) | 2.88.3 | GNU LGPL 2.1 or later | ksmbd.tools |
+| [Haiku](box/Haiku.txt) | Haiku's tree, taken 12 October 2026 | MIT | VectorIcons in /init: the renderer that draws vector icons (ports/vicon/haiku/icon) -- the HVIF reader, the icon model and IconRenderer; and tools' vicon. BOX's changes to it are under Haiku's licence |
+| [IconArt](box/IconArt.txt) | the sets of 12 October 2026 | MIT (Haiku, Fluent); public domain (Tango); Apache License 2.0 (the Acorn art); SIL Open Font License 1.1 (the Noto Sans outlines) | Resources.Themes: the four vector icon sets (BOX, Win2K, Pinstripe and the Cube plinths), as VecIcons files loaded by *IconSprites. The composition and the tools are BOX's own; each source keeps its licence |
 | [ksmbd-tools](box/ksmbd-tools.txt) | 3.5.7 | GNU GPL 2 or later | ksmbd.tools in the ROM (*Share, the box's SMB server) |
 | [libjpeg-turbo](box/libjpeg-turbo.txt) | 3.2.0 | IJG licence, Modified (3-clause) BSD, zlib | /init (CompressJPEG, SpriteExtend's JPEG, ChangeFSI's CFSI), !NetSurf |
 | [libnl](box/libnl.txt) | 3.12.0 | GNU LGPL 2.1 | ksmbd.tools |
@@ -113,7 +116,7 @@ files are on every BOX's disc, in `Documents.Licences`.
 | [Themes](box/Themes.txt) | RISC OS 5.30 | as RISC OS Open distributes them in RISC OS 5.30 | Resources.Themes: the desktop themes (window furniture and icons) for *WimpTheme |
 | [utf8proc](box/utf8proc.txt) | 2.12.0 | MIT, and the Unicode data licence | !NetSurf (Unicode) |
 | [xbyak](box/xbyak.txt) | 8c0098b69f | 3-clause BSD | the ARM container in /init, which runs ARM code (runtime/armrun), on the Intel box |
-| [Zig](box/Zig.txt) | 0.17.0 | MIT | the cross compiler /init and the Linux programs are built with; its compiler_rt is in them |
+| [Zig](box/Zig.txt) | 0.15.2 | MIT | the cross compiler /init and the Linux programs are built with; its compiler_rt is in them |
 | [zlib](box/zlib.txt) | 1.3.2 | zlib licence | /init (the ZLib module, CompressPNG), !NetSurf |
 | [Zycore](box/Zycore.txt) | 0b2432ced0 | MIT | the ARM container in /init, which runs ARM code (runtime/armrun), on the Intel box |
 | [Zydis](box/Zydis.txt) | bffbb610cf | MIT | the ARM container in /init, which runs ARM code (runtime/armrun), on the Intel box |
