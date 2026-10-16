@@ -78,7 +78,7 @@ memory, disc, and a Windows licence that you will not be using.
 | The same from a brand name (ASUS NUC 14 Essential or Elite) | 340 to 400 pounds |
 
 The useful point is the second and third rows. For the price of a decent
-monitor you get a machine that runs the whole of BOX, with the desktop
+monitor you get a machine that runs BOX comfortably, with the desktop
 composited on the graphics part and a WebKit browser playing video, and
 has memory and disc left over.
 
@@ -302,15 +302,23 @@ it your work falls on before buying one.
 
 ## 8 In short
 
-A twelve-watt processor that costs the maker $128, in a case the size of a
-sandwich, with a power supply that looks like a phone charger, runs the
-whole of RISC OS with a composited desktop at 60 frames a second, a
-WebKit browser doing accelerated WebGL at the same rate, and video with
-sound, and uses about two per cent of one of its four cores to do the
-compositing.
+A twelve-watt processor that costs the maker $128, in a case the size of
+a sandwich, with a power supply that looks like a phone charger, runs a
+reasonably compatible modern RISC OS application environment: a
+composited desktop at 60 frames a second, a WebKit browser doing
+accelerated WebGL at the same rate, and video with sound, for about two
+per cent of one of its four cores.
+
+What it runs is translated applications, and some emulated ones. BOX is
+not RISC OS and does not claim to be; it is an environment in which a
+good deal of RISC OS software works, and we hope the emulated side will
+in time cover more of what the translated side cannot. Section 5 lists
+what we have actually watched run on this machine, and
+[Emulation in BOX](2-Emulation.md) and
+[Tiers of Translation](1-Tiers.md) say what the two routes are.
 
 It is not a fast computer, and section 6 says where that shows. But a
-person who wants a RISC OS machine on a desk, for about 200 pounds, now
+person who wants a RISC OS desktop on a desk, for about 200 pounds, now
 has one, and it gives a better RISC OS application experience than the
 hardware's price suggests. That is a better position than RISC OS has
 been in for some time, and it is not because the software got faster. It
