@@ -2,6 +2,13 @@
 
 *16 October 2026*
 
+**Note — this is not RISC OS.** BOX is a RISC OS window manager and
+application environment running on a Linux kernel. It is not RISC OS,
+it is not a port of RISC OS, and it does not claim to be either. It
+aims to be reasonably compatible: it runs translated applications, and
+some emulated ones. Where this article says what the machine runs, it
+means that, and section 5 lists what we have watched run on it.
+
 ## Introduction
 
 Most of BOX's development has been done on expensive machines: an Apple
