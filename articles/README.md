@@ -5,6 +5,11 @@ Technical articles about BOX, a RISC OS application environment for
 Reference Manuals and describe the system as it works today. Each
 article can be read on its own.
 
+**This is not RISC OS.** BOX is a RISC OS window manager and application
+environment running on a Linux kernel. It is not RISC OS, it is not a port
+of RISC OS, and it does not claim to be either. It aims to be reasonably
+compatible: it runs translated applications, and some emulated ones.
+
 | Article | What it covers |
 | --- | --- |
 | [BOX Design](0-Design.md) | How BOX is put together: the Linux kernel and the RISC OS personality; the arena, the low 4 GB in which a RISC OS address is a host address; where the two meet, service by service — screen, pointer, input, sound, filing systems, network, time, faults, threads, parallel work, the Unix bridge and the ARM container; tasks as threads, the personality lock and the baton; and how a SWI is made. |

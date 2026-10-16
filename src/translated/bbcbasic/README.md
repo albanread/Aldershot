@@ -3,6 +3,11 @@
 These files are RISC OS's BBC BASIC V interpreter (BASICVFP), translated
 by hand from ARM assembler into C. They are the BASIC in the BOX's ROM.
 
+**This is not RISC OS.** BOX is a RISC OS window manager and application
+environment running on a Linux kernel. It is not RISC OS, it is not a port
+of RISC OS, and it does not claim to be either. It aims to be reasonably
+compatible: it runs translated applications, and some emulated ones.
+
 The original is RISC OS Open's BBC BASIC, `Sources/Programmer/BASIC`, as
 in RISC OS 5.31: about 24,000 lines of 32-bit ARM assembler. These files
 are a translation of it, so they keep its licence, the Apache License 2.0.

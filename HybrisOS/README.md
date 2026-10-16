@@ -4,9 +4,15 @@ HybrisOS, also called the HAL, is a small operating system kernel that runs BOX 
 
 This folder describes HybrisOS, and [src](src) holds its source, under the MIT licence.
 
+**This is not RISC OS.** BOX is a RISC OS window manager and application
+environment running on a kernel below it -- a Linux kernel on every
+release so far, and HybrisOS here. It is not RISC OS, it is not a port of
+RISC OS, and it does not claim to be either. It aims to be reasonably
+compatible: it runs translated applications, and some emulated ones.
+
 ## Overview
 
-BOX is RISC OS translated to C. Its first program, `/init`, is the RISC OS personality: the kernel's SWIs, the modules, the Wimp and the desktop. On every release so far `/init` has run on a Linux kernel.
+BOX is built from RISC OS's components translated to C. Its first program, `/init`, is the RISC OS personality: the kernel's SWIs, the modules, the Wimp and the desktop. On every release so far `/init` has run on a Linux kernel.
 
 Linux is a very large dependency. The kernel that BOX boots is a 7.6 MB image, built from a source tree of tens of millions of lines, and BOX uses only a small part of what it offers.
 

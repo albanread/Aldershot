@@ -5,6 +5,11 @@ window has a picture of its own and a separate program composites the
 desktop on the graphics card. It is published whole, with the presenter
 that draws it and the block format the two share.
 
+**This is not RISC OS.** BOX is a RISC OS window manager and application
+environment running on a Linux kernel. It is not RISC OS, it is not a port
+of RISC OS, and it does not claim to be either. It aims to be reasonably
+compatible: it runs translated applications, and some emulated ones.
+
 It does **not** replace `src/box/modules/wimp`, which is the Window Manager
 as the other builds run it, drawing into one screen in memory. The two are
 the same Wimp with different output: the files here are that Wimp with the

@@ -4,6 +4,11 @@ A RISC OS environment for generic devices.
 
 *RISC OS's components translated to C, running on a Linux kernel, on a 64-bit PC or a Mac.*
 
+**This is not RISC OS.** BOX is a RISC OS window manager and application
+environment running on a Linux kernel. It is not RISC OS, it is not a port
+of RISC OS, and it does not claim to be either. It aims to be reasonably
+compatible: it runs translated applications, and some emulated ones.
+
 ![BOX on a PC, booted from a USB stick](screenshots/box-on-a-pc.png)
 
 ## Sunday 11th October release

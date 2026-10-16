@@ -2,6 +2,11 @@
 
 This is the source of `/init`, the program at the centre of BOX. It holds the RISC OS runtime, the platform layer, the boot code and its self-tests, and about 66 modules written for BOX.
 
+**This is not RISC OS.** BOX is a RISC OS window manager and application
+environment running on a Linux kernel. It is not RISC OS, it is not a port
+of RISC OS, and it does not claim to be either. It aims to be reasonably
+compatible: it runs translated applications, and some emulated ones.
+
 ## What is here
 
 | Directory | Contents |
