@@ -17,20 +17,14 @@ describes how it works, and is the place to start.
 
 **Apache License 2.0** — see [LICENSE](LICENSE).
 
-The Window Manager is RISC OS Open Ltd's. These files implement it for
-BOX: written in C against RISC OS 5.30's behaviour and, where the exact
-behaviour mattered, against RISC OS Open's own sources — `s/Wimp10` and
-`Wimp02` are cited in the code where that was done. They therefore keep the
-licence of the work they derive from, the Apache License 2.0, as the rest
-of BOX's RISC OS code does.
+The Window Manager is RISC OS Open Ltd's, under the Apache License 2.0.
+The BOX project converted it to C, and added support for surfaces,
+virtual VDUs, vector drawing and compositing. Translated code keeps the
+licence of the code it was translated from, so the Window Manager here is
+still RISC OS Open's under the Apache License 2.0.
 
-The compositing work — a window's backing, the surfaces list, the damage,
-the presenter, the shadows and the rounded corners — is the BOX project's
-extension, published under the same licence so the whole is one thing.
-
-One file, `wimp/backing.c`, carries an MIT identifier from when it was
-written. It is published here under the Apache License 2.0 with the rest;
-the MIT grant it carries is not withdrawn by that.
+`wimp/backing.c` the project wrote itself, and it is the BOX project's own
+code under the MIT licence, as its header says.
 
 ## What is here
 
