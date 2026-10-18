@@ -11,6 +11,14 @@ compatible: it runs translated applications, and some emulated ones.
 
 ![BOX on a PC, booted from a USB stick](screenshots/box-on-a-pc.png)
 
+## Work in progress, Sunday 18th October 2026
+
+Not released yet. What has been going on since the 11th:
+
+- **Compositing.** On the PC builds every window now has a picture of its own, and a separate program puts the desktop together on the graphics card, with shadows and rounded corners over a backdrop the card draws itself. See [The Compositing Wimp](articles/8-Compositing.md).
+- **Four PCs tested.** The same build has been run on an i7-12700 with an NVIDIA T1000, an Alder Lake-N mini PC, a Dell Latitude laptop, and a PC booted from a USB stick. See [BOX on a Low-Cost Mini PC](articles/9-MiniPC.md).
+- **New BOX RISC OS apps.** A word processor, a drawing program, a paint program, a spreadsheet and a PDF editor, written for BOX, which open the document formats the rest of the world uses. See [Apps for BOX](articles/10-Apps.md).
+
 ## Sunday 11th October release
 
 The same release for all three kinds of machine, built from one source.
@@ -50,6 +58,22 @@ BBC BASIC on its own, and every earlier preview, are on the
 
 - [Just BBC BASIC translated](https://github.com/albanread/Aldershot/releases/tag/BBCBASICVA64-1.2) (BBCBASICVA64, Apple silicon Macs, macOS 14 or later)
 - [Just BBC BASIC translated, for Intel Macs](https://github.com/albanread/Aldershot/releases/tag/BBCBASICVX64-1.2) (BBCBASICVX64, macOS 14 or later)
+
+## Apps
+
+Apps for RISC OS BOX, written in easy to understand Mojo, backed by Rust library code.
+
+A RISC OS desktop should be able to open the files everyone else sends: a `.docx`, an SVG, a PDF, an `.xlsx`. So BOX has applications of its own, split in two. The part the person uses is an ordinary Wimp task, written in Mojo, which behaves as a RISC OS application should. The part that understands the document is existing Rust code, large and complicated and maintained in the open by people who care about those formats.
+
+| Application | What it is | Opens and saves |
+| --- | --- | --- |
+| !Scribe | a word processor | `.docx` |
+| !Trace | a drawing program | SVG, PostScript and EPS, Draw files |
+| !Palette | a paint program | PNG, JPEG |
+| !Ledger | a spreadsheet | `.xlsx`, CSV |
+| !Folio | a PDF reader and editor | PDF |
+
+[Apps for BOX](articles/10-Apps.md) describes how they are put together, why Mojo for the user interface and Rust underneath it, and how the two halves talk.
 
 ## Ports
 
