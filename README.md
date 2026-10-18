@@ -67,13 +67,14 @@ Apps for RISC OS BOX, written in easy to understand Mojo, backed by Rust library
 
 A RISC OS desktop should be able to open the files everyone else sends: a `.docx`, an SVG, a PDF, an `.xlsx`. So BOX has applications of its own, split in two. The part the person uses is an ordinary Wimp task, written in Mojo, which behaves as a RISC OS application should. The part that understands the document is existing Rust code, large and complicated and maintained in the open by people who care about those formats.
 
-| Application | What it is | Opens and saves |
-| --- | --- | --- |
-| !Scribe | a word processor | `.docx` |
-| !Trace | a drawing program | SVG, PostScript and EPS, Draw files |
-| !Palette | a paint program | PNG, JPEG |
-| !Ledger | a spreadsheet | `.xlsx`, CSV |
-| !Folio | a PDF reader and editor | PDF |
+- [!Scribe](src/box/apps/scribe/) is a word processor. It opens and saves Word documents (`.docx`).
+- [!Trace](src/box/apps/trace/) is a drawing program. It opens and saves SVG, opens PostScript, EPS and DXF, and imports Draw files.
+- [!Palette](src/box/apps/palette/) is a paint program. It opens PNG, JPEG, TIFF, GIF and BMP pictures, and saves PNG.
+- [!Ledger](src/box/apps/ledger/) is a spreadsheet. It opens and saves Excel workbooks (`.xlsx`) and CSV files.
+- [!Folio](src/box/apps/folio/) is a PDF reader and editor. It adds notes, highlights and ink, and moves and turns pages.
+- [!Present](src/box/apps/present/) is a presentation program. It opens and saves PowerPoint files (`.pptx`) and shows them full screen.
+
+The Mojo source of the applications, and of the [shell](src/box/apps/shell/) they share, is in [src/box/apps](src/box/apps/).
 
 [Apps for BOX](articles/10-Apps.md) describes how they are put together, why Mojo for the user interface and Rust underneath it, and how the two halves talk.
 
