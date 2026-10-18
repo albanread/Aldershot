@@ -3,8 +3,9 @@ Rust's standard library (core, alloc, std, compiler-builtins)
 
 Version:  1.101.0-nightly 2026-09-30
 From:     https://www.rust-lang.org/
-Used by:  !PDF's module (rospdf) and pdfsvc (the printer driver's PDF
-          writer)
+Used by:  !PDF's module (rospdf), pdfsvc (the printer driver's PDF writer)
+          and the ROSAPPS engines (!Scribe, !Trace, !Palette, !Ledger,
+          !Folio)
 Licence:  MIT or Apache License 2.0
 
 ------------------------------------------------------------------------

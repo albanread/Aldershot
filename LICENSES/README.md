@@ -68,6 +68,7 @@ files are on every BOX's disc, in `Documents.Licences`.
 | [Cabin](box/Cabin.txt) | 2011 | SIL Open Font License 1.1 | RISC OS 5.30's !Fonts (Resources.!Fonts on the disc), as RISC OS Open converted them |
 | [ChangeFSI](box/ChangeFSI.txt) | 1.70 (422a156c43) | Apache License 2.0 and New BSD, IJG for JPEG/, btpc's terms (PhotoCD is left out) | !ChangeFSI in the ROM's Apps, and the CFSI module |
 | [Compositor](box/Compositor.txt) | 0.20.2 (tinywl), ROSGD 2026 | MIT (tinywl, wlroots) | the WPE edition: the screen put together, Linux programs' windows as Wimp windows |
+| [craft-libs](box/craft-libs.txt) | 8f5a283161 | MIT or Apache License 2.0 | !Trace's and !Folio's engines: the shared forks of the PDF back end and pdf-writer the ArtCraft libraries are built on |
 | [curl](box/curl.txt) | 8.22.0 | curl licence (MIT-style) | /init (AcornHTTP and the URL fetcher) |
 | [dynarmic](box/dynarmic.txt) | a46601580d | 0BSD | the ARM container in /init, which runs ARM code (runtime/armrun) |
 | [Exo](box/Exo.txt) | 2011 | SIL Open Font License 1.1 | RISC OS 5.30's !Fonts (Resources.!Fonts on the disc), as RISC OS Open converted them |
@@ -77,16 +78,17 @@ files are on every BOX's disc, in `Documents.Licences`.
 | [FreeFont](box/FreeFont.txt) | 20120503 | GNU GPL 3 or later, with the font exception | RISC OS 5.30's !Fonts (Resources.!Fonts on the disc), as RISC OS Open converted them |
 | [GCC](box/GCC.txt) | 15.2.0 | GNU GPL 3 with the GCC Runtime Library Exception 3.1 | *Mojo: the compiler's C++ runtime (libstdc++ and libgcc), linked into it |
 | [GLib](box/GLib.txt) | 2.88.3 | GNU LGPL 2.1 or later | ksmbd.tools |
+| [gridcraft](box/gridcraft.txt) | e6b6b34970 | MIT or Apache License 2.0 | !Ledger's engine: spreadsheets (.xlsx, CSV), their calculation and their number formats |
 | [Haiku](box/Haiku.txt) | Haiku's tree, taken 12 October 2026 | MIT | VectorIcons in /init: the renderer that draws vector icons (ports/vicon/haiku/icon) -- the HVIF reader, the icon model and IconRenderer; and tools' vicon. BOX's changes to it are under Haiku's licence |
 | [IconArt](box/IconArt.txt) | the sets of 12 October 2026 | MIT (Haiku, Fluent); public domain (Tango); Apache License 2.0 (the Acorn art); SIL Open Font License 1.1 (the Noto Sans outlines) | Resources.Themes: the four vector icon sets (BOX, Win2K, Pinstripe and the Cube plinths), as VecIcons files loaded by *IconSprites. The composition and the tools are BOX's own; each source keeps its licence |
 | [ksmbd-tools](box/ksmbd-tools.txt) | 3.5.7 | GNU GPL 2 or later | ksmbd.tools in the ROM (*Share, the box's SMB server) |
 | [libjpeg-turbo](box/libjpeg-turbo.txt) | 3.2.0 | IJG licence, Modified (3-clause) BSD, zlib | /init (CompressJPEG, SpriteExtend's JPEG, ChangeFSI's CFSI), !NetSurf |
 | [libnl](box/libnl.txt) | 3.12.0 | GNU LGPL 2.1 | ksmbd.tools |
 | [libpng](box/libpng.txt) | 1.6.50 | libpng licence (PNG Reference Library License 2) | /init (CompressPNG, SpriteExtend's PNG, ChangeFSI's CFSI), !NetSurf |
-| [LuaJIT](box/LuaJIT.txt) | 2.1 (c6ffc14) | MIT | *LuaJIT, the Lua language, linked into /init |
 | [libsmb2](box/libsmb2.txt) | commit fc710a3ebd | GNU LGPL 2.1 or later | LanManFS (*LMConnect), linked statically into /init |
 | [Linux](box/Linux.txt) | 6.18.54 | GNU GPL 2, with the Linux syscall note | the kernel BOX runs on (both machines, and the PC image) |
 | [LLVM](box/LLVM.txt) | 22.1.2 | Apache License 2.0 with LLVM Exceptions | both boxes' clang and ld.lld (*CC, *RosBas), compiler-rt's builtins; libc++, libc++abi and libunwind in /init (by zig) |
+| [LuaJIT](box/LuaJIT.txt) | 2.1 (c6ffc14) | MIT | *LuaJIT, the Lua language, linked into /init |
 | [lwIP](box/lwIP.txt) | 2.2.1 | BSD 3-clause | [HybrisOS](../HybrisOS/README.md), the HAL: its TCP/IP stack, compiled into the HAL edition's kernel image; not in the current releases |
 | [Manuals](box/Manuals.txt) | RISC OS 5.30 | No licence stated; described in the manuals as public domain; distributed by RISC OS Open in RISC OS 5.30's image | Utilities.!Manuals, as RISC OS 5.30's image has it, unaltered: the manuals Assembly, Basic, FloatingPt, GPIO, InetSocket, InetSWIs, MiscSWIs, OS, SH-RefMan, Toolbox, VCache, VDU and Wimp |
 | [mcl](box/mcl.txt) | 5fc4beaf33 | MIT | the ARM container in /init, which runs ARM code (runtime/armrun) |
@@ -98,15 +100,17 @@ files are on every BOX's disc, in `Documents.Licences`.
 | [OpenSSH](box/OpenSSH.txt) | 10.5p1 | BSD-style (several) | ssh, ssh-keygen and sshd in the ROM (*SSH, logging in to the box) |
 | [OpenSSL](box/OpenSSL.txt) | 3.6.4 | Apache License 2.0 | /init (AcornSSL, URL fetching), ssh and sshd |
 | [OvationPro](box/OvationPro.txt) | 2.78 (26-July-2022) | Not stated in the application; distributed by RISC OS Open in RISC OS 5.30's image | Apps.!OvnPro, as RISC OS 5.30's image has it, unaltered (ARM code, run by the ARM container) |
-| [RiscLua](box/RiscLua.txt) | 8.6 | MIT | the riscos library of *LuaJIT, ported from RiscLua's riscoslib |
 | [Paige](box/Paige.txt) | 3.0b (ec53af9a25) | GNU LGPL 2.1 | !Write's text engine. BOX's changes to Paige are under Paige's licence |
+| [PDFCraft](box/PDFCraft.txt) | afa8e1843c | MIT or Apache License 2.0 | !Folio's engine: PDF documents, their editing and their page renderer (hayro, vendored in it, is under the same licences) |
+| [PhotoCraft](box/PhotoCraft.txt) | df055f3dcb | MIT or Apache License 2.0 | !Palette's engine: pictures (PNG, JPEG), their compositing and their brushes |
 | [PipeDream](box/PipeDream.txt) | 4.63 (b63a102bd6) | Mozilla Public License 2.0 | Apps.!PipeDream and Documents.PipeDream. BOX's port of PipeDream, its changes and the C that replaces its assembler, is under PipeDream's licence |
 | [QEMU](box/QEMU.txt) | 11.1 (qemu-intel-mac) | GNU GPL 2; parts under other free licences | the Mac releases: BOX.app runs the box in it |
+| [RiscLua](box/RiscLua.txt) | 8.6 | MIT | the riscos library of *LuaJIT, ported from RiscLua's riscoslib |
 | [RISCOS](box/RISCOS.txt) | 5.30 (Kernel 6.70) | Apache License 2.0; some components BSD-style | the modules and applications translated to C for the box (the Kernel's SWIs, FileSwitch, the Wimp, the Font Manager and the ROM fonts Corpus, Homerton, Trinity, Selwyn and Sidney, Draw, ColourTrans, BASIC (BASICVFP), the Toolbox and its modules, DrawFile, MessageTrans, Territory, the networking modules and the rest); !Maestro and !CloseUp, and the Maestro tunes in Documents.Music, from RISC OS 5.30's HardDisc4 |
 | [robin-map](box/robin-map.txt) | 054ec5ad67 | MIT | the ARM container in /init, which runs ARM code (runtime/armrun) |
 | [Roboto](box/Roboto.txt) | 2011 | Apache License 2.0 | RISC OS 5.30's !Fonts (Resources.!Fonts on the disc), as RISC OS Open converted them |
-| [Rust](box/Rust.txt) | 1.101.0-nightly 2026-09-30 | MIT or Apache License 2.0 | !PDF's module (rospdf) and pdfsvc (the printer driver's PDF writer) |
-| [RustCrates](box/RustCrates.txt) | Cargo.lock's | MIT, Apache 2.0, BSD, zlib, Unicode, Unlicense, per crate | !PDF (rospdf: hayro, the PDF interpreter, and vello_cpu, the rasteriser) and pdfsvc (pdf-writer) |
+| [Rust](box/Rust.txt) | 1.101.0-nightly 2026-09-30 | MIT or Apache License 2.0 | !PDF's module (rospdf), pdfsvc (the printer driver's PDF writer) and the ROSAPPS engines (!Scribe, !Trace, !Palette, !Ledger, !Folio) |
+| [RustCrates](box/RustCrates.txt) | Cargo.lock's | MIT, Apache 2.0, BSD, zlib, Unicode, Unlicense, per crate | !PDF (rospdf: hayro, the PDF interpreter, and vello_cpu, the rasteriser), pdfsvc (pdf-writer), and the ROSAPPS engines, which are built from the ArtCraft libraries and the crates those use |
 | [Simonetta](box/Simonetta.txt) | 2011-2012 | SIL Open Font License 1.1 | RISC OS 5.30's !Fonts (Resources.!Fonts on the disc), as RISC OS Open converted them |
 | [SparkFS](box/SparkFS.txt) | 1.50+ (git, 2026) | CDDL 1.0 and Apache License 2.0, file by file; SparkZip adds the Info-ZIP licence | !SparkFS in the ROM's Apps, its module and codecs |
 | [SQLite](box/SQLite.txt) | 3.53.4 | public domain | Resources.Dictionaries.spelldict (an SQLite database) and the box's SQLite module (ROSSQLITE) |
@@ -115,6 +119,8 @@ files are on every BOX's disc, in `Documents.Licences`.
 | [SymSpell](box/SymSpell.txt) | 2025 | MIT | the spelling checker (ROSSPELL) and the word list behind Resources.Dictionaries.spelldict |
 | [Themes](box/Themes.txt) | RISC OS 5.30 | as RISC OS Open distributes them in RISC OS 5.30 | Resources.Themes: the desktop themes (window furniture and icons) for *WimpTheme |
 | [utf8proc](box/utf8proc.txt) | 2.12.0 | MIT, and the Unicode data licence | !NetSurf (Unicode) |
+| [VectorCraft](box/VectorCraft.txt) | b12a52f724 | MIT or Apache License 2.0 | !Trace's engine: drawings (SVG, PostScript and EPS), their tools and their renderer |
+| [WordCraft](box/WordCraft.txt) | fd0bb2fb1e | MIT or Apache License 2.0 | !Scribe's engine: Word documents (.docx), their layout and their editing |
 | [xbyak](box/xbyak.txt) | 8c0098b69f | 3-clause BSD | the ARM container in /init, which runs ARM code (runtime/armrun), on the Intel box |
 | [Zig](box/Zig.txt) | 0.15.2 | MIT | the cross compiler /init and the Linux programs are built with; its compiler_rt is in them |
 | [zlib](box/zlib.txt) | 1.3.2 | zlib licence | /init (the ZLib module, CompressPNG), !NetSurf |
