@@ -38,7 +38,7 @@ case "$FLAVOUR" in
 box)
     BASE=/mnt/build
     SUFFIX=x86_64
-    FRAGMENTS=$FRAGMENT ;;
+    FRAGMENTS="$FRAGMENT $ROSGD/kernel/x86_64/config-box.fragment" ;;
 pc)
     BASE=/mnt/build/pc
     SUFFIX=pc-x86_64
@@ -47,9 +47,26 @@ pc)
     # once, and it must not change underneath
     mkdir -p "$BASE"
     cp "$ROSGD/.cache/pc/initramfs.cpio" "$BASE/rosgd-initramfs.cpio"
+    # NVIDIA's firmware, when image/build-image.sh staged it (its
+    # ROSGD_NV_FIRMWARE), for nouveau -- built in -- to find at /lib/firmware
+    # as it probes (RISCOSGrandDesign design 37, P0).  The kernel takes one
+    # .cpio source directly, but a LIST of sources re-parses each file as a
+    # cpio LIST (usr/gen_initramfs.sh input_file), which a binary archive is
+    # not.  The kernel unpacks concatenated cpio archives in order, so the
+    # firmware's is appended to the ROM's.
+    initramfs="$BASE/rosgd-initramfs.cpio"
+    if [ -d "$ROSGD/.cache/pc/firmware/lib" ]; then
+        rm -rf "$BASE/rosgd-firmware" "$BASE/rosgd-initramfs-fw.cpio"
+        cp -R "$ROSGD/.cache/pc/firmware" "$BASE/rosgd-firmware"
+        (cd "$BASE/rosgd-firmware" && find . | cpio -o -H newc --quiet) \
+            > "$BASE/firmware.cpio"
+        cat "$BASE/rosgd-initramfs.cpio" "$BASE/firmware.cpio" \
+            > "$BASE/rosgd-initramfs-fw.cpio"
+        initramfs="$BASE/rosgd-initramfs-fw.cpio"
+    fi
     # its path, as one more fragment (scripts/config needs bash, which the
     # build VM has not got)
-    echo "CONFIG_INITRAMFS_SOURCE=\"$BASE/rosgd-initramfs.cpio\"" > "$BASE/initramfs.fragment"
+    echo "CONFIG_INITRAMFS_SOURCE=\"$initramfs\"" > "$BASE/initramfs.fragment"
     FRAGMENTS="$FRAGMENTS $BASE/initramfs.fragment"
     # and an image's own changes, last (image/build-image.sh writes it: the
     # WPE edition's command line)
@@ -96,6 +113,15 @@ if [ "$ARCH" = arm64 ]; then
     fi
 fi
 
+# rosgd-shm, the backings region the Mac apps' QEMU draws from (design
+# 39): a driver of ours, built in beside the misc devices
+if [ "$FLAVOUR" = box-aarch64 ] || [ "$FLAVOUR" = box ]; then
+    cp "$ROSGD/kernel/drivers/rosgd-shm.c" drivers/misc/rosgd-shm.c
+    grep -q 'rosgd-shm.o' drivers/misc/Makefile || echo 'obj-$(CONFIG_DMA_CMA) += rosgd-shm.o' >> drivers/misc/Makefile
+    grep -q 'rosgd-shm.o' drivers/misc/Makefile ||
+        { echo "ROSGD-KERNEL-FAILED: rosgd-shm not added to drivers/misc/Makefile"; exit 1; }
+fi
+
 echo "== configuring $FLAVOUR: tinyconfig + $FRAGMENTS"
 # Every option a fragment names must be one this Linux has: kconfig drops
 # an unknown name without a word (CONFIG_SND_VIRTIOSND, #35)
@@ -126,7 +152,8 @@ REQUIRED="BINFMT_ELF BINFMT_SCRIPT BLK_DEV_INITRD DEVTMPFS PROC_FS PROC_SYSCTL S
           SND SND_PCM SND_VIRTIO
           UNIX98_PTYS POSIX_TIMERS SECCOMP SECCOMP_FILTER CIFS SMB_SERVER NLS_UTF8
           NAMESPACES USER_NS PID_NS NET_NS UTS_NS SYSVIPC IPC_NS NO_HZ_IDLE HIGH_RES_TIMERS
-          ADVISE_SYSCALLS MEMBARRIER RSEQ VM_EVENT_COUNTERS PERF_EVENTS ENABLE_DEFAULT_TRACERS"
+          ADVISE_SYSCALLS MEMBARRIER RSEQ VM_EVENT_COUNTERS PERF_EVENTS ENABLE_DEFAULT_TRACERS
+          CMA DMA_CMA"
 else
 REQUIRED="BINFMT_ELF BLK_DEV_INITRD DEVTMPFS PROC_FS SYSFS SHMEM TMPFS
           MEMFD_CREATE FUTEX EPOLL TIMERFD INOTIFY_USER SERIAL_8250 SERIAL_8250_CONSOLE
@@ -137,6 +164,7 @@ REQUIRED="BINFMT_ELF BLK_DEV_INITRD DEVTMPFS PROC_FS SYSFS SHMEM TMPFS
           NAMESPACES USER_NS PID_NS NET_NS UTS_NS SYSVIPC IPC_NS NO_HZ_IDLE HIGH_RES_TIMERS
           ADVISE_SYSCALLS MEMBARRIER RSEQ VM_EVENT_COUNTERS PERF_EVENTS ENABLE_DEFAULT_TRACERS"
 fi
+[ "$FLAVOUR" = box ] && REQUIRED="$REQUIRED CMA DMA_CMA"
 [ "$FLAVOUR" = pc ] && REQUIRED="$REQUIRED EFI EFI_STUB CMDLINE_BOOL X86_X2APIC
           DRM_VMWGFX SYSFB_SIMPLEFB DRM_SIMPLEDRM SERIO_I8042 KEYBOARD_ATKBD
           MOUSE_PS2 MOUSE_PS2_VMMOUSE USB USB_XHCI_HCD USB_EHCI_HCD USB_OHCI_HCD
@@ -149,8 +177,12 @@ for opt in $REQUIRED; do
         missing=1
     fi
 done
-[ "$FLAVOUR" != pc ] || grep -q "^CONFIG_INITRAMFS_SOURCE=\"$BASE/rosgd-initramfs.cpio\"$" .config ||
-    { echo "MISSING CONFIG_INITRAMFS_SOURCE"; missing=1; }
+[ "$FLAVOUR" != pc ] || {
+    src=$(sed -n 's/^CONFIG_INITRAMFS_SOURCE="\(.*\)"$/\1/p' .config)
+    [ "$src" = "$BASE/rosgd-initramfs.cpio" ] ||
+    [ "$src" = "$BASE/rosgd-initramfs-fw.cpio" ] ||
+        { echo "MISSING CONFIG_INITRAMFS_SOURCE (is $src)"; missing=1; }
+}
 grep -q '^CONFIG_DEFAULT_MMAP_MIN_ADDR=16384$' "$OBJ/.config" || { echo "MISSING CONFIG_DEFAULT_MMAP_MIN_ADDR=16384"; missing=1; }
 # no module loader: every driver is in the Image
 [ "$ARCH" != arm64 ] || ! grep -q '^CONFIG_MODULES=y' "$OBJ/.config" || { echo "UNWANTED CONFIG_MODULES"; missing=1; }
@@ -162,6 +194,10 @@ $K -j"$(nproc)" $TARGET > "$OBJ/build.log" 2>&1 || {
     echo "ROSGD-KERNEL-FAILED: make"
     exit 1
 }
+if { [ "$FLAVOUR" = box-aarch64 ] || [ "$FLAVOUR" = box ]; } && ! grep -q ' rosgd_shm_init$' "$OBJ/System.map"; then
+    echo "ROSGD-KERNEL-FAILED: rosgd-shm is not in the Image"
+    exit 1
+fi
 cp "$OBJ/$IMAGE" "$OUT/$TARGET-$SUFFIX"
 cp "$OBJ/.config" "$OUT/config-$SUFFIX"
 ls -l "$OUT/$TARGET-$SUFFIX"

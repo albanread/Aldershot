@@ -235,3 +235,18 @@ CONFIG_SND_VIRTIO=y
 # own interrupts.
 CONFIG_NO_HZ_IDLE=y
 CONFIG_HIGH_RES_TIMERS=y
+
+# ---- the backings region: guest memory the host maps once (design 39) ------
+# On the Mac apps our QEMU composites the Wimp's surfaces itself, from the
+# backings' pixels where they lie in guest RAM.  The host can map only
+# what is physically contiguous, so the backings are carved from one
+# 192 MB region of the contiguous memory allocator -- the box's 128 MB of
+# backings and the compositor's 64 MB of pages -- which our driver
+# rosgd-shm (kernel/drivers, built in by build-kernel.sh) gives as
+# /dev/rosgd-shm, cached, with its physical address.  The 224 MB reserved
+# here hold it; until it is asked for the kernel lends the space to
+# movable pages, so nothing is lost by having it.
+CONFIG_CMA=y
+CONFIG_DMA_CMA=y
+CONFIG_CMA_SIZE_SEL_MBYTES=y
+CONFIG_CMA_SIZE_MBYTES=224

@@ -1,0 +1,10 @@
+# The Intel Mac app's box (the "box" flavour only, not the PC's): the
+# backings region its QEMU draws from (RISCOSGrandDesign design 39).  192 MB
+# of the contiguous memory allocator -- the box's 128 MB of backings, the
+# compositor's pages, the host channel -- which our driver rosgd-shm
+# (kernel/drivers, built in by build-kernel.sh) gives as /dev/rosgd-shm.
+# The 224 MB reserved are lent to movable pages until they are asked for.
+CONFIG_CMA=y
+CONFIG_DMA_CMA=y
+CONFIG_CMA_SIZE_SEL_MBYTES=y
+CONFIG_CMA_SIZE_MBYTES=224
