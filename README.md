@@ -17,7 +17,7 @@ Not released yet. What has been going on since the 11th:
 
 - **Compositing.** On the PC builds every window now has a picture of its own, and a separate program puts the desktop together on the graphics card, with shadows and rounded corners over a backdrop the card draws itself. See [The Compositing Wimp](articles/8-Compositing.md).
 - **Four PCs tested.** The same build has been run on an i7-12700 with an NVIDIA T1000, an Alder Lake-N mini PC, a Dell Latitude laptop, and a PC booted from a USB stick. See [BOX on a Low-Cost Mini PC](articles/9-MiniPC.md).
-- **New BOX RISC OS apps.** A word processor, a drawing program, a paint program, a spreadsheet and a PDF editor, written for BOX, which open the document formats the rest of the world uses. See [Apps for BOX](articles/10-Apps.md).
+- **New BOX RISC OS apps.** A word processor, a drawing program, a paint program, a spreadsheet, a PDF editor and a presentation program, written for BOX, which open the document formats the rest of the world uses. See [Apps for BOX](articles/10-Apps.md).
 - **PC BOX: video acceleration for YouTube, GL acceleration for WebGL.** The browser decodes video on the graphics part and runs WebGL on it, so a mini PC with integrated graphics plays YouTube and holds sixty frames a second in a WebGL page.
 - **Mac: switched BOX to the Mac's own browser** for accelerated web pages.
 
