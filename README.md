@@ -11,15 +11,43 @@ compatible: it runs translated applications, and some emulated ones.
 
 ![BOX on a PC, booted from a USB stick](screenshots/box-on-a-pc.png)
 
+## Sunday 18th October release, for the Mac
+
+The two Mac releases. The PC release is still the 11th's, below.
+
+### Release notes
+
+New features:
+
+- **The Mac composites the desktop.** The Mac's window now draws each of the desktop's windows itself, from the box's memory, rather than a copy of the whole screen. !Browser shows its pages with the Mac's own WebKit.
+- **The new BOX apps.** !Scribe, !Trace, !Palette, !Ledger, !Folio and !Present, in Apps on the Host disc; see [Apps](#apps).
+- **`*Present FILE`** opens a presentation and shows it on the whole screen at once. Documents.BOX holds one about BOX.
+- **A new disc** starts with the Iyonix theme, RISC OS 5.30's own default, and a plain grey desktop.
+- **The network is set up in the box,** and the boot no longer waits for it.
+
+Fixes (2026.10.18.4):
+
+- GraphTask shows every frame, and the desktop keeps running while a program in it waits for the screen. Before, a program that waited each frame held the whole desktop for as long as it ran.
+- A stroke in !Palette no longer runs on to the next click.
+
+### Downloads
+
+| Machine | Download | Needs |
+| --- | --- | --- |
+| Apple silicon Mac | [BOX-arm64-mac-2026.10.18](https://github.com/albanread/Aldershot/releases/tag/BOX-arm64-mac-2026.10.18) | macOS 14 or later; M1 or later |
+| Intel Mac | [BOX-x64-mac-2026.10.18](https://github.com/albanread/Aldershot/releases/tag/BOX-x64-mac-2026.10.18) | macOS 14 or later |
+| Intel PC, UEFI boot | [BOX-x64-pc-2026.10.11](https://github.com/albanread/Aldershot/releases/tag/BOX-x64-pc-2026.10.11) (the 11th's) | a 64-bit PC that boots by UEFI with Secure Boot off; a USB stick of 16 GB or more |
+
+To update, drop the new BOX over the old one. BOX brings the programs on your disc up to date the first time it runs, and leaves what you saved alone.
+
 ## Work in progress, Sunday 18th October 2026
 
-Not released yet. What has been going on since the 11th:
+Not released yet on the PC. What has been going on since the 11th:
 
 - **Compositing.** On the PC builds every window now has a picture of its own, and a separate program puts the desktop together on the graphics card, with shadows and rounded corners over a backdrop the card draws itself. See [The Compositing Wimp](articles/8-Compositing.md).
 - **Four PCs tested.** The same build has been run on an i7-12700 with an NVIDIA T1000, an Alder Lake-N mini PC, a Dell Latitude laptop, and a PC booted from a USB stick. See [BOX on a Low-Cost Mini PC](articles/9-MiniPC.md).
-- **New BOX RISC OS apps.** A word processor, a drawing program, a paint program, a spreadsheet, a PDF editor and a presentation program, written for BOX, which open the document formats the rest of the world uses. See [Apps for BOX](articles/10-Apps.md).
+- **New BOX RISC OS apps.** A word processor, a drawing program, a paint program, a spreadsheet, a PDF editor and a presentation program, written for BOX, which open the document formats the rest of the world uses. See [Apps for BOX](articles/10-Apps.md). In the Mac release of the 18th; not yet on the PC.
 - **PC BOX: video acceleration for YouTube, GL acceleration for WebGL.** The browser decodes video on the graphics part and runs WebGL on it, so a mini PC with integrated graphics plays YouTube and holds sixty frames a second in a WebGL page.
-- **Mac: switched BOX to the Mac's own browser** for accelerated web pages.
 
 ## Sunday 11th October release
 
