@@ -9,11 +9,10 @@ compatible: it runs translated applications, and some emulated ones.
 
 ## Introduction
 
-RISC OS has good applications, and most of them were finished twenty or
-thirty years ago. They do what they always did very well. What they cannot
-do is open the files everyone else now sends: a `.docx` from a colleague,
-an SVG from a drawing tool, a PDF from a bank, an `.xlsx` from an
-accountant.
+RISC OS has good applications. Some of them were created twenty or thirty
+years ago, and a few are still maintained. What they cannot do is open all
+of the files I need today: a `.docx` from a colleague, an SVG from a
+drawing tool, a PDF from a bank, an `.xlsx` from an accountant.
 
 Writing a word processor is hard. Writing one that reads Word's files
 correctly is far harder, and it is not the interesting part. The file
@@ -103,8 +102,10 @@ of text and a buffer of pixels.
 
 The application half is a Wimp task like any other. It calls
 `Wimp_Initialise` and `Wimp_Poll`, it has a window definition and a menu
-block, and it obeys the Style Guide. There is nothing exotic about it. The
-question is only what language to write it in, and we chose Mojo.
+block, and it tries to follow the Style Guide. It is also easy to change,
+and to add new features to a little at a time. There is nothing exotic
+about it. The question is only what language to write it in, and we chose
+Mojo.
 
 The reasons are plain ones.
 
