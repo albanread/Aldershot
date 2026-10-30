@@ -143,14 +143,14 @@ Mac.
 | Language | Mac Studio (M4 Max) | Mac mini 2018 | MacBook Pro 2019 | Mac Pro 2013 |
 | --- | ---: | ---: | ---: | ---: |
 | C | 1.4 | 3.1 | 2.9 | 3.2 |
-| Rust | 1.5 | 6.5 | 2.3 | -- |
-| Mojo | 1.5 | 2.8 | 2.6 | -- |
+| Rust | 1.5 | 6.5 | 2.3 | 2.4 |
+| Mojo | 1.5 | 2.8 | 2.6 | 3.0 |
 | Lua | 3.0 | 8.0 | 8.0 | 9.0 |
 | Smalltalk | 3.2 | 7.7 | 7.4 | 9.9 |
 | Lisp | 12.8 | 27.1 | 25.7 | 30.5 |
 | BBC BASIC, compiled | 52 | 128 | 125 | 150 |
 | Python | 62.8 | 141 | 148 | 170 |
-| Tcl | 259 | 570 | 549 | -- |
+| Tcl | 259 | 570 | 549 | 732 |
 | BBC BASIC, interpreted | 330 | 690 | 680 | 770 |
 
 ### Sieve of the primes below 2,000,000
@@ -158,14 +158,14 @@ Mac.
 | Language | Mac Studio (M4 Max) | Mac mini 2018 | MacBook Pro 2019 | Mac Pro 2013 |
 | --- | ---: | ---: | ---: | ---: |
 | C | 4.2 | 5.6 | 5.6 | 6.9 |
-| Mojo | 4.5 | 15.2 | 14.7 | -- |
-| Rust | 4.6 | 7.5 | 7.1 | -- |
+| Mojo | 4.5 | 15.2 | 14.7 | 19.2 |
+| Rust | 4.6 | 7.5 | 7.1 | 8.4 |
 | Lua | 26 | 20 | 17 | 30 |
 | BBC BASIC, compiled | 43.3 | 102 | 100 | 125 |
 | Smalltalk | 55 | 134 | 130 | 170 |
 | Lisp | 69.3 | 130 | 124 | 141 |
 | Python | 90.4 | 213 | 190 | 282 |
-| Tcl | 282 | 626 | 572 | -- |
+| Tcl | 282 | 626 | 572 | 868 |
 | BBC BASIC, interpreted | 335 | 820 | 800 | 920 |
 
 ### 200,000 string keys
@@ -173,18 +173,16 @@ Mac.
 | Language | Mac Studio (M4 Max) | Mac mini 2018 | MacBook Pro 2019 | Mac Pro 2013 |
 | --- | ---: | ---: | ---: | ---: |
 | Lua | 11 | 39 | 35 | 52 |
-| Mojo | 17.6 | 34 | 30.6 | -- |
+| Mojo | 17.6 | 34 | 30.6 | 35.3 |
 | C | 21.7 | 46.4 | 45 | 57.8 |
-| Rust | 28.4 | 76.4 | 78.9 | -- |
+| Rust | 28.4 | 76.4 | 78.9 | 90.9 |
 | Python | 46.2 | 113 | 109 | 134 |
-| Tcl | 55.3 | 171 | 159 | -- |
+| Tcl | 55.3 | 171 | 159 | 197 |
 | Smalltalk | 77.8 | 219 | 203 | 280 |
 | Lisp | 347 | 798 | 798 | 1038 |
 | BBC BASIC, compiled | 370 | 850 | 820 | 980 |
 | BBC BASIC, interpreted | 1940 | 4270 | 4220 | 5030 |
 
-A dash marks a time not yet taken: the 2013 Mac Pro's Tcl, Mojo and Rust
-times will be added when that machine is free.
 
 ---
 
@@ -195,15 +193,15 @@ taking the three tests together:
 
 | Language | Mac mini 2018 | MacBook Pro 2019 | Mac Pro 2013 |
 | --- | ---: | ---: | ---: |
-| Rust | 2.7 | 1.9 | -- |
+| Rust | 2.7 | 1.9 | 2.1 |
 | C | 1.8 | 1.8 | 2.2 |
-| Mojo | 2.3 | 2.1 | -- |
+| Mojo | 2.3 | 2.1 | 2.6 |
 | Lua | 1.9 | 1.8 | 2.5 |
 | Smalltalk | 2.5 | 2.4 | 3.3 |
 | Lisp | 2.1 | 2.0 | 2.4 |
 | BBC BASIC, compiled | 2.4 | 2.3 | 2.8 |
 | Python | 2.3 | 2.3 | 2.9 |
-| Tcl | 2.5 | 2.3 | -- |
+| Tcl | 2.5 | 2.3 | 3.1 |
 | BBC BASIC, interpreted | 2.2 | 2.2 | 2.6 |
 | **All** | **2.3** | **2.1** | **2.6** |
 
@@ -213,9 +211,11 @@ than the newest of the Intel ones.
 
 The 2018 Mac mini and the 2019 MacBook Pro are close. The MacBook Pro has
 more cores, but each program here uses only one. The one large
-difference is Rust's fib, which takes 6.5 ms on the mini every time and
-2.3 ms on the MacBook Pro; the mini's other Rust times match the
-MacBook's. We have not found out why.
+difference is Rust's fib, which takes 6.5 ms on the mini every time,
+against 2.3 ms on the MacBook Pro and 2.4 ms on the 2013 Mac Pro; the
+mini's other Rust times match the MacBook's. So it is something about the
+mini's processor, the i7-8700B, and that one program's code. We have not
+found out what.
 
 The 2013 Mac Pro takes about a fifth longer than the two later Intel
 Macs. Its Ivy Bridge processor is five years older than theirs. All the
