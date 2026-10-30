@@ -9,17 +9,17 @@ itself would be different.
 
 ## Introduction
 
-BOX runs programs in several languages: C, BBC BASIC (interpreted, or
-compiled), Lua, Python, Lisp and Smalltalk. It runs on Apple silicon
-Macs and on Intel machines. We wanted to know how fast each language is
-on each machine, so we wrote the same three small programs in every
-language, and timed them on the four machines that run all of the
-languages today.
+BOX runs programs in many languages: C, BBC BASIC (interpreted, or
+compiled), Lua, Python, Tcl, Lisp, Smalltalk and Mojo, with Rust used for
+library code and engines. It runs on Apple silicon Macs and on Intel
+machines. We wanted to know how fast each language is on each machine,
+so we wrote the same three small programs in every language and timed
+them on the four machines that run all of the languages today.
 
 This article covers:
 
 - the machines;
-- the languages, and how BOX runs each;
+- the languages, how BOX runs each, and what each is used for in BOX;
 - the three tests, and how they were timed;
 - the results, test by test;
 - the machines compared;
@@ -52,20 +52,48 @@ time.
 
 ## 2 The languages
 
+### How BOX runs them
+
 | Language | What BOX uses | How the program runs |
 | --- | --- | --- |
 | C | clang, the box's `*CC` | compiled to machine code before it runs |
-| BBC BASIC | BOX's BASIC, RISC OS's interpreter translated into C | interpreted |
+| Mojo | Mojo 1.1, the box's `*Mojo` | compiled to machine code before it runs |
+| Rust | rustc, on the Mac that builds BOX | compiled before it runs, as a Linux program; see below |
 | BBC BASIC, compiled | ROSBAS ([source](../src/ROSBAS/README.md)), the box's `*RosBas` | compiled to machine code before it runs |
 | Lua | LuaJIT | interpreted, then compiled to machine code as it runs |
-| Python | CPython 3.14 | interpreted |
-| Lisp | NCL, BOX's Common Lisp | compiled to machine code through LLVM as each definition is read |
 | Smalltalk | MACVM, a Strongtalk-style virtual machine | interpreted, then compiled to machine code as it runs |
+| Lisp | NCL, BOX's Common Lisp | compiled to machine code through LLVM as each definition is read |
+| Python | CPython 3.14 | interpreted |
+| Tcl | Tcl 9.1 | interpreted, from byte code |
+| BBC BASIC | BOX's BASIC, RISC OS's interpreter translated into C | interpreted |
 
 Each has a compiler or interpreter for both kinds of processor: A64
 code on Apple silicon, x86-64 code on Intel. Compiled BASIC keeps the
 meaning of BBC BASIC exactly, so the same source gives the same answers
 interpreted or compiled.
+
+**Rust is different from the others.** It is used in BOX only for library
+code and engines, which run as Linux programs beside RISC OS. BOX's RISC
+OS programs are not written in Rust, and Rust code is built on the Mac
+that builds BOX. Its program here was built there too, and run in the box
+with `*RunBox`, as the engines are. We include it because so much of BOX's
+heavy work is done in it, and because it shows how fast that work can
+be.
+
+### What each is used for in BOX
+
+| Language | Used for in BOX today |
+| --- | --- |
+| C | most of BOX itself: the operating system modules, translated from RISC OS's assembler or rewritten, the Window Manager, FileSwitch and HostFS, and Declaritive; the ported applications, among them PipeDream and NetSurf; and anyone's own programs, built with `*CC` |
+| Mojo | the applications written for BOX: the front ends of !Scribe, !Trace, !Palette, !Ledger, !Folio, !Code, !Draft, !Present, !Publish, !FloorPlan, !Micropolis, !Tower and !Workflows, the Wimp side of each ([Apps for BOX](10-Apps.md)); Worker kernels, which run on the other cores; and anyone's own programs, built with `*Mojo` |
+| Rust | library code and engines only: the document engines behind the applications above, which read and write .docx, .xlsx, PDF, SVG and images, and the engines of some of the games, such as !Tower's |
+| BBC BASIC, interpreted | RISC OS's own language: existing BASIC programs, the examples on the disc, quick experiments, and BASIC programs' screens in desktop windows |
+| BBC BASIC, compiled | turning a finished BASIC program into a faster application, from StrongED's Compile and run or with `*RosBas` |
+| Lua | scripts, and small desktop utilities with Declaritive's Lua binding |
+| Python | scripts, and small desktop programs with the `riscos` and `declaritive` modules; the newest of the languages |
+| Tcl | automation: `*Tcl` scripts and !Workflows, which records and replays work in the desktop and drives the applications |
+| Lisp | !Lisp, an editor with a live Lisp underneath, and Lisp programs with windows, a game pane and sound |
+| Smalltalk | !Smalltalk, a Workspace and class Browser, and Smalltalk programs run like BASIC ones, by a double-click or `*Smalltalk` |
 
 ---
 
@@ -84,10 +112,10 @@ them.
 
 Each program is written the way someone who uses that language would
 write it, with no tricks. C uses an array of bytes and its own small hash
-table; Lua, Python, Lisp and Smalltalk use their built-in tables. BBC
-BASIC has no hash table, so its program makes one from arrays, with a
-hash function written in BASIC. The interpreted and compiled BASIC
-results come from the same source file.
+table; Mojo, Rust, Lua, Python, Tcl, Lisp and Smalltalk use their own
+tables. BBC BASIC has no hash table, so its program makes one from
+arrays, with a hash function written in BASIC. The interpreted and
+compiled BASIC results come from the same source file.
 
 ---
 
@@ -97,12 +125,14 @@ Each program times itself with its own language's clock, so the time
 taken to start the language is not counted. Each test is run three times
 and the best of the three is reported.
 
-C, Lua and BASIC read clocks that count in hundredths of a second. To
-time something shorter than that, these three repeat each test until at
+C, Mojo, Lua and BASIC read clocks that count in hundredths of a second.
+To time something shorter than that, these repeat each test until at
 least half a second has passed, and divide by the number of runs.
 
 All times are in milliseconds (thousandths of a second). Smaller is
-better. Every program gave the right answer on every machine.
+better. Every program gave the right answer on every machine. The
+languages are listed fastest first, by their time on the Apple silicon
+Mac.
 
 ---
 
@@ -113,23 +143,29 @@ better. Every program gave the right answer on every machine.
 | Language | Mac Studio (M4 Max) | Mac mini 2018 | MacBook Pro 2019 | Mac Pro 2013 |
 | --- | ---: | ---: | ---: | ---: |
 | C | 1.4 | 3.1 | 2.9 | 3.2 |
+| Rust | 1.5 | 6.5 | 2.3 | -- |
+| Mojo | 1.5 | 2.8 | 2.6 | -- |
 | Lua | 3.0 | 8.0 | 8.0 | 9.0 |
 | Smalltalk | 3.2 | 7.7 | 7.4 | 9.9 |
-| Lisp | 12.6 | 27.1 | 25.7 | 30.5 |
+| Lisp | 12.8 | 27.1 | 25.7 | 30.5 |
 | BBC BASIC, compiled | 52 | 128 | 125 | 150 |
-| Python | 63 | 141 | 148 | 171 |
-| BBC BASIC, interpreted | 335 | 690 | 680 | 770 |
+| Python | 62.8 | 141 | 148 | 170 |
+| Tcl | 259 | 570 | 549 | -- |
+| BBC BASIC, interpreted | 330 | 690 | 680 | 770 |
 
 ### Sieve of the primes below 2,000,000
 
 | Language | Mac Studio (M4 Max) | Mac mini 2018 | MacBook Pro 2019 | Mac Pro 2013 |
 | --- | ---: | ---: | ---: | ---: |
-| C | 4.3 | 5.6 | 5.6 | 6.9 |
-| Lua | 30 | 20 | 17 | 30 |
-| BBC BASIC, compiled | 43 | 102 | 100 | 125 |
-| Smalltalk | 55 | 134 | 131 | 170 |
-| Lisp | 71 | 130 | 124 | 141 |
-| Python | 94 | 213 | 191 | 282 |
+| C | 4.2 | 5.6 | 5.6 | 6.9 |
+| Mojo | 4.5 | 15.2 | 14.7 | -- |
+| Rust | 4.6 | 7.5 | 7.1 | -- |
+| Lua | 26 | 20 | 17 | 30 |
+| BBC BASIC, compiled | 43.3 | 102 | 100 | 125 |
+| Smalltalk | 55 | 134 | 130 | 170 |
+| Lisp | 69.3 | 130 | 124 | 141 |
+| Python | 90.4 | 213 | 190 | 282 |
+| Tcl | 282 | 626 | 572 | -- |
 | BBC BASIC, interpreted | 335 | 820 | 800 | 920 |
 
 ### 200,000 string keys
@@ -137,12 +173,18 @@ better. Every program gave the right answer on every machine.
 | Language | Mac Studio (M4 Max) | Mac mini 2018 | MacBook Pro 2019 | Mac Pro 2013 |
 | --- | ---: | ---: | ---: | ---: |
 | Lua | 11 | 39 | 35 | 52 |
-| C | 24 | 46 | 45 | 58 |
-| Python | 45 | 113 | 109 | 134 |
-| Smalltalk | 88 | 219 | 203 | 280 |
-| Lisp | 364 | 798 | 798 | 1038 |
-| BBC BASIC, compiled | 375 | 850 | 820 | 980 |
-| BBC BASIC, interpreted | 1950 | 4270 | 4220 | 5030 |
+| Mojo | 17.6 | 34 | 30.6 | -- |
+| C | 21.7 | 46.4 | 45 | 57.8 |
+| Rust | 28.4 | 76.4 | 78.9 | -- |
+| Python | 46.2 | 113 | 109 | 134 |
+| Tcl | 55.3 | 171 | 159 | -- |
+| Smalltalk | 77.8 | 219 | 203 | 280 |
+| Lisp | 347 | 798 | 798 | 1038 |
+| BBC BASIC, compiled | 370 | 850 | 820 | 980 |
+| BBC BASIC, interpreted | 1940 | 4270 | 4220 | 5030 |
+
+A dash marks a time not yet taken: the 2013 Mac Pro's Tcl, Mojo and Rust
+times will be added when that machine is free.
 
 ---
 
@@ -153,31 +195,36 @@ taking the three tests together:
 
 | Language | Mac mini 2018 | MacBook Pro 2019 | Mac Pro 2013 |
 | --- | ---: | ---: | ---: |
-| C | 1.8 | 1.7 | 2.1 |
-| Lua | 1.8 | 1.7 | 2.4 |
-| Smalltalk | 2.4 | 2.3 | 3.1 |
-| Lisp | 2.0 | 2.0 | 2.4 |
+| Rust | 2.7 | 1.9 | -- |
+| C | 1.8 | 1.8 | 2.2 |
+| Mojo | 2.3 | 2.1 | -- |
+| Lua | 1.9 | 1.8 | 2.5 |
+| Smalltalk | 2.5 | 2.4 | 3.3 |
+| Lisp | 2.1 | 2.0 | 2.4 |
 | BBC BASIC, compiled | 2.4 | 2.3 | 2.8 |
 | Python | 2.3 | 2.3 | 2.9 |
-| BBC BASIC, interpreted | 2.2 | 2.2 | 2.5 |
-| **All seven** | **2.1** | **2.0** | **2.6** |
+| Tcl | 2.5 | 2.3 | -- |
+| BBC BASIC, interpreted | 2.2 | 2.2 | 2.6 |
+| **All** | **2.3** | **2.1** | **2.6** |
 
 The Apple silicon Mac is the fastest, by about two to one, even though
 BOX runs there as a virtual machine. Its processor is six years newer
 than the newest of the Intel ones.
 
-The 2018 Mac mini and the 2019 MacBook Pro are within a few per cent of
-each other. The MacBook Pro has more cores, but each program here uses
-only one, and its single core is no faster than the mini's.
+The 2018 Mac mini and the 2019 MacBook Pro are close. The MacBook Pro has
+more cores, but each program here uses only one. The one large
+difference is Rust's fib, which takes 6.5 ms on the mini every time and
+2.3 ms on the MacBook Pro; the mini's other Rust times match the
+MacBook's. We have not found out why.
 
-The 2013 Mac Pro takes about a quarter longer than the two later Intel
+The 2013 Mac Pro takes about a fifth longer than the two later Intel
 Macs. Its Ivy Bridge processor is five years older than theirs. All the
 same, it runs every language and every test.
 
-There is one exception to the pattern: Lua's sieve is quicker on the
-two later Intel Macs than on the Apple silicon Mac. We think the reason
-is that LuaJIT's compiler for x86-64 has had many more years of work
-than its compiler for A64, but we have not looked into it.
+Lua's sieve is the exception to the pattern: it is quicker on the two
+later Intel Macs than on the Apple silicon Mac. We think the reason is
+that LuaJIT's compiler for x86-64 has had many more years of work than
+its compiler for A64, but we have not looked into it.
 
 ---
 
@@ -188,23 +235,34 @@ Mac:
 
 | Language | fib | sieve | dict |
 | --- | ---: | ---: | ---: |
-| Lua | 2 | 7 | 0.5 |
-| Smalltalk | 2 | 13 | 4 |
-| Lisp | 9 | 16 | 15 |
-| BBC BASIC, compiled | 37 | 10 | 16 |
-| Python | 45 | 22 | 2 |
-| BBC BASIC, interpreted | 240 | 78 | 83 |
+| Mojo | 1.1 | 1.1 | 0.8 |
+| Rust | 1.1 | 1.1 | 1.3 |
+| Lua | 2.1 | 6.2 | 0.5 |
+| Smalltalk | 2.3 | 13 | 3.6 |
+| Python | 45 | 22 | 2.1 |
+| Lisp | 9.1 | 16 | 16 |
+| BBC BASIC, compiled | 37 | 10 | 17 |
+| Tcl | 185 | 67 | 2.5 |
+| BBC BASIC, interpreted | 236 | 80 | 89 |
 
-**C is the fastest at calling procedures and running loops**, as it
-should be, and is the yardstick for the rest.
+**Mojo, Rust and C are the fast three.** All are compiled to machine code
+before they run, through the same kind of optimising compiler, LLVM; on
+the Apple silicon Mac they are within a tenth of one another at fib and
+the sieve. Mojo is the quickest of the three at the dict test, since its
+`Dict` is a well-made table and its strings are cheap; Rust's standard
+`HashMap` spends time on a hash function chosen to resist attack rather
+than for speed. On the Intel Macs, Mojo falls behind C and Rust at the
+sieve. Of the languages BOX's RISC OS programs are written in, Mojo is as
+fast as C on Apple silicon, and close to it on Intel apart from the
+sieve.
 
 **Lua and Smalltalk compile themselves to machine code while they run,
 and it shows.** At calling procedures both are within two or three times
 C's time, and about twenty times as fast as Python. LuaJIT's tables are
-written in C and tuned hard, and beat our plain C hash table at the
-dict test. Smalltalk's arrays and strings cost more than Lua's. It is
-ahead of Lisp at both, and of BASIC at strings, but compiled BASIC is a
-little quicker at the sieve.
+written in C and tuned hard, and are the quickest of all at the dict
+test. Smalltalk's arrays and strings cost more than Lua's. It is ahead of
+Lisp at both, and of BASIC at strings, but compiled BASIC is a little
+quicker at the sieve.
 
 **Lisp** is compiled too, and takes about four times Smalltalk's time
 at calls. Its dict test is slow because its hashing, its comparison of
@@ -218,14 +276,21 @@ scope, and every statement records its line number and checks for
 Escape.
 
 **Python** interprets every statement and pays for every call, so it
-takes forty-five to fifty-five times C's time at fib. But its dictionary
-is written in C, so at the dict test it comes third, behind only LuaJIT
-and C.
+takes about forty-five times C's time at fib. But its dictionary is
+written in C, so it is quick at the dict test.
 
-**The BBC BASIC interpreter** is the slowest. BOX's BASIC is RISC OS's
-own interpreter, translated from ARM assembler into C ([Tiers of Translation](1-Tiers.md)), so that it behaves exactly as the original
-does. That exactness costs time on every statement. For speed,
-compile the program.
+**Tcl** is slower still at calls and loops, nearly two hundred times C's
+time at fib: every procedure call and every expression goes through
+Tcl's interpreter, and a list element is changed through a command. Its
+dictionaries, like Python's, are written in C, so it is quick at the
+dict test, ahead of Smalltalk.
+
+**The BBC BASIC interpreter** is the slowest at all three tests, a
+little behind Tcl at fib and the sieve and far behind everything at the
+dict test, where its hash table is written in BASIC. BOX's BASIC is RISC
+OS's own interpreter, translated from ARM assembler into C ([Tiers of Translation](1-Tiers.md)), so that it behaves exactly as the original
+does. That exactness costs time on every statement. For speed, compile
+the program.
 
 ---
 
@@ -247,7 +312,9 @@ times above were taken:
 - **Our C program** assumed that `long` is 64 bits and that `strdup`
   exists. On the Intel version of BOX, `long` is 32 bits, so the sieve
   overflowed and gave a wrong answer; and BOX's C library has no
-  `strdup`. Both were fixed in the program.
+  `strdup`. Both were fixed in the program. Mojo's `Int` is 32 bits in
+  the box for the same reason, so its program adds up the dict test's
+  numbers in an `Int64`.
 
 ---
 
@@ -256,14 +323,13 @@ times above were taken:
 - Three small programs say little about large ones. A program that
   spends its time drawing in the desktop, reading files or using the
   network will see much smaller differences between languages.
-- The dict test compares tables written in C, for Lua and Python, with
-  tables written in the language itself, for Lisp, Smalltalk and BASIC.
-- The times vary by a few per cent from run to run. The C, Lua and BASIC
-  times are averages over repeated runs, read from a clock that counts
-  hundredths of a second.
-- BOX also runs Tcl and Mojo; they are not in these tables. On the Apple
-  silicon Mac, Tcl took 253 ms for fib, 270 ms for the sieve and 54 ms
-  for the dict test.
+- The dict test compares tables written in C, for Lua, Python and Tcl,
+  with tables written in the language itself, for Mojo, Rust, Lisp,
+  Smalltalk and BASIC.
+- The times vary by a few per cent from run to run. The C, Mojo, Lua and
+  BASIC times are averages over repeated runs, read from a clock that
+  counts hundredths of a second. The Apple silicon times are the best of
+  two runs of all the programs.
 - BOX runs on other machines too, among them an Intel N97 mini PC
   ([BOX on a Low-Cost Mini PC](9-MiniPC.md)) and Intel Macs under
   QEMU. They are not measured here yet.
@@ -272,7 +338,7 @@ times above were taken:
 
 ## 10 The programs
 
-The seven programs, one for each language (the two BBC BASIC results
-share one), are in [benchmarks](benchmarks/README.md), with the commands
-that run each one in BOX. Each prints one line for each test: the
-language, the test, the time in milliseconds and the answer.
+The programs, one for each language (the two BBC BASIC results share
+one), are in [benchmarks](benchmarks/README.md), with the commands that
+run each one in BOX. Each prints one line for each test: the language,
+the test, the time in milliseconds and the answer.
