@@ -18,7 +18,7 @@ MIT licence ([LICENSES](../../LICENSES/README.md)).
 | bench.fbas | FasterBASIC | `*FasterBASIC bench/fbas` |
 | bench.mod | Modula-2 | `*Modula2 bench/mod` |
 | bench.bcl | BCPL | `*BCPL bench/bcl` |
-| bench.fth | Forth | `*F66 bench/fth` (Apple silicon only) |
+| bench.fth | Forth | `*F66 bench/fth` |
 | bench.ss | Scheme | `*Scheme --load <the file's Linux name>`, after !Scheme has been seen |
 
 Each prints one line for each test: the language, the test, the time in

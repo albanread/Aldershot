@@ -63,7 +63,7 @@ time.
 | FasterBASIC | FasterBASIC's compiler, through LLVM, the box's `*FasterBASIC` | compiled to machine code in memory, then run |
 | Modula-2 | a Modula-2 compiler (PIM 4 and ISO) through LLVM, the box's `*Modula2` | compiled to machine code in memory, then run |
 | BCPL | a modern BCPL compiler through LLVM, the box's `*BCPL` | compiled to machine code in memory, then run |
-| Forth | F66, a subroutine-threaded Forth with its own optimiser, the box's `*F66` | each definition compiled to machine code as it is read |
+| Forth | F66, a subroutine-threaded Forth with its own optimiser, the box's `*F66` (MF66 on Apple silicon, WF66 on Intel) | each definition compiled to machine code as it is read |
 | Lua | LuaJIT | interpreted, then compiled to machine code as it runs |
 | Smalltalk | MACVM, a Strongtalk-style virtual machine | interpreted, then compiled to machine code as it runs |
 | Scheme | Chez Scheme 10.4, the box's `*Scheme` | compiled to machine code by Chez's own compiler as each definition is read |
@@ -73,8 +73,9 @@ time.
 | BBC BASIC | BOX's BASIC, RISC OS's interpreter translated into C | interpreted |
 
 Each has a compiler or interpreter for both kinds of processor, A64
-code on Apple silicon and x86-64 code on Intel, except Forth: F66 makes
-only A64 code so far, so it runs on Apple silicon alone. FasterBASIC,
+code on Apple silicon and x86-64 code on Intel. Forth is two Forths that
+behave the same: MF66, which makes A64 code, and WF66, its x86-64
+parent, which makes x86-64 code. FasterBASIC,
 Modula-2, BCPL and compiled BASIC share one copy of LLVM inside BOX. Compiled BASIC keeps the
 meaning of BBC BASIC exactly, so the same source gives the same answers
 interpreted or compiled.
@@ -105,7 +106,7 @@ be.
 | FasterBASIC | !FasterBASIC, an editor in the style of QuickBASIC where F5 runs the program at once, and BASIC programs that call SWIs and open Declaritive windows |
 | Modula-2 | !Modula2 and Modula-2 in !Code (colouring, Build and Run, errors, layout): programs made of modules, calling SWIs and opening Declaritive windows |
 | BCPL | !BCPL and BCPL in !Code: BCPL programs with RISC OS's streams, SWIs and Declaritive windows |
-| Forth | !F66, a console for trying things out, with the stack and the words on show, and Forth programs with SWIs and Declaritive windows; Apple silicon only so far |
+| Forth | !F66, a console for trying things out, with the stack and the words on show, and Forth programs with SWIs and Declaritive windows |
 
 ---
 
@@ -165,7 +166,7 @@ Mac.
 | Rust | 1.5 | 6.5 | 2.3 | 2.4 |
 | Mojo | 1.5 | 2.8 | 2.6 | 3.0 |
 | Modula-2 | 1.7 | 2.5 | 2.2 | 2.8 |
-| Forth | 2.5 | -- | -- | -- |
+| Forth | 2.5 | 4.5 | -- | 5.8 |
 | Lua | 3.0 | 8.0 | 8.0 | 9.0 |
 | Smalltalk | 3.2 | 7.7 | 7.4 | 9.9 |
 | Scheme | 3.3 | 8.3 | 8.5 | 13.9 |
@@ -184,7 +185,7 @@ Mac.
 | Modula-2 | 4.3 | 6.2 | 5.9 | 7.0 |
 | Mojo | 4.5 | 15.2 | 14.7 | 19.2 |
 | Rust | 4.6 | 7.5 | 7.1 | 8.4 |
-| Forth | 6.3 | -- | -- | -- |
+| Forth | 6.3 | 20 | -- | 27.4 |
 | FasterBASIC | 7.1 | 12.5 | 8.9 | 21.7 |
 | Scheme | 10.6 | 30.5 | 31.1 | 29.8 |
 | Lua | 26 | 20 | 17 | 30 |
@@ -200,7 +201,7 @@ Mac.
 | Language | Mac Studio (M4 Max) | Mac mini 2018 | MacBook Pro 2019 | Mac Pro 2013 |
 | --- | ---: | ---: | ---: | ---: |
 | Lua | 11 | 39 | 35 | 52 |
-| Forth | 12.8 | -- | -- | -- |
+| Forth | 12.8 | 62.5 | -- | 78.6 |
 | Mojo | 17.6 | 34 | 30.6 | 35.3 |
 | C | 21.7 | 46.4 | 45 | 57.8 |
 | Modula-2 | 22.7 | 61.1 | 56.7 | 57.8 |
@@ -215,8 +216,8 @@ Mac.
 | FasterBASIC | 465 | 610 | 570 | 750 |
 | BBC BASIC, interpreted | 1940 | 4270 | 4220 | 5030 |
 
-A dash marks a time that cannot be taken: our Forth is written in Arm
-assembly language and so runs only on the Arm box.
+A dash marks a time not yet taken: the MacBook Pro's Forth times will
+be added when that machine is next updated.
 
 ---
 
@@ -240,7 +241,7 @@ taking the three tests together:
 | Modula-2 | 1.8 | 1.7 | 1.9 |
 | BCPL | 2.1 | 1.9 | 2.4 |
 | Scheme | 2.5 | 2.5 | 3.2 |
-| Forth | -- | -- | -- |
+| Forth | 3.0 | -- | 3.9 |
 | BBC BASIC, interpreted | 2.2 | 2.2 | 2.6 |
 | **All** | **2.2** | **2.0** | **2.6** |
 
@@ -269,7 +270,9 @@ FasterBASIC loses the least on the Intel Macs, because most of its time
 is spent in the dict test, where it is only a third slower on the 2018
 Mac mini than on the Apple silicon Mac. Modula-2 is the steadiest on the
 2013 Mac Pro, which takes no longer than the two later Intel Macs at its
-dict test. Forth has no Intel times; it runs on Apple silicon only.
+dict test. Forth loses the most, three to four times: on the Intel Macs it
+is WF66, a different compiler from the Apple silicon Mac's MF66, and its
+sieve and dict test are slower than C's there, where MF66's are not.
 
 ---
 
@@ -416,7 +419,6 @@ times above were taken:
   with tables written in the language itself, for Mojo, Rust, Lisp,
   Smalltalk, Scheme, BASIC, Modula-2, BCPL and Forth. FasterBASIC's `HASHMAP`
   is part of its run-time library, which is written in Zig.
-- Forth runs only on Apple silicon so far, so it has no Intel times.
 - The times vary by a few per cent from run to run. The C, Mojo, Lua,
   BASIC, FasterBASIC, Modula-2, BCPL and Forth times are averages over repeated runs, read from a clock that
   counts hundredths of a second. The Apple silicon times are the best of
