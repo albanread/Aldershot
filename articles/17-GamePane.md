@@ -1,13 +1,14 @@
 # The Game Pane
 
-*31 October 2026*
+*31 October 2026, revised the same day*
 
-**Note: this is work in progress.** The game pane works, and Galaxigans
-and the Lisp examples run on it every day, but it has important gaps,
-listed under Limits at the end: most languages cannot use it yet, a Mac
-draws only one pane at a time, and the tile layers, sprite flipping and
-much of ABC are still to come. We are filling them in, and this article
-will be revised as they close.
+**Note: this is work in progress.** When this article was first written
+the pane had important gaps: most languages could not use it, a Mac drew
+one pane at a time, and the tile layers, sprite flipping and much of ABC
+were still to come. Those are now closed, and this revision describes
+the pane as it is. One large gap remains: the PCs, and the Intel Macs
+that run BOX directly, cannot yet open a pane from a RISC OS program.
+Limits, at the end, lists it and the smaller ones.
 
 **Note: this is not RISC OS.** BOX is a RISC OS window manager and
 application environment running on a Linux kernel. [Is BOX Linux?](5-Linux.md) says what that means. The game pane is BOX's own,
@@ -27,12 +28,13 @@ This article covers:
 
 - the gap the game pane fills;
 - the picture, layer by layer, and the hardware each layer stands for;
-- the shared block a program writes, and the five SWIs;
+- the shared block a program writes, and the SWIs;
+- !GamePane, which gives any program a pane;
 - how the picture is drawn, on a PC and on a Mac;
 - the sound chip;
 - the ABC player, and the effects;
 - Galaxigans, the game written to prove it all;
-- which languages can use it today;
+- the languages that can use it;
 - the limits.
 
 ![The game pane demonstration: the black-hole backdrop, a formation of sprites, copper bars and a palette strip, with the text layer on top](images/gamepane-demo.png)
@@ -135,9 +137,14 @@ green one. Colour 0 is transparent.
 
 A program draws up to 8,192 sprites a frame, and all of them are drawn in
 one instruction to the graphics card. Later sprites are drawn over
-earlier ones. Sprites are not scaled or rotated: a sprite is the size of
-its picture, as a hardware sprite was. A sprite may be drawn solid, or
+earlier ones. A sprite may be flipped left to right or top to bottom, and
+drawn two, three or four times its size, as the sprite chips of the time
+could double a sprite; it is not rotated. A sprite may be drawn solid, or
 blended with what is under it by its transparency.
+
+A program may define a sprite's picture from bytes, or load a sprite file
+saved by !Paint: each sprite in it becomes a frame, numbered, and its
+colours become a scheme.
 
 Each sprite is held strictly to its own rectangle of the sheet, so that a
 neighbouring frame of animation never bleeds into its edge, which is the
@@ -146,20 +153,23 @@ fault every sprite-sheet renderer has to guard against.
 ### Text
 
 The text layer draws up to 4,096 characters, at any pixel position, each
-with its own colour and size. The font is 5 by 7 pixels in an 8 by 8
-cell, in capitals, and the pen moves 6 pixels a character. All the text
-on the pane is one draw.
+with its own colour and size. A program that draws through the SWIs gets
+the RISC OS system font's 8 by 8 characters, lower case and all; the
+games in the ROM have their own font of capitals, 5 by 7 pixels. All the
+text on the pane is one draw.
 
 ### Tile layers
 
-On a PC the pane can also have up to four tile layers, the parallax
-scrolling of the 16-bit consoles. A tile layer is a map of 8 by 8 tiles,
-up to 1,024 different tiles from a sheet, over a world 1,024 pixels wide.
-Each layer scrolls by itself. Sideways it wraps round for ever, at its
-own width, so that layers of different widths drift past one another;
-upwards and downwards it stops at the world's edge. A game can ask which
-tile is under a point. The tile layers are not yet in the Mac's version
-of the pane.
+The pane has four tile layers, the parallax scrolling of the 16-bit
+consoles. A tile layer is a map of 8 by 8 tiles, up to 128 by 64 cells,
+from a sheet of 512 tiles. Each layer has two scroll registers, and its
+map repeats both ways for ever at its own size, so layers of different
+sizes scrolled at different speeds drift past one another, and a game
+scrolls by adding to a number, never redrawing a map. The layers lie over
+the canvas and under the sprites, layer 0 at the back; a tile's colour 0
+and an empty cell are holes. The graphics card draws all four in one
+pass, reading each pixel's cell from the map and its colour from the
+tile.
 
 ### No blitter
 
@@ -175,8 +185,8 @@ sprite is moved by changing two numbers in its table.
 
 ## 3 The block and the SWIs
 
-On BOX a program draws by writing a block of memory, about 900 KB, laid
-out as the hardware's registers and memory would be:
+On BOX a program draws by writing a block of memory, just under 1 MB,
+laid out as the hardware's registers and memory would be:
 
 | Part | Size |
 | --- | --- |
@@ -189,6 +199,9 @@ out as the hardware's registers and memory would be:
 | the sprite sheet | 262,144 bytes |
 | the sprite colour schemes | 2,048 bytes |
 | the font | 8,192 bytes |
+| the tile layers' registers | 128 bytes |
+| the four tile maps | 65,536 bytes |
+| the tile sheet | 32,768 bytes |
 
 The block is shared with whatever draws the picture. A frame number in
 the header keeps the two in step. It is odd while the program is writing
@@ -203,6 +216,10 @@ The drawer trusts nothing in the block: it checks the block's mark and
 version, and limits every count and every index, so a program with a bug
 draws a wrong picture, not a crash.
 
+The tile layers come last, after everything else. A Mac app from before
+them still draws the rest of a block that has them, and a newer one knows
+a block that has them by its size.
+
 The GamePane module gives the block to a program:
 
 | SWI | Number | What it does |
@@ -216,6 +233,31 @@ The GamePane module gives the block to a program:
 A frame is Begin, the writes, then Present. The block is carved from the
 memory BOX keeps for windows' pictures, and bound to the window as a kind
 of surface; a window may have one, and the box up to four.
+
+Writing the block needs floating-point numbers and a knowledge of its
+layout, which BBC BASIC and Tcl do not have. So the module also does the
+writing for a program, through SWIs that every language can call:
+
+| SWIs | What they do |
+| --- | --- |
+| GamePane_Attach | the pane !GamePane made for the program |
+| GamePane_Clear, Plot, Rect, Line | draw on the canvas |
+| GamePane_Colour, Scene | the palettes, and the backdrop |
+| GamePane_DefineSprite, LoadSprites, SpriteColour, Sprite | sprite frames and schemes, and a sprite placed this frame, flipped or scaled |
+| GamePane_Text | text placed this frame |
+| GamePane_Tiles | tiles, maps, cells and scrolling |
+| GamePane_Input | the pointer, the buttons and whether a key is held |
+| GamePane_Wait | until the next frame is due |
+| GamePane_Tune, Music, Effect | the sound chips |
+
+A SWI costs about a third of a microsecond, so thousands of sprites a
+frame are within reach of an interpreted language. A program may mix the
+two ways, writing some of the block itself.
+
+`GamePane_Wait` is the vertical blank. It returns a sixtieth of a second
+after the last frame, kept to the clock so that a long frame is followed
+by a short wait. A program run by !GamePane sleeps while it waits, and
+the desktop runs; it takes no time at all.
 
 ---
 
@@ -235,8 +277,9 @@ a late frame is a glitch and a late sound buffer is a click.
 
 **On a Mac**, the Apple silicon box runs under QEMU, and the program in
 the box draws nothing at all. It writes the block, and the Mac's own
-graphics, Metal, read the block from the box's memory and draw the four
-layers into a 640 by 360 picture, which is then shown in the window. The
+graphics, Metal, read the block from the box's memory and draw the
+layers into a 640 by 360 picture, which is then shown in the window.
+Each pane on the screen has a picture of its own, up to four at once. The
 box's processors spend their time on the game alone: Galaxigans runs at
 60 frames a second for 7 per cent of one of the box's processors.
 
@@ -308,6 +351,16 @@ naturals that last to the bar line, rests, and lengths written as
 multiples and fractions. Up to eight voices (`V:`) play at once, each
 with its own place in the tune, on the chip's three.
 
+It plays repeats, with first and second endings; ties, across a bar line
+too; triplets and the other tuplets; and grace notes, which take their
+time from the front of the note they lead to. A part has one voice of the
+chip, so a chord is played as the Commodore 64's composers played one: an
+arpeggio, a note of it every fiftieth of a second, without the envelope
+starting again. Chord symbols and decorations are passed over. Every one
+of these is checked by a test that reads the notes' times, pitches and
+lengths, and another checks that all eighteen of Galaxigans' tunes play
+exactly as they did before.
+
 The `[I:chip ...]` field is BOX's own. It sets a voice's sound from
 inside the tune: the waveform, the pulse width, the envelope, the filter
 and its cutoff, resonance and mode, the volume, ring modulation and sync.
@@ -356,14 +409,70 @@ disc.
 
 ---
 
-## 8 Which languages can use it
+## 8 !GamePane
 
-| Language | How |
+GraphTask showed the shape a feature like this should take: an
+application with its own icon, onto which a program is dragged. !GamePane
+is in the ROM, under Apps. Drag a program onto its icon and it opens a
+pane window and runs the program in it, as the child of a task window,
+so the program need not be a Wimp task at all. A BBC BASIC program, a
+Lua, Python or Tcl script, or an application made by `*CC` or `*Mojo`
+all run the same way. The program asks for its pane with
+`GamePane_Attach` and draws.
+
+Click on the pane and keys go to the program, which reads them as a
+1980s game read its joystick: by asking whether a key is held now.
+`*GamePane <command>` runs a command in a new pane from the command line
+or a script. When the program ends, the window stays with its last
+picture and the word "finished" in its title; anything the program
+printed, and the error that stopped it if there was one, is drawn over
+the bottom of the picture. Menu on a pane gives its scale (one, two or
+three times), sound off, and Kill.
+
+---
+
+## 9 Which languages can use it
+
+Each language has a small library over the SWIs, a Balls example in
+`!GamePane.Examples`, and a page in the GamePane manual in !Manuals:
+
+| Language | The library |
 | --- | --- |
-| C | in the ROM, through the GamePane SWIs and the block: the demonstration and Galaxigans are written so. On a PC, as a Linux program using the pane's own library |
-| Lisp | `(require 'gamepane)` and `(require 'sound)` in !Lisp: `gp-open`, `gp-rect`, `gp-line`, `gp-colour`, `gp-line-colour` for the copper, `gp-scene`, `gp-sprite`, `gp-text`, `gp-present`; `snd-tune`, `snd-music` and `snd-effect`. The pane is a surface in a Declaritive window |
+| BBC BASIC | `LIBRARY "<GamePane$Dir>.Lib.GamePane"`: `PROCgp_rect`, `PROCgp_sprite`, `FNgp_key`, `FNgp_tune` and the rest |
+| Lua | `require "gamepane"` |
+| Python | `import gamepane` |
+| Tcl | `package require gamepane` |
+| Mojo | `from riscos.gamepane import attach` |
+| C, with `*CC` | `#include "gamepane.h"`, a header of inline functions |
+| C, in the ROM | the block itself: the demonstration and Galaxigans |
+| Lisp | `(require 'gamepane)` and `(require 'sound)` in !Lisp, a pane in a Declaritive window |
+| Smalltalk | the GamePane class in !Smalltalk |
 
-In Lisp, a pane and a tune are a few lines:
+All six of the first languages were run in !GamePane in the Apple silicon
+box: each drew forty sprites over a backdrop and a scrolling strip of
+tiles, read the pointer, played its tune and stopped on Q.
+
+![The Balls example in six languages, each in its own !GamePane window: BBC BASIC, Lua, Python, Tcl, C and Mojo, each with its own backdrop, sprites and strip of tiles](images/gamepane-languages.png)
+
+In BBC BASIC a pane is a few lines:
+
+```basic
+LIBRARY "<GamePane$Dir>.Lib.GamePane"
+PROCgp_attach
+PROCgp_scene(2,TRUE)
+PROCgp_colour(3,255,200,0)
+x%=0
+REPEAT
+  PROCgp_begin
+  PROCgp_clear(0)
+  PROCgp_rect(x%,170,20,20,3)
+  PROCgp_end
+  PROCgp_wait
+  x%=(x%+2) MOD 620
+UNTIL FNgp_key(-17)
+```
+
+In Lisp, a pane and a tune are a few lines too:
 
 ```lisp
 (gp-open window "pane")
@@ -385,18 +494,15 @@ bouncing over the black-hole backdrop, and a jukebox of chip tunes.
 
 ---
 
-## 9 Limits
+## 10 Limits
 
-- The block is written by programs in the ROM, and by !Lisp. BBC BASIC,
-  Lua, Python, Mojo and Smalltalk have no binding to it yet; it is a
-  block of memory and five SWIs, so each is a short piece of work.
-- On a Mac, only the first visible game pane is drawn; a second pane's
-  window stays blank.
-- The tile layers are drawn on a PC only.
-- `GamePane_Open` needs a host to draw the block, which the Mac has. On a
-  PC the demonstration and Galaxigans run their Linux versions instead.
-- Sprites are not flipped, scaled or rotated.
-- The font has capitals only.
-- The ABC player does not yet expand repeats, or play chords, triplets,
-  ties or grace notes; the Mojo original it came from does, and they are
-  to follow.
+- `GamePane_Open` needs a host to draw the block. The Mac has one; the
+  PCs, and the Intel Macs that run BOX directly, do not yet, so there a
+  RISC OS program cannot open a pane, and the demonstration and
+  Galaxigans run their Linux versions instead. The next step is for the
+  PCs' presenter to draw the block itself, as the Mac does.
+- Lisp and Smalltalk draw through their own engines, in panes of their
+  own windows; their programs are not run by !GamePane.
+- The ABC player has no broken rhythm (`>` and `<`), no repeats inside
+  repeats, and no key or length changes in the middle of a line.
+- Sprites are not rotated.
