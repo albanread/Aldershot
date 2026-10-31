@@ -1,6 +1,6 @@
 # Benchmarks: the Machines and the Languages
 
-*30 October 2026; FasterBASIC, Modula-2, BCPL and Forth added 31 October*
+*30 October 2026; FasterBASIC, Modula-2, BCPL, Forth and Scheme added 31 October*
 
 **Note: this is not RISC OS.** BOX is a RISC OS window manager and
 application environment running on a Linux kernel. [Is BOX Linux?](5-Linux.md) says what that means. The languages
@@ -11,7 +11,7 @@ itself would be different.
 
 BOX runs programs in many languages: C, BBC BASIC (interpreted, or
 compiled), FasterBASIC, Modula-2, BCPL, Forth, Lua, Python, Tcl, Lisp,
-Smalltalk and Mojo, with Rust used for library code and engines. It runs on Apple silicon Macs and on Intel
+Scheme, Smalltalk and Mojo, with Rust used for library code and engines. It runs on Apple silicon Macs and on Intel
 machines. We wanted to know how fast each language is on each machine,
 so we wrote the same three small programs in every language and timed
 them on the four machines that run the languages today.
@@ -66,6 +66,7 @@ time.
 | Forth | F66, a subroutine-threaded Forth with its own optimiser, the box's `*F66` | each definition compiled to machine code as it is read |
 | Lua | LuaJIT | interpreted, then compiled to machine code as it runs |
 | Smalltalk | MACVM, a Strongtalk-style virtual machine | interpreted, then compiled to machine code as it runs |
+| Scheme | Chez Scheme 10.4, the box's `*Scheme` | compiled to machine code by Chez's own compiler as each definition is read |
 | Lisp | NCL, BOX's Common Lisp | compiled to machine code through LLVM as each definition is read |
 | Python | CPython 3.14 | interpreted |
 | Tcl | Tcl 9.1 | interpreted, from byte code |
@@ -100,6 +101,7 @@ be.
 | Tcl | automation: `*Tcl` scripts and !Workflows, which records and replays work in the desktop and drives the applications |
 | Lisp | !Lisp, an editor with a live Lisp underneath, and Lisp programs with windows, a game pane and sound |
 | Smalltalk | !Smalltalk, a Workspace and class Browser, and Smalltalk programs run like BASIC ones, by a double-click or `*Smalltalk` |
+| Scheme | !Scheme, an editor with a live Scheme underneath like !Lisp's, Scheme programs that call SWIs from its window and open Declaritive windows, and `*Scheme` |
 | FasterBASIC | !FasterBASIC, an editor in the style of QuickBASIC where F5 runs the program at once, and BASIC programs that call SWIs and open Declaritive windows |
 | Modula-2 | !Modula2 and Modula-2 in !Code (colouring, Build and Run, errors, layout): programs made of modules, calling SWIs and opening Declaritive windows |
 | BCPL | !BCPL and BCPL in !Code: BCPL programs with RISC OS's streams, SWIs and Declaritive windows |
@@ -122,7 +124,7 @@ them.
 
 Each program is written the way someone who uses that language would
 write it, with no tricks. C uses an array of bytes and its own small hash
-table; Mojo, Rust, Lua, Python, Tcl, Lisp, Smalltalk and FasterBASIC use
+table; Mojo, Rust, Lua, Python, Tcl, Lisp, Scheme, Smalltalk and FasterBASIC use
 their own tables. BBC BASIC, Modula-2, BCPL and Forth have none, so their
 programs make one from arrays, with a hash function written in the
 language. The interpreted and
@@ -141,7 +143,7 @@ that count in hundredths of a second.
 To time something shorter than that, these repeat each test until at
 least half a second has passed, and divide by the number of runs.
 
-The first ten languages were timed on 30 October and the four newest on
+The first ten languages were timed on 30 October and the five newest on
 31 October, each time with that day's build of BOX.
 
 All times are in milliseconds (thousandths of a second). Smaller is
@@ -166,6 +168,7 @@ Mac.
 | Forth | 2.5 | -- | -- | -- |
 | Lua | 3.0 | 8.0 | 8.0 | 9.0 |
 | Smalltalk | 3.2 | 7.7 | 7.4 | 9.9 |
+| Scheme | 3.3 | 8.3 | 8.5 | 13.9 |
 | Lisp | 12.8 | 27.1 | 25.7 | 30.5 |
 | BBC BASIC, compiled | 52 | 128 | 125 | 150 |
 | Python | 62.8 | 141 | 148 | 170 |
@@ -183,6 +186,7 @@ Mac.
 | Rust | 4.6 | 7.5 | 7.1 | 8.4 |
 | Forth | 6.3 | -- | -- | -- |
 | FasterBASIC | 7.1 | 12.5 | 8.9 | 21.7 |
+| Scheme | 10.6 | 30.5 | 31.1 | 29.8 |
 | Lua | 26 | 20 | 17 | 30 |
 | BBC BASIC, compiled | 43.3 | 102 | 100 | 125 |
 | Smalltalk | 55 | 134 | 130 | 170 |
@@ -205,6 +209,7 @@ Mac.
 | Python | 46.2 | 113 | 109 | 134 |
 | Tcl | 55.3 | 171 | 159 | 197 |
 | Smalltalk | 77.8 | 219 | 203 | 280 |
+| Scheme | 144 | 308 | 302 | 400 |
 | Lisp | 347 | 798 | 798 | 1038 |
 | BBC BASIC, compiled | 370 | 850 | 820 | 980 |
 | FasterBASIC | 465 | 610 | 570 | 750 |
@@ -234,9 +239,10 @@ taking the three tests together:
 | FasterBASIC | 1.6 | 1.4 | 2.2 |
 | Modula-2 | 1.8 | 1.7 | 1.9 |
 | BCPL | 2.1 | 1.9 | 2.4 |
+| Scheme | 2.5 | 2.5 | 3.2 |
 | Forth | -- | -- | -- |
 | BBC BASIC, interpreted | 2.2 | 2.2 | 2.6 |
-| **All** | **2.2** | **2.0** | **2.5** |
+| **All** | **2.2** | **2.0** | **2.6** |
 
 The Apple silicon Mac is the fastest, by about two to one, even though
 BOX runs there as a virtual machine. Its processor is six years newer
@@ -281,6 +287,7 @@ Mac:
 | BCPL | 1.0 | 1.0 | 1.9 |
 | Lua | 2.1 | 6.2 | 0.5 |
 | FasterBASIC | 1.0 | 1.7 | 21 |
+| Scheme | 2.4 | 2.5 | 6.6 |
 | Smalltalk | 2.3 | 13 | 3.6 |
 | Python | 45 | 22 | 2.1 |
 | Lisp | 9.1 | 16 | 16 |
@@ -325,6 +332,13 @@ written in C and tuned hard, and are the quickest of all at the dict
 test. Smalltalk's arrays and strings cost more than Lua's. It is ahead of
 Lisp at both, and of BASIC at strings, but compiled BASIC is a little
 quicker at the sieve.
+
+**Scheme** is Chez Scheme, whose compiler makes machine code directly,
+without LLVM. It takes between two and three times C's time at fib and
+the sieve, a quarter of Lisp's at fib and a sixth of it at the sieve,
+and between Smalltalk and Lisp at the dict test, about seven times C's
+time, with its own hash tables. On the 2013 Mac Pro its fib takes 14 ms against 8 on the
+two later Intel Macs, every time we ran it; we have not found out why.
 
 **Lisp** is compiled too, and takes about four times Smalltalk's time
 at calls. Its dict test is slow because its hashing, its comparison of
@@ -400,7 +414,7 @@ times above were taken:
   network will see much smaller differences between languages.
 - The dict test compares tables written in C, for Lua, Python and Tcl,
   with tables written in the language itself, for Mojo, Rust, Lisp,
-  Smalltalk, BASIC, Modula-2, BCPL and Forth. FasterBASIC's `HASHMAP`
+  Smalltalk, Scheme, BASIC, Modula-2, BCPL and Forth. FasterBASIC's `HASHMAP`
   is part of its run-time library, which is written in Zig.
 - Forth runs only on Apple silicon so far, so it has no Intel times.
 - The times vary by a few per cent from run to run. The C, Mojo, Lua,
