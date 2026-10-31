@@ -1,0 +1,111 @@
+// bench.bcl -- the BOX language comparison in BCPL: fib(30) by recursion, a sieve of
+// the primes below 2,000,000, and 200,000 string keys put in a hash table
+// (open addressing, doubled when half full) and read back.
+// OS_ReadMonotonicTime counts centiseconds, so each test repeats until half
+// a second has gone; the best of three, in milliseconds.
+MANIFEST $( N = 2000000; KEYS = 200000 $)
+
+LET fib(n) = n < 2 -> n, fib(n - 1) + fib(n - 2)
+
+LET sieve() = VALOF $(
+    LET sv = GETVEC(N / 8 + 2)
+    LET c = 0
+    FOR i = 2 TO N DO sv%i := 0
+    FOR i = 2 TO N DO
+        IF sv%i = 0 DO $(
+            c := c + 1
+            IF i <= 1414 DO $(
+                LET j = i * i
+                WHILE j <= N DO $( sv%j := 1; j := j + i $)
+            $)
+        $)
+    FREEVEC(sv)
+    RESULTIS c
+$)
+
+// "k" and the digits of n into the byte vector b, 0-terminated
+LET key(b, n) BE $(
+    LET d = VEC 2
+    LET k = 0
+    $( d%k := '0' + n REM 10; n := n / 10; k := k + 1 $) REPEATUNTIL n = 0
+    b%0 := 'k'
+    FOR i = 1 TO k DO b%i := d%(k - i)
+    b%(k + 1) := 0
+$)
+
+LET hash(s) = VALOF $(
+    LET h, i = 2166136261, 0
+    UNTIL s%i = 0 DO $( h := ((h NEQV s%i) * 16777619) & #XFFFFFFFF; i := i + 1 $)
+    RESULTIS h
+$)
+
+LET same(a, b) = VALOF $(
+    LET i = 0
+    UNTIL a%i ~= b%i DO $( IF a%i = 0 RESULTIS TRUE; i := i + 1 $)
+    RESULTIS FALSE
+$)
+
+// The slot for key k in a table of cap keys (ks) and values (vs)
+LET find(ks, cap, k) = VALOF $(
+    LET i = hash(k) & (cap - 1)
+    UNTIL ks!i = 0 DO $(
+        IF same(ks!i, k) RESULTIS i
+        i := (i + 1) & (cap - 1)
+    $)
+    RESULTIS i
+$)
+
+LET dict() = VALOF $(
+    LET cap, used, s = 8, 0, 0
+    LET ks, vs = GETVEC(cap), GETVEC(cap)
+    LET b = VEC 2
+    FOR i = 0 TO cap - 1 DO $( ks!i := 0; vs!i := 0 $)
+    FOR i = 1 TO KEYS DO $(
+        LET e = 0
+        key(b, i)
+        e := find(ks, cap, b)
+        IF ks!e = 0 DO $(
+            LET c = GETVEC(2)
+            FOR j = 0 TO 15 DO c%j := b%j
+            ks!e := c
+            used := used + 1
+            IF used * 2 > cap DO $(
+                LET nc = cap * 2
+                LET nk, nv = GETVEC(nc), GETVEC(nc)
+                FOR j = 0 TO nc - 1 DO $( nk!j := 0; nv!j := 0 $)
+                FOR j = 0 TO cap - 1 DO
+                    IF ks!j ~= 0 DO $( LET f = find(nk, nc, ks!j); nk!f := ks!j; nv!f := vs!j $)
+                FREEVEC(ks); FREEVEC(vs)
+                ks, vs, cap := nk, nv, nc
+                e := find(ks, cap, b)
+            $)
+        $)
+        vs!e := i * 2
+    $)
+    FOR i = 1 TO KEYS DO $( key(b, i); s := s + vs!(find(ks, cap, b)) $)
+    FOR j = 0 TO cap - 1 DO IF ks!j ~= 0 DO FREEVEC(ks!j)
+    FREEVEC(ks); FREEVEC(vs)
+    RESULTIS s
+$)
+
+LET now() = VALOF $( LET r = VEC 9
+    SYS(#X42, r)
+    RESULTIS r!0
+$)
+
+LET work(w) = w = 0 -> fib(30), w = 1 -> sieve(), dict()
+
+LET START() BE $(
+    FOR w = 0 TO 2 DO $(
+        LET b, r, c, e = 1000000000, 0, 0, 0
+        FOR k = 1 TO 3 DO $(
+            LET t = now()
+            LET ms100 = 0
+            c := 0
+            $( r := work(w); c := c + 1; e := now() - t $) REPEATUNTIL e >= 50
+            ms100 := e * 1000 / c
+            IF ms100 < b DO b := ms100
+        $)
+        WRITEF("bcpl %s %d.%d%d %d*N", w = 0 -> "fib", w = 1 -> "sieve", "dict", b / 100, b / 10 REM 10, b REM 10, r)
+    $)
+$)

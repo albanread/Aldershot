@@ -1,0 +1,79 @@
+' bench.fbas -- the BOX language comparison in FasterBASIC, the LLVM compiler: fib(30) by
+' recursion, a sieve of the primes below 2,000,000, and 200,000 string keys
+' in its own HASHMAP.  This compiler wants SHARED for the globals a
+' function uses.  OS_ReadMonotonicTime counts centiseconds, so each test
+' repeats until half a second has gone; the best of three, in milliseconds.
+DIM sv(2000001) AS BYTE
+DIM dmap AS HASHMAP
+
+FUNCTION Fib(n AS INTEGER) AS INTEGER
+  IF n < 2 THEN
+    Fib = n
+  ELSE
+    Fib = Fib(n - 1) + Fib(n - 2)
+  END IF
+END FUNCTION
+
+FUNCTION Sieve() AS LONG
+  SHARED sv
+  DIM i AS INTEGER, j AS INTEGER, c AS LONG
+  FOR i = 2 TO 2000000
+    sv(i) = 0
+  NEXT i
+  c = 0
+  FOR i = 2 TO 2000000
+    IF sv(i) = 0 THEN
+      c = c + 1
+      IF i <= 1414 THEN
+        FOR j = i * i TO 2000000 STEP i
+          sv(j) = 1
+        NEXT j
+      END IF
+    END IF
+  NEXT i
+  Sieve = c
+END FUNCTION
+
+FUNCTION Dict() AS LONG
+  SHARED dmap
+  DIM i AS INTEGER, s AS LONG
+  FOR i = 1 TO 200000
+    dmap("k" + STR$(i)) = STR$(i * 2)
+  NEXT i
+  s = 0
+  FOR i = 1 TO 200000
+    s = s + VAL(dmap("k" + STR$(i)))
+  NEXT i
+  Dict = s
+END FUNCTION
+
+FUNCTION Work(w AS INTEGER) AS LONG
+  IF w = 1 THEN
+    Work = Fib(30)
+  ELSEIF w = 2 THEN
+    Work = Sieve()
+  ELSE
+    Work = Dict()
+  END IF
+END FUNCTION
+
+SUB Best(nm AS STRING, w AS INTEGER)
+  DIM b AS DOUBLE, k AS INTEGER, t AS INTEGER, now AS INTEGER, c AS INTEGER, e AS INTEGER, r AS LONG
+  b = 99999999
+  FOR k = 1 TO 3
+    SYS "OS_ReadMonotonicTime" TO t
+    c = 0
+    DO
+      r = Work(w)
+      c = c + 1
+      SYS "OS_ReadMonotonicTime" TO now
+      e = now - t
+    LOOP UNTIL e >= 50
+    IF e * 10.0 / c < b THEN b = e * 10.0 / c
+  NEXT k
+  PRINT "fasterbasic "; nm; " "; INT(b * 100 + 0.5) / 100; " "; r
+END SUB
+
+CALL Best("fib", 1)
+CALL Best("sieve", 2)
+CALL Best("dict", 3)

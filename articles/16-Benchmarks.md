@@ -1,6 +1,6 @@
 # Benchmarks: the Machines and the Languages
 
-*30 October 2026*
+*30 October 2026; FasterBASIC, Modula-2, BCPL and Forth added 31 October*
 
 **Note: this is not RISC OS.** BOX is a RISC OS window manager and
 application environment running on a Linux kernel. [Is BOX Linux?](5-Linux.md) says what that means. The languages
@@ -10,11 +10,11 @@ itself would be different.
 ## Introduction
 
 BOX runs programs in many languages: C, BBC BASIC (interpreted, or
-compiled), Lua, Python, Tcl, Lisp, Smalltalk and Mojo, with Rust used for
-library code and engines. It runs on Apple silicon Macs and on Intel
+compiled), FasterBASIC, Modula-2, BCPL, Forth, Lua, Python, Tcl, Lisp,
+Smalltalk and Mojo, with Rust used for library code and engines. It runs on Apple silicon Macs and on Intel
 machines. We wanted to know how fast each language is on each machine,
 so we wrote the same three small programs in every language and timed
-them on the four machines that run all of the languages today.
+them on the four machines that run the languages today.
 
 This article covers:
 
@@ -60,6 +60,10 @@ time.
 | Mojo | Mojo 1.1, the box's `*Mojo` | compiled to machine code before it runs |
 | Rust | rustc, on the Mac that builds BOX | compiled before it runs, as a Linux program; see below |
 | BBC BASIC, compiled | ROSBAS ([source](../src/ROSBAS/README.md)), the box's `*RosBas` | compiled to machine code before it runs |
+| FasterBASIC | FasterBASIC's compiler, through LLVM, the box's `*FasterBASIC` | compiled to machine code in memory, then run |
+| Modula-2 | a Modula-2 compiler (PIM 4 and ISO) through LLVM, the box's `*Modula2` | compiled to machine code in memory, then run |
+| BCPL | a modern BCPL compiler through LLVM, the box's `*BCPL` | compiled to machine code in memory, then run |
+| Forth | F66, a subroutine-threaded Forth with its own optimiser, the box's `*F66` | each definition compiled to machine code as it is read |
 | Lua | LuaJIT | interpreted, then compiled to machine code as it runs |
 | Smalltalk | MACVM, a Strongtalk-style virtual machine | interpreted, then compiled to machine code as it runs |
 | Lisp | NCL, BOX's Common Lisp | compiled to machine code through LLVM as each definition is read |
@@ -67,8 +71,10 @@ time.
 | Tcl | Tcl 9.1 | interpreted, from byte code |
 | BBC BASIC | BOX's BASIC, RISC OS's interpreter translated into C | interpreted |
 
-Each has a compiler or interpreter for both kinds of processor: A64
-code on Apple silicon, x86-64 code on Intel. Compiled BASIC keeps the
+Each has a compiler or interpreter for both kinds of processor, A64
+code on Apple silicon and x86-64 code on Intel, except Forth: F66 makes
+only A64 code so far, so it runs on Apple silicon alone. FasterBASIC,
+Modula-2, BCPL and compiled BASIC share one copy of LLVM inside BOX. Compiled BASIC keeps the
 meaning of BBC BASIC exactly, so the same source gives the same answers
 interpreted or compiled.
 
@@ -94,6 +100,10 @@ be.
 | Tcl | automation: `*Tcl` scripts and !Workflows, which records and replays work in the desktop and drives the applications |
 | Lisp | !Lisp, an editor with a live Lisp underneath, and Lisp programs with windows, a game pane and sound |
 | Smalltalk | !Smalltalk, a Workspace and class Browser, and Smalltalk programs run like BASIC ones, by a double-click or `*Smalltalk` |
+| FasterBASIC | !FasterBASIC, an editor in the style of QuickBASIC where F5 runs the program at once, and BASIC programs that call SWIs and open Declaritive windows |
+| Modula-2 | !Modula2 and Modula-2 in !Code (colouring, Build and Run, errors, layout): programs made of modules, calling SWIs and opening Declaritive windows |
+| BCPL | !BCPL and BCPL in !Code: BCPL programs with RISC OS's streams, SWIs and Declaritive windows |
+| Forth | !F66, a console for trying things out, with the stack and the words on show, and Forth programs with SWIs and Declaritive windows; Apple silicon only so far |
 
 ---
 
@@ -112,9 +122,10 @@ them.
 
 Each program is written the way someone who uses that language would
 write it, with no tricks. C uses an array of bytes and its own small hash
-table; Mojo, Rust, Lua, Python, Tcl, Lisp and Smalltalk use their own
-tables. BBC BASIC has no hash table, so its program makes one from
-arrays, with a hash function written in BASIC. The interpreted and
+table; Mojo, Rust, Lua, Python, Tcl, Lisp, Smalltalk and FasterBASIC use
+their own tables. BBC BASIC, Modula-2, BCPL and Forth have none, so their
+programs make one from arrays, with a hash function written in the
+language. The interpreted and
 compiled BASIC results come from the same source file.
 
 ---
@@ -125,9 +136,13 @@ Each program times itself with its own language's clock, so the time
 taken to start the language is not counted. Each test is run three times
 and the best of the three is reported.
 
-C, Mojo, Lua and BASIC read clocks that count in hundredths of a second.
+C, Mojo, Lua, BASIC, FasterBASIC, Modula-2, BCPL and Forth read clocks
+that count in hundredths of a second.
 To time something shorter than that, these repeat each test until at
 least half a second has passed, and divide by the number of runs.
+
+The first ten languages were timed on 30 October and the four newest on
+31 October, each time with that day's build of BOX.
 
 All times are in milliseconds (thousandths of a second). Smaller is
 better. Every program gave the right answer on every machine. The
@@ -142,9 +157,13 @@ Mac.
 
 | Language | Mac Studio (M4 Max) | Mac mini 2018 | MacBook Pro 2019 | Mac Pro 2013 |
 | --- | ---: | ---: | ---: | ---: |
+| BCPL | 1.4 | 2.7 | 2.5 | 3.0 |
+| FasterBASIC | 1.4 | 2.6 | 2.4 | 3.0 |
 | C | 1.4 | 3.1 | 2.9 | 3.2 |
 | Rust | 1.5 | 6.5 | 2.3 | 2.4 |
 | Mojo | 1.5 | 2.8 | 2.6 | 3.0 |
+| Modula-2 | 1.7 | 2.5 | 2.2 | 2.8 |
+| Forth | 2.5 | -- | -- | -- |
 | Lua | 3.0 | 8.0 | 8.0 | 9.0 |
 | Smalltalk | 3.2 | 7.7 | 7.4 | 9.9 |
 | Lisp | 12.8 | 27.1 | 25.7 | 30.5 |
@@ -157,9 +176,13 @@ Mac.
 
 | Language | Mac Studio (M4 Max) | Mac mini 2018 | MacBook Pro 2019 | Mac Pro 2013 |
 | --- | ---: | ---: | ---: | ---: |
+| BCPL | 4.1 | 6.4 | 5.9 | 7.0 |
 | C | 4.2 | 5.6 | 5.6 | 6.9 |
+| Modula-2 | 4.3 | 6.2 | 5.9 | 7.0 |
 | Mojo | 4.5 | 15.2 | 14.7 | 19.2 |
 | Rust | 4.6 | 7.5 | 7.1 | 8.4 |
+| Forth | 6.3 | -- | -- | -- |
+| FasterBASIC | 7.1 | 12.5 | 8.9 | 21.7 |
 | Lua | 26 | 20 | 17 | 30 |
 | BBC BASIC, compiled | 43.3 | 102 | 100 | 125 |
 | Smalltalk | 55 | 134 | 130 | 170 |
@@ -173,16 +196,22 @@ Mac.
 | Language | Mac Studio (M4 Max) | Mac mini 2018 | MacBook Pro 2019 | Mac Pro 2013 |
 | --- | ---: | ---: | ---: | ---: |
 | Lua | 11 | 39 | 35 | 52 |
+| Forth | 12.8 | -- | -- | -- |
 | Mojo | 17.6 | 34 | 30.6 | 35.3 |
 | C | 21.7 | 46.4 | 45 | 57.8 |
+| Modula-2 | 22.7 | 61.1 | 56.7 | 57.8 |
 | Rust | 28.4 | 76.4 | 78.9 | 90.9 |
+| BCPL | 40.8 | 114 | 100 | 150 |
 | Python | 46.2 | 113 | 109 | 134 |
 | Tcl | 55.3 | 171 | 159 | 197 |
 | Smalltalk | 77.8 | 219 | 203 | 280 |
 | Lisp | 347 | 798 | 798 | 1038 |
 | BBC BASIC, compiled | 370 | 850 | 820 | 980 |
+| FasterBASIC | 465 | 610 | 570 | 750 |
 | BBC BASIC, interpreted | 1940 | 4270 | 4220 | 5030 |
 
+A dash marks a time that cannot be taken: our Forth is written in Arm
+assembly language and so runs only on the Arm box.
 
 ---
 
@@ -202,8 +231,12 @@ taking the three tests together:
 | BBC BASIC, compiled | 2.4 | 2.3 | 2.8 |
 | Python | 2.3 | 2.3 | 2.9 |
 | Tcl | 2.5 | 2.3 | 3.1 |
+| FasterBASIC | 1.6 | 1.4 | 2.2 |
+| Modula-2 | 1.8 | 1.7 | 1.9 |
+| BCPL | 2.1 | 1.9 | 2.4 |
+| Forth | -- | -- | -- |
 | BBC BASIC, interpreted | 2.2 | 2.2 | 2.6 |
-| **All** | **2.3** | **2.1** | **2.6** |
+| **All** | **2.2** | **2.0** | **2.5** |
 
 The Apple silicon Mac is the fastest, by about two to one, even though
 BOX runs there as a virtual machine. Its processor is six years newer
@@ -226,6 +259,12 @@ later Intel Macs than on the Apple silicon Mac. We think the reason is
 that LuaJIT's compiler for x86-64 has had many more years of work than
 its compiler for A64, but we have not looked into it.
 
+FasterBASIC loses the least on the Intel Macs, because most of its time
+is spent in the dict test, where it is only a third slower on the 2018
+Mac mini than on the Apple silicon Mac. Modula-2 is the steadiest on the
+2013 Mac Pro, which takes no longer than the two later Intel Macs at its
+dict test. Forth has no Intel times; it runs on Apple silicon only.
+
 ---
 
 ## 7 The languages compared
@@ -236,8 +275,12 @@ Mac:
 | Language | fib | sieve | dict |
 | --- | ---: | ---: | ---: |
 | Mojo | 1.1 | 1.1 | 0.8 |
+| Modula-2 | 1.2 | 1.0 | 1.0 |
 | Rust | 1.1 | 1.1 | 1.3 |
+| Forth | 1.8 | 1.5 | 0.6 |
+| BCPL | 1.0 | 1.0 | 1.9 |
 | Lua | 2.1 | 6.2 | 0.5 |
+| FasterBASIC | 1.0 | 1.7 | 21 |
 | Smalltalk | 2.3 | 13 | 3.6 |
 | Python | 45 | 22 | 2.1 |
 | Lisp | 9.1 | 16 | 16 |
@@ -255,6 +298,25 @@ than for speed. On the Intel Macs, Mojo falls behind C and Rust at the
 sieve. Of the languages BOX's RISC OS programs are written in, Mojo is as
 fast as C on Apple silicon, and close to it on Intel apart from the
 sieve.
+
+**Modula-2, BCPL and FasterBASIC are as quick as C at calls.** All three
+are compiled through LLVM, as C is, into machine code in memory just
+before the program runs, and at fib all three are within a fifth of C.
+Modula-2 and BCPL match C at the sieve as well, and Modula-2 matches it
+at the dict test, with a table made from arrays. BCPL takes about twice
+C's time at the dict test: its table starts small and is doubled as it
+fills, and each key is a vector of its own from the heap. FasterBASIC is
+a little behind at the sieve. Its dict test takes twenty times C's,
+since every key is a new string value, made, hashed, stored in its
+`HASHMAP` and freed again by its run-time library, which does far more
+work for each short string than C's program does.
+
+**Forth** compiles each definition to machine code as it is read, with
+its own optimiser rather than LLVM. It is within twice C's time at fib
+and the sieve, and quicker than C at the dict test, second only to Lua:
+its program keeps the table in two fixed arrays, large enough from the
+start, and copies the keys into one block of memory, so nothing is
+allocated for each key.
 
 **Lua and Smalltalk compile themselves to machine code while they run,
 and it shows.** At calling procedures both are within two or three times
@@ -296,7 +358,7 @@ the program.
 
 ## 8 What we fixed on the way
 
-Writing the comparison found three faults, which were fixed before the
+Writing the comparison found these faults, which were fixed before the
 times above were taken:
 
 - **Lisp's hash tables never grew.** A table kept the 16 buckets it was
@@ -315,6 +377,19 @@ times above were taken:
   `strdup`. Both were fixed in the program. Mojo's `Int` is 32 bits in
   the box for the same reason, so its program adds up the dict test's
   numbers in an `Int64`.
+- **FasterBASIC's dict test seemed never to end.** Freeing a block of
+  memory walked the whole list of free blocks first, to catch a block
+  freed twice, so freeing n blocks in a row took time in proportion to n
+  squared. The test finished, then took minutes to free its 200,000
+  keys. A free block now carries a mark, and the list is walked only
+  when the mark is there.
+- **BCPL had four faults.** `VEC n` and `GETVEC(n)` gave n words rather
+  than n+1, so writing `v!n` overwrote the next block; `FREEVEC` freed
+  nothing, so a `GETVEC` in a loop used memory until there was none;
+  every routine checked in with a garbage collector that BCPL does not
+  have, which took fib from 18.5 ms to 1.4 ms once removed; and every call
+  of a routine with a `VEC` made and cleared 64 KB of workspace, where
+  1 KB does, which took the dict test from 227 ms to 39 ms.
 
 ---
 
@@ -325,9 +400,11 @@ times above were taken:
   network will see much smaller differences between languages.
 - The dict test compares tables written in C, for Lua, Python and Tcl,
   with tables written in the language itself, for Mojo, Rust, Lisp,
-  Smalltalk and BASIC.
-- The times vary by a few per cent from run to run. The C, Mojo, Lua and
-  BASIC times are averages over repeated runs, read from a clock that
+  Smalltalk, BASIC, Modula-2, BCPL and Forth. FasterBASIC's `HASHMAP`
+  is part of its run-time library, which is written in Zig.
+- Forth runs only on Apple silicon so far, so it has no Intel times.
+- The times vary by a few per cent from run to run. The C, Mojo, Lua,
+  BASIC, FasterBASIC, Modula-2, BCPL and Forth times are averages over repeated runs, read from a clock that
   counts hundredths of a second. The Apple silicon times are the best of
   two runs of all the programs.
 - BOX runs on other machines too, among them an Intel N97 mini PC
