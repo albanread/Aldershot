@@ -2,6 +2,13 @@
 
 *31 October 2026*
 
+**Note: this is work in progress.** The game pane works, and Galaxigans
+and the Lisp examples run on it every day, but it has important gaps,
+listed under Limits at the end: most languages cannot use it yet, a Mac
+draws only one pane at a time, and the tile layers, sprite flipping and
+much of ABC are still to come. We are filling them in, and this article
+will be revised as they close.
+
 **Note: this is not RISC OS.** BOX is a RISC OS window manager and
 application environment running on a Linux kernel. [Is BOX Linux?](5-Linux.md) says what that means. The game pane is BOX's own,
 and is not part of RISC OS.
