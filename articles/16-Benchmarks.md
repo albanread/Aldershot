@@ -166,7 +166,7 @@ Mac.
 | Rust | 1.5 | 6.5 | 2.3 | 2.4 |
 | Mojo | 1.5 | 2.8 | 2.6 | 3.0 |
 | Modula-2 | 1.7 | 2.5 | 2.2 | 2.8 |
-| Forth | 2.5 | 4.5 | -- | 5.8 |
+| Forth | 2.5 | 4.5 | 4.7 | 5.8 |
 | Lua | 3.0 | 8.0 | 8.0 | 9.0 |
 | Smalltalk | 3.2 | 7.7 | 7.4 | 9.9 |
 | Scheme | 3.3 | 8.3 | 8.5 | 13.9 |
@@ -185,7 +185,7 @@ Mac.
 | Modula-2 | 4.3 | 6.2 | 5.9 | 7.0 |
 | Mojo | 4.5 | 15.2 | 14.7 | 19.2 |
 | Rust | 4.6 | 7.5 | 7.1 | 8.4 |
-| Forth | 6.3 | 20 | -- | 27.4 |
+| Forth | 6.3 | 20 | 20.8 | 27.4 |
 | FasterBASIC | 7.1 | 12.5 | 8.9 | 21.7 |
 | Scheme | 10.6 | 30.5 | 31.1 | 29.8 |
 | Lua | 26 | 20 | 17 | 30 |
@@ -201,7 +201,7 @@ Mac.
 | Language | Mac Studio (M4 Max) | Mac mini 2018 | MacBook Pro 2019 | Mac Pro 2013 |
 | --- | ---: | ---: | ---: | ---: |
 | Lua | 11 | 39 | 35 | 52 |
-| Forth | 12.8 | 62.5 | -- | 78.6 |
+| Forth | 12.8 | 62.5 | 65 | 78.6 |
 | Mojo | 17.6 | 34 | 30.6 | 35.3 |
 | C | 21.7 | 46.4 | 45 | 57.8 |
 | Modula-2 | 22.7 | 61.1 | 56.7 | 57.8 |
@@ -216,8 +216,6 @@ Mac.
 | FasterBASIC | 465 | 610 | 570 | 750 |
 | BBC BASIC, interpreted | 1940 | 4270 | 4220 | 5030 |
 
-A dash marks a time not yet taken: the MacBook Pro's Forth times will
-be added when that machine is next updated.
 
 ---
 
@@ -241,9 +239,9 @@ taking the three tests together:
 | Modula-2 | 1.8 | 1.7 | 1.9 |
 | BCPL | 2.1 | 1.9 | 2.4 |
 | Scheme | 2.5 | 2.5 | 3.2 |
-| Forth | 3.0 | -- | 3.9 |
+| Forth | 3.0 | 3.1 | 3.9 |
 | BBC BASIC, interpreted | 2.2 | 2.2 | 2.6 |
-| **All** | **2.2** | **2.0** | **2.6** |
+| **All** | **2.2** | **2.1** | **2.6** |
 
 The Apple silicon Mac is the fastest, by about two to one, even though
 BOX runs there as a virtual machine. Its processor is six years newer
