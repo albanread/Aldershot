@@ -93,7 +93,7 @@ be.
 | Language | Used for in BOX today |
 | --- | --- |
 | C | most of BOX itself: the operating system modules, translated from RISC OS's assembler or rewritten, the Window Manager, FileSwitch and HostFS, and Declaritive; the ported applications, among them PipeDream and NetSurf; and anyone's own programs, built with `*CC` |
-| Mojo | the applications written for BOX: the front ends of !Scribe, !Trace, !Palette, !Ledger, !Folio, !Code, !Draft, !Present, !Publish, !FloorPlan, !Micropolis, !Tower and !Workflows, the Wimp side of each ([Apps for BOX](10-Apps.md)); Worker kernels, which run on the other cores; and anyone's own programs, built with `*Mojo` |
+| Mojo | the applications written for BOX: the front ends of !Scribe, !Ledger, !Folio, !Present, !Publish, !Draft, !Trace, !Palette, !Canvas, !FloorPlan, !Studio, !Code, !Workflows, !Micropolis, !Tower and !Antiquity, the Wimp side of each ([Apps for BOX](10-Apps.md)); Worker kernels, which run on the other cores; and anyone's own programs, built with `*Mojo` |
 | Rust | library code and engines only: the document engines behind the applications above, which read and write .docx, .xlsx, PDF, SVG and images, and the engines of some of the games, such as !Tower's |
 | BBC BASIC, interpreted | RISC OS's own language: existing BASIC programs, the examples on the disc, quick experiments, and BASIC programs' screens in desktop windows |
 | BBC BASIC, compiled | turning a finished BASIC program into a faster application, from StrongED's Compile and run or with `*RosBas` |
