@@ -367,7 +367,7 @@ components are licensed to Licensee pursuant to the following terms and conditio
 
    COPYRIGHT AND PERMISSION NOTICE
 
-   Copyright © 1996 - 2022, Daniel Stenberg, <daniel@haxx.se>, and many
+   Copyright Â© 1996 - 2022, Daniel Stenberg, <daniel@haxx.se>, and many
    contributors, see the THANKS file.
 
    All rights reserved.

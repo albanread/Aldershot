@@ -7740,7 +7740,7 @@ The same text as chardetng 1.0.0: LICENSE-MIT, above.
 encoding_rs 0.8.42: LICENSE-WHATWG
 ------------------------------------------------------------------------
 
-Copyright © WHATWG (Apple, Google, Mozilla, Microsoft).
+Copyright Â© WHATWG (Apple, Google, Mozilla, Microsoft).
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -8485,7 +8485,7 @@ The same text as adler2 2.0.1: LICENSE-MIT, above.
 fax 0.2.7: LICENSE
 ------------------------------------------------------------------------
 
-Copyright © 2021 The pdf-rs contributers.
+Copyright Â© 2021 The pdf-rs contributers.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -11005,7 +11005,7 @@ UNICODE LICENSE V3
 
 COPYRIGHT AND PERMISSION NOTICE
 
-Copyright © 2020-2024 Unicode, Inc.
+Copyright Â© 2020-2024 Unicode, Inc.
 
 NOTICE TO USER: Carefully read the following legal agreement. BY
 DOWNLOADING, INSTALLING, COPYING OR OTHERWISE USING DATA FILES, AND/OR
@@ -11046,7 +11046,7 @@ SPDX-License-Identifier: Unicode-3.0
 --
 
 Portions of ICU4X may have been adapted from ICU4C and/or ICU4J.
-ICU 1.8.1 to ICU 57.1 © 1995-2016 International Business Machines Corporation and others.
+ICU 1.8.1 to ICU 57.1 Â© 1995-2016 International Business Machines Corporation and others.
 
 ------------------------------------------------------------------------
 icu_locale_core 2.3.0: LICENSE
@@ -11618,7 +11618,7 @@ limitations under the License.
 jpeg-encoder 0.6.1: LICENSE-MIT
 ------------------------------------------------------------------------
 
-Copyright (c) 2021 Volker Ströbel <volkerstroebel@mysurdity.de>
+Copyright (c) 2021 Volker StrÃ¶bel <volkerstroebel@mysurdity.de>
 
 Permission is hereby granted, free of charge, to any
 person obtaining a copy of this software and associated
@@ -12180,7 +12180,7 @@ terms compatible with the above MIT license:
 * musl libc https://www.musl-libc.org/. This library contains the following
   copyright:
 
-      Copyright © 2005-2020 Rich Felker, et al.
+      Copyright Â© 2005-2020 Rich Felker, et al.
 
 * The CORE-MATH project https://core-math.gitlabpages.inria.fr/. CORE-MATH
   routines are available under the MIT license on a per-file basis.
@@ -12190,12 +12190,12 @@ math portions of the library:
 
 ------------------------------------------------------------------------------
 Much of the math library code (src/math/* and src/complex/*) is
-Copyright © 1993,2004 Sun Microsystems or
-Copyright © 2003-2011 David Schultz or
-Copyright © 2003-2009 Steven G. Kargl or
-Copyright © 2003-2009 Bruce D. Evans or
-Copyright © 2008 Stephen L. Moshier or
-Copyright © 2017-2018 Arm Limited
+Copyright Â© 1993,2004 Sun Microsystems or
+Copyright Â© 2003-2011 David Schultz or
+Copyright Â© 2003-2009 Steven G. Kargl or
+Copyright Â© 2003-2009 Bruce D. Evans or
+Copyright Â© 2008 Stephen L. Moshier or
+Copyright Â© 2017-2018 Arm Limited
 and labelled as such in comments in the individual source files. All
 have been licensed under extremely permissive terms.
 ------------------------------------------------------------------------------
@@ -13467,7 +13467,7 @@ SOFTWARE.
 oem_cp 2.1.2: LICENSE
 ------------------------------------------------------------------------
 
-Copyright © 2020 Tatsunori Uchino <tats.u@live.jp>
+Copyright Â© 2020 Tatsunori Uchino <tats.u@live.jp>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -13503,7 +13503,7 @@ The same text as adler2 2.0.1: LICENSE-MIT, above.
 ordered-channel 1.2.0: LICENSE
 ------------------------------------------------------------------------
 
-© 2024 Kornel Lesi?ski
+Â© 2024 Kornel Lesi?ski
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -14552,7 +14552,7 @@ The same text as jpeg-encoder 0.6.1: LICENSE-APACHE, above.
 psm 0.1.24: LICENSE-MIT
 ------------------------------------------------------------------------
 
-Copyright © 2018, Simonas Kazlauskas
+Copyright Â© 2018, Simonas Kazlauskas
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -16825,7 +16825,7 @@ sha3 0.12.0: LICENSE-MIT
 
 Copyright (c) 2020-2026 The RustCrypto Project Developers
 Copyright (c) 2016-2023 Artyom Pavlov, Marek Kotewicz
-Copyright (c) 2014 Sébastien Martini
+Copyright (c) 2014 SÃ©bastien Martini
 Copyright (c) 2009-2013 Mozilla Foundation
 Copyright (c) 2006-2009 Graydon Hoare
 
