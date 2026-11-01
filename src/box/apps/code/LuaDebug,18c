@@ -1,0 +1,162 @@
+-- LuaDebug: !Code's debugger for Lua (code-engine's scriptdbg.rs).
+--
+--   *LuaJIT -joff <Code$Dir>.LuaDebug <script> [<line>...]
+--
+-- runs the script under a line hook: at a breakpoint (the lines given), or
+-- after a step, it writes "@@dbg" lines -- where it is, the call stack,
+-- the frame's locals -- and reads one command from its input, which !Code
+-- sends the task window: c (go on), n (step over), s (step into), r (step
+-- out), q (stop), f K (show frame K), b/cl PATH LINE (a breakpoint in or
+-- out, in the script). With no lines given it stops at the script's first.
+-- The compiler is off (jit.off()): a line hook sees only interpreted code.
+
+local script = arg[1]
+local breaks, any = {}, false
+for i = 2, #arg do
+  local n = tonumber(arg[i])
+  if n then breaks[n] = true; any = true end
+end
+if jit then jit.off() end
+
+local function say(...)
+  local t = { ... }
+  for i = 1, #t do t[i] = (tostring(t[i]):gsub("[|\r\n]", " ")) end
+  io.write("@@dbg ", table.concat(t, "|"), "\n")
+  io.flush()
+end
+
+local chunk, err = loadfile(script)
+if not chunk then
+  io.write(tostring(err), "\n")
+  say("ended", "error")
+  return
+end
+local src = "@" .. script
+
+-- the frames of the script, from level `base` (as the caller counts) up
+local function frames(base)
+  local out, lvl = {}, base
+  while true do
+    local info = debug.getinfo(lvl, "Sln")
+    if not info then break end
+    if info.source == src then
+      local name = info.name or (info.what == "main" and "chunk" or "function")
+      out[#out + 1] = { lvl, name, info.currentline }
+    end
+    lvl = lvl + 1
+  end
+  return out
+end
+
+local function show(v)
+  local s = tostring(v)
+  if type(v) == "string" then s = string.format("%q", v) end
+  if #s > 80 then s = s:sub(1, 77) .. "..." end
+  return s
+end
+
+-- the stop's lines; fr's levels are its caller's, which is report's too
+local function report(why, fr, cur)
+  local f = fr[cur]
+  say("stopped", script, f[3], why)
+  for k, g in ipairs(fr) do say("frame", k - 1, g[2], script, g[3]) end
+  local i = 1
+  while true do
+    local n, v = debug.getlocal(f[1] + 1, i)
+    if not n then break end
+    if n:sub(1, 1) ~= "(" then say("var", n, type(v), show(v)) end
+    i = i + 1
+  end
+  say("end")
+end
+
+local mode, target = (any and "cont" or "step"), 0
+-- the line it last stopped at, and the depth: LuaJIT gives a line its
+-- event again when a call in it returns, which is not a new stop until
+-- another line of that function (or one it returns to) has run
+local skipline, skipdepth
+
+local function depth(base)
+  local d, lvl = 0, base
+  while debug.getinfo(lvl, "S") do d = d + 1; lvl = lvl + 1 end
+  return d
+end
+
+-- waits for a command; returns when the script is to go on, true if it
+-- is to stop
+local function wait(why, fr)
+  local cur, escapes = 1, 0
+  report(why, fr, cur)
+  while true do
+    local line = io.read("l")
+    if line == nil then
+      escapes = escapes + 1
+      line = escapes > 20 and "q" or ""
+    end
+    line = line:gsub("@@cmd", ""):gsub("^%s+", ""):gsub("%s+$", "")
+    local c, rest = line:match("^(%S+)%s*(.*)$")
+    if c == "c" then mode = "cont"; return
+    elseif c == "s" then mode = "step"; return
+    elseif c == "n" then mode = "next"; target = depth(4) - (cur - 1); return
+    elseif c == "r" then mode = "out"; target = depth(4) - 1; return
+    elseif c == "q" then return true
+    elseif c == "f" then
+      local k = tonumber(rest)
+      if k and fr[k + 1] then cur = k + 1 end
+      report("frame", fr, cur)
+    elseif c == "b" or c == "cl" then
+      local n = tonumber(rest:match("(%d+)$"))
+      if n then breaks[n] = (c == "b") or nil end
+      say("ok")
+    end
+  end
+end
+
+local function hook(event, line)
+  local info = debug.getinfo(2, "S")
+  if not info or info.source ~= src then return end
+  if skipline then
+    local d = depth(3)
+    if d > skipdepth or (line == skipline and d == skipdepth and mode ~= "out") then
+      if mode ~= "step" or line == skipline then return end
+    else
+      skipline = nil
+    end
+  end
+  local stop
+  if breaks[line] then
+    stop = "breakpoint"
+  elseif mode == "step" then
+    stop = "step"
+  elseif mode == "next" then
+    if depth(3) <= target then stop = "step" end
+  elseif mode == "out" then
+    if depth(3) <= target then stop = "step" end
+  end
+  if stop then
+    -- level 3 here is the function the hook was called in (1 frames, 2 hook)
+    skipline, skipdepth = line, depth(3)
+    if wait(stop, frames(3)) then error("@@quit", 0) end
+  end
+end
+
+local function failed(e)
+  if e == "@@quit" then return e end
+  local fr = frames(3)
+  io.write(debug.traceback(tostring(e), 2), "\n")
+  debug.sethook()
+  if #fr > 0 and wait("error: " .. tostring(e), fr) then return "@@quit" end
+  return e
+end
+
+debug.sethook(hook, "l")
+say("started", script)
+local ok, e = xpcall(chunk, failed)
+debug.sethook()
+if ok then
+  say("ended", 0)
+elseif e == "@@quit" then
+  say("ended", "stopped")
+else
+  say("ended", "error")
+end

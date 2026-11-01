@@ -7,9 +7,11 @@
 It opens PNG, JPEG, TIFF, GIF and BMP pictures that are double-clicked or
 dropped on it.  RISC OS sprites can be dropped on it too, but they are
 still opened by Paint when double-clicked.  It can paint, select (by
-shape, by colour, or the main subject of a photo), fill, crop, turn,
-resize, correct colours, apply effects and remove red eyes, and it saves
-pictures as PNG.  The engine uses PhotoCraft's pictures, file formats and
+box, ellipse, outline, colour, or the main subject of a photo), copy,
+paste and move what is selected, fill, crop, turn, resize, correct
+colours, apply effects and remove red eyes, and it saves pictures as PNG.
+Its properties pane holds the tool's settings, the adjustments and the
+picture's size.  The engine uses PhotoCraft's pictures, file formats and
 brushes, with commands of our own."""
 
 from rosapp import RosApp, AppConfig
@@ -26,13 +28,14 @@ def main():
             cfg.types.append(t)
         cfg.imports.append(0xFF9)
         for t in ["rs_marquee", "rs_lasso", "rs_wand", "rs_brush", "rs_spray", "rs_smudge", "rs_eraser", "rs_fill",
-                  "rs_gradient", "rs_eyedrop", "rs_redeye", "rs_crop", "rs_pan", "rs_zoomtool"]:
+                  "rs_gradient", "rs_eyedrop", "rs_redeye", "rs_crop", "rs_move", "rs_pan", "rs_zoomtool"]:
             cfg.tools.append(String(t))
         cfg.start = String("new")
         cfg.save_type = 0xB60
         cfg.save_leaf = String("Picture")
         cfg.fit = True
         cfg.colours = True
+        cfg.props = True
         cfg.menu_names.append(String("Picture"))
         cfg.menu_items.append(String("Rotate right,Rotate left,Turn over,Flip across,Flip down,-Half size,"
                                      + "Double size,-Brighter,Darker,More contrast,Less contrast,More colour,"
@@ -41,7 +44,7 @@ def main():
         cfg.menu_items.append(String("Blur,Blur more,Sharpen,Sharpen more,-Reduce noise,Add noise,-Pixelate,"
                                      + "Emboss,Find edges,Invert,Posterize,Sepia,-Oil paint,Cutout,Watercolour"))
         cfg.menu_names.append(String("Select"))
-        cfg.menu_items.append(String("All,None,Inverse,-Subject,-Grow,Shrink,Soften the edge,Edge only,-Crop to it"))
+        cfg.menu_items.append(String("All,None,Inverse,-Subject,-Grow,Shrink,Soften the edge,Edge only,-Crop to it,Fill in"))
         cfg.menu_names.append(String("Distort"))
         cfg.menu_items.append(String("Twirl,Pinch,Bulge,Ripple,-Motion blur,Wind,-Crystals,Dots,Mezzotint,Halftone,"
                                      + "-Diffuse,Solarise,-Smooth,Dust and scratches"))
@@ -51,6 +54,14 @@ def main():
                                      + "Dry bristle,Gouache,Sponge,Ink wash,-Spatter,Stipple,Grass,Leaves,Confetti,"
                                      + "Sparkle,Rake,Halftone,Canvas"))
         # The File menu's Export entries, which save a copy in another format.
+        # sprites: 16 million colours, or 256 with a palette made for the
+        # picture for programs older than RISC OS 3.5 (the engine writes both)
+        cfg.export_names.append(String("Sprite"))
+        cfg.export_types.append(0xFF9)
+        cfg.export_exts.append(String("spr"))
+        cfg.export_names.append(String("Sprite (256 colours)"))
+        cfg.export_types.append(0xFF9)
+        cfg.export_exts.append(String("spr8"))
         cfg.export_names.append(String("JPEG"))
         cfg.export_types.append(0xC85)
         cfg.export_exts.append(String("jpg"))

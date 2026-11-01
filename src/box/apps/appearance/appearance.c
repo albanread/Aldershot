@@ -19,7 +19,13 @@
  *               tiled or centred.  All of these use *Backdrop, which the
  *               Pinboard provides.  The Composite switch tiles a one-colour
  *               sprite that is tagged for the Metal display's backdrop layer,
- *               so that the host's layer shows through the desktop.
+ *               so that the host's layer shows through the desktop.  The
+ *               switch is offered only where the window has that layer: the
+ *               launcher says so with the system variable BOX$HostBackdrop.
+ *   Icons       The icon set of the current theme.  Each set on Themes$Path
+ *               that has a SpritesV file is shown with a few of its icons,
+ *               drawn from the file by *VIconSet.  A click runs
+ *               *WimpThemeSet Theme.Vectors and the icons change at once.
  *
  * Each choice is written as it is made to <Choices$Write>.Appearance, an
  * Obey file of the commands above.  !Boot runs that file as the desktop
@@ -92,6 +98,12 @@ enum {
 #define COMPOSITE_H 168                 /* the switch and the lines beneath it */
 #define DEFAULT_TILE "Resources:$.Resources.Pinboard.Tile"
 
+/* the Icons page: a row for each set */
+#define SET_H       184
+#define SET_PITCH   204
+#define SET_TEXT_W  440                 /* the name and its two lines, then the samples */
+#define SAMPLE_PITCH 170
+
 /* ---- themes ---------------------------------------------------------------------------------- */
 
 #define MAX_THEMES 40
@@ -112,6 +124,8 @@ struct theme {
     int frame, resize_bar;              /* Window.Frame, Window.ResizeBar: pixels */
     unsigned frame_face, button_face, button_colour;
     int buttons_right, hide_unfocused;  /* Buttons.Layout right, Buttons.HideUnfocused */
+    char vectors_name[40];              /* [Theme] Vectors: the icon set it names */
+    int own_vectors;                    /* its directory has a SpritesV of its own */
 };
 
 static struct theme themes[MAX_THEMES];
@@ -171,15 +185,17 @@ struct choice {
     char picture[220];
     int fit;
     int composite;                      /* set when the tagged tile is the wallpaper */
+    char vectors[24];                   /* the icon set chosen by hand; "" is the theme's own */
 };
 
-enum { PAGE_THEMES, PAGE_WINDOWS, PAGE_WALLPAPER, NPAGES };
-static const char *const page_names[NPAGES] = { "Themes", "Windows", "Wallpaper" };
-static const char *const page_heads[NPAGES] = { "Themes", "Windows", "Wallpaper" };
+enum { PAGE_THEMES, PAGE_WINDOWS, PAGE_WALLPAPER, PAGE_ICONS, NPAGES };
+static const char *const page_names[NPAGES] = { "Themes", "Windows", "Wallpaper", "Icons" };
+static const char *const page_heads[NPAGES] = { "Themes", "Windows", "Wallpaper", "Icons" };
 static const char *const page_subs[NPAGES] = {
     "Click a theme: the desktop changes at once.",
     "How a painted theme draws its windows.",
     "The desktop's colour, and a picture behind your windows.",
+    "The icons this theme draws with.",
 };
 
 static struct {
@@ -190,6 +206,7 @@ static struct {
     int win_h;
     struct choice now, start;
     int quitting;
+    int host_backdrop;                  /* the window has a backdrop layer of its own (BOX$HostBackdrop) */
 } g;
 
 /* ---- small things ---------------------------------------------------------------------------- */
@@ -492,6 +509,8 @@ static void apply_key(struct theme *t, const char *sec, const char *key, const c
         snprintf(t->name, sizeof t->name, "%s", v);
     else if (same(sec, "Theme") && same(key, "Icons"))
         snprintf(t->icons_name, sizeof t->icons_name, "%s", v);
+    else if (same(sec, "Theme") && same(key, "Vectors"))
+        snprintf(t->vectors_name, sizeof t->vectors_name, "%s", v);
     else if (same(sec, "Theme") && same(key, "Base"))
         snprintf(base, (size_t)basesize, "%s", v);
     else if (same(sec, "Chrome") && same(key, "Style"))
@@ -717,6 +736,8 @@ static void add_theme(const char *dir, const char *leaf)
     char base[40] = "";
     parse_theme(t, dir, base, sizeof base, 0);
     t->icons = theme_icons(dir, base, t->icons_name);
+    snprintf(f, sizeof f, "%s.SpritesV", dir);
+    t->own_vectors = object_type(f) == 1;
 }
 
 static void scan_themes(void)
@@ -789,6 +810,168 @@ static void read_current(void)
     while (n && v[n - 1] == '.')
         v[--n] = 0;
     snprintf(g.now.theme, sizeof g.now.theme, "%s", v);
+}
+
+static int choices_name(char *buf, int size);
+
+/* ---- the icon sets --------------------------------------------------------------------------- */
+
+#define MAX_SETS     8
+#define SAMPLES      5
+#define SAMPLE_PX    128                /* a sample's size on the screen, in OS units */
+
+/* The icons shown for each set.  Edit, Paint, Draw, the discs, folders and
+ * standard file types are drawn the same in every set, so none of those is here. */
+static const struct { const char *name, *caption; } samples[SAMPLES] = {
+    { "romapps", "Apps" }, { "discs", "Discs" }, { "file_f7a", "BASIC" }, { "file_fb1", "Sound" },
+    { "file_c85", "Picture" },
+};
+
+static struct iconset {
+    char leaf[32];                      /* what Theme.Vectors takes */
+    char file[240];                     /* its SpritesV */
+    int *area;                          /* the sample icons drawn from it, or NULL */
+} sets[MAX_SETS];
+static int nsets;
+
+static const struct { const char *leaf, *label, *line1, *line2; } set_text[] = {
+    { "Icons", "BOX", "The BOX set. Pages seen in", "perspective, drawn from open art." },
+    { "Win2K", "Win2K", "Flat pages on a label band,", "with yellow folders." },
+    { "Pinstripe", "Pinstripe", "Win2K's pages with pale lilac", "folders and cool grey hardware." },
+    { "Cube", "Cube", "The BOX art on a dark granite", "plinth, the name on a light bar." },
+};
+
+static const char *set_label(const struct iconset *c, const char **l1, const char **l2)
+{
+    for (unsigned i = 0; i < sizeof set_text / sizeof set_text[0]; i++)
+        if (same(c->leaf, set_text[i].leaf)) {
+            *l1 = set_text[i].line1, *l2 = set_text[i].line2;
+            return set_text[i].label;
+        }
+    *l1 = "An icon set found on", *l2 = "Themes$Path.";
+    return c->leaf;
+}
+
+static int set_order(const void *a, const void *b)
+{
+    const struct iconset *x = a, *y = b;
+    if (same(x->leaf, "Icons") || same(y->leaf, "Icons"))
+        return same(y->leaf, "Icons") - same(x->leaf, "Icons");
+    const char *p = x->leaf, *q = y->leaf;
+    for (; *p && tolower((unsigned char)*p) == tolower((unsigned char)*q); p++, q++)
+        ;
+    return tolower((unsigned char)*p) - tolower((unsigned char)*q);
+}
+
+static int set_known(const char *leaf)
+{
+    for (int i = 0; i < nsets; i++)
+        if (same(sets[i].leaf, leaf))
+            return 1;
+    return 0;
+}
+
+/* Draws the sample icons of each set into a sprite area, with *VIconSet, which uses the
+ * same drawing as the Wimp.  The file is a scrap file, taken away again. */
+static void make_samples(void)
+{
+    char scrap[220], dir[200];
+    if (!read_var("Wimp$Scrap", scrap, sizeof scrap)) {
+        if (!read_var("Choices$Write", dir, sizeof dir))
+            return;
+        snprintf(scrap, sizeof scrap, "%s.IconScrap", dir);
+    }
+    int ex = 1;
+    _swix(OS_ReadModeVariable, _INR(0, 1) | _OUT(2), -1, 4, &ex);
+    int px = SAMPLE_PX >> (ex > 3 ? 3 : ex);
+    for (int i = 0; i < nsets; i++) {
+        free(sets[i].area);
+        sets[i].area = NULL;
+        char names[200] = "";
+        for (int k = 0; k < SAMPLES; k++)
+            snprintf(names + strlen(names), sizeof names - strlen(names), " %s", samples[k].name);
+        if (cli("VIconSet %s %d %s%s", sets[i].file, px, scrap, names))
+            continue;
+        int len = 0;
+        char *b = load_file(scrap, &len);
+        _swix(OS_File, _INR(0, 1), 6, scrap);
+        if (!b || len < 12) {
+            free(b);
+            continue;
+        }
+        int *area = malloc((size_t)len + 4);
+        if (area) {
+            area[0] = len + 4;
+            memcpy(area + 1, b, (size_t)len);
+            sets[i].area = area;
+        }
+        free(b);
+    }
+}
+
+/* Lists the folders of Themes$Path that hold a SpritesV, the icon sets */
+static void scan_sets(void)
+{
+    for (int i = 0; i < nsets; i++)
+        free(sets[i].area);
+    nsets = 0;
+    char path[400];
+    read_var("Themes$Path", path, sizeof path);
+    for (char *el = path; *el;) {
+        char *end = strchr(el, ',');
+        if (end)
+            *end = 0;
+        char dir[200];
+        snprintf(dir, sizeof dir, "%s", el);
+        size_t n = strlen(dir);
+        while (n && dir[n - 1] == '.')
+            dir[--n] = 0;
+        if (n && object_type(dir) == 2) {
+            int offset = 0;
+            char buf[1024];
+            while (offset != -1) {
+                int read = 0;
+                if (_swix(OS_GBPB, _INR(0, 6) | _OUTR(3, 4), 10, dir, buf, 32, offset, (int)sizeof buf, 0,
+                          &read, &offset))
+                    break;
+                char *r = buf;
+                for (int i = 0; i < read; i++) {
+                    int type = ((int *)r)[4];
+                    char *leaf = r + 20;
+                    char f[240];
+                    snprintf(f, sizeof f, "%s.%s.SpritesV", dir, leaf);
+                    if (type == 2 && nsets < MAX_SETS && !set_known(leaf) && object_type(f) == 1) {
+                        struct iconset *c = &sets[nsets++];
+                        memset(c, 0, sizeof *c);
+                        snprintf(c->leaf, sizeof c->leaf, "%s", leaf);
+                        snprintf(c->file, sizeof c->file, "%s", f);
+                    }
+                    r = (char *)(((size_t)(leaf + strlen(leaf) + 1) + 3) & ~(size_t)3);
+                }
+            }
+        }
+        if (!end)
+            break;
+        el = end + 1;
+    }
+    qsort(sets, (size_t)nsets, sizeof sets[0], set_order);
+    make_samples();
+}
+
+/* The set the current theme draws with when none is chosen by hand: its own SpritesV, else
+ * the one it names, else none (it draws the bitmap icons) */
+static const char *native_set(const struct theme *t)
+{
+    if (t->own_vectors)
+        return t->leaf;
+    if (t->vectors_name[0])
+        return t->vectors_name;
+    return t->icons_name;
+}
+
+static const char *current_set(void)
+{
+    return g.now.vectors[0] ? g.now.vectors : native_set(current_theme());
 }
 
 /* Finds the tagged tile that Composite uses, on the disc with the Pinboard's pictures.
@@ -868,6 +1051,8 @@ static void load_choices(void)
             *p++ = 0;
         char a[40] = "", b[40] = "";
         if (sscanf(line, "WimpThemeSet %39s %39s", a, b) == 2) {
+            if (same(a, "Theme.Vectors"))
+                snprintf(g.now.vectors, sizeof g.now.vectors, "%s", b);
             for (int i = 0; i < NSETTINGS; i++)
                 if (same(a, settings[i].key))
                     for (int k = 0; k < settings[i].n; k++)
@@ -898,6 +1083,8 @@ static void save_choices(void)
     for (int i = 0; i < NSETTINGS; i++)
         if (g.now.set[i] >= 0)
             fprintf(f, "WimpThemeSet %s %s\n", settings[i].key, settings[i].values[g.now.set[i]]);
+    if (g.now.vectors[0])
+        fprintf(f, "WimpThemeSet Theme.Vectors %s\n", g.now.vectors);
     char tile[260];
     if (g.now.composite && tile_file(tile, sizeof tile)) {
         /* The comments are what Off puts back.
@@ -943,6 +1130,9 @@ static int content_height(void)
     int rows = (nthemes + COLUMNS - 1) / COLUMNS;
     int h = -HEAD_Y + rows * (CARD_H + CARD_GAP) + FOOTER_H + 24;
     int w = -(composite_top() - COMPOSITE_H) + FOOTER_H + 16;      /* the Wallpaper page */
+    if (w > h)
+        h = w;
+    w = -HEAD_Y + (nsets > 4 ? nsets : 4) * SET_PITCH + FOOTER_H + 40;      /* the Icons page */
     if (w > h)
         h = w;
     return h < 1040 ? 1040 : h;
@@ -1095,6 +1285,12 @@ static struct box composite_hit(void)
 {
     struct box b = composite_switch();
     b.x1 = PANE_X + 400, b.y0 -= 4, b.y1 += 4;
+    return b;
+}
+
+static struct box set_row(int i)
+{
+    struct box b = { PANE_X, HEAD_Y - i * SET_PITCH - SET_H, WIN_W - 40, HEAD_Y - i * SET_PITCH };
     return b;
 }
 
@@ -1572,13 +1768,19 @@ static void draw_composite(void)
 {
     struct box b = composite_switch();
     int top = composite_top(), on = g.now.composite;
-    rrect(b.x0, b.y0, b.x1, b.y1, 24, on ? C_ACCENT : C_DIM);
-    disc(on ? b.x1 - 24 : b.x0 + 24, (b.y0 + b.y1) / 2, 19, C_WHITE);
-    text(g.font_bold, "Composite", b.x1 + 28, b.y0 + 14, LEFT, C_TEXT, C_PANE);
+    int usable = g.host_backdrop || on;         /* an unavailable switch can still be turned off */
+    rrect(b.x0, b.y0, b.x1, b.y1, 24, on ? (usable ? C_ACCENT : C_DIM) : g.host_backdrop ? C_DIM : C_SEGBG);
+    disc(on ? b.x1 - 24 : b.x0 + 24, (b.y0 + b.y1) / 2, 19, usable ? C_WHITE : C_CARDEDGE);
+    text(g.font_bold, "Composite", b.x1 + 28, b.y0 + 14, LEFT, g.host_backdrop ? C_TEXT : C_DIM, C_PANE);
     text(g.font_small, on ? "On" : "Off", b.x1 + 28 + text_width(g.font_bold, "Composite") + 16, b.y0 + 14, LEFT,
-         on ? C_ACCENT : C_SUBTEXT, C_PANE);
+         on && g.host_backdrop ? C_ACCENT : g.host_backdrop ? C_SUBTEXT : C_DIM, C_PANE);
     text(g.font_small, "Lets the Mac's window show its own backdrop behind your windows.", PANE_X, top - 88, LEFT,
-         C_SUBTEXT, C_PANE);
+         g.host_backdrop ? C_SUBTEXT : C_DIM, C_PANE);
+    if (!g.host_backdrop) {
+        text(g.font_small, "Not available: the layer comes from BOX's Metal window, and this display is not it.",
+             PANE_X, top - 122, LEFT, C_ACCENT, C_PANE);
+        return;
+    }
     text(g.font_small, "Needs a 32 bpp mode and BOX's Metal window.", PANE_X, top - 122, LEFT, C_SUBTEXT, C_PANE);
     int bpp = screen_bpp();
     if (bpp != 32) {
@@ -1645,6 +1847,54 @@ static void draw_wallpaper(void)
     draw_composite();
 }
 
+static void draw_icons(void)
+{
+    const struct theme *t = current_theme();
+    int enabled = t->painted;
+    const char *now = current_set();
+    for (int i = 0; i < nsets; i++) {
+        const struct iconset *c = &sets[i];
+        struct box b = set_row(i);
+        int cur = enabled && now[0] && same(now, c->leaf);
+        rrect(b.x0, b.y0 - 4, b.x1, b.y1 - 4, 18, C_SHADOW);
+        rbox(b.x0, b.y0, b.x1, b.y1, 18, cur ? 4 : 2, C_CARD, cur ? C_ACCENT : C_CARDEDGE);
+        const char *l1, *l2, *label = set_label(c, &l1, &l2);
+        text(g.font_bold, label, b.x0 + 28, b.y1 - 62, LEFT, enabled ? C_TEXT : C_DIM, C_CARD);
+        text(g.font_small, l1, b.x0 + 28, b.y1 - 106, LEFT, enabled ? C_SUBTEXT : C_DIM, C_CARD);
+        text(g.font_small, l2, b.x0 + 28, b.y1 - 138, LEFT, enabled ? C_SUBTEXT : C_DIM, C_CARD);
+        for (int k = 0; k < SAMPLES; k++) {
+            int x0 = b.x0 + SET_TEXT_W + k * SAMPLE_PITCH, y0 = b.y0 + 40;
+            if (c->area)
+                sprite(c->area, samples[k].name, x0, y0, x0 + SAMPLE_PX, y0 + SAMPLE_PX);
+            text(g.font_small, samples[k].caption, x0 + SAMPLE_PX / 2, b.y0 + 10, CENTRE, C_SUBTEXT, C_CARD);
+        }
+        if (cur) {
+            disc(b.x1 - 40, b.y1 - 40, 16, C_ACCENT);
+            gcol(C_WHITE);
+            int cx = ox + b.x1 - 40, cy = oy + b.y1 - 40;
+            for (int j = -1; j <= 1; j++) {
+                plot(4, cx - 9, cy + 1 + j);
+                plot(5, cx - 3, cy - 6 + j);
+                plot(5, cx + 9, cy + 7 + j);
+            }
+        }
+    }
+    struct box last = set_row(nsets > 4 ? nsets - 1 : 3);
+    char line[160];
+    if (!enabled)
+        snprintf(line, sizeof line, "%s draws its icons from sprites. Choose a painted theme to pick a set.",
+                 t->name);
+    else if (!now[0])
+        snprintf(line, sizeof line, "%s draws the bitmap icons. Choose a set to use vector icons instead.",
+                 t->name);
+    else
+        snprintf(line, sizeof line, "This changes %s for now; choosing another theme starts again from its own.",
+                 t->name);
+    text(g.font_body, line, PANE_X, last.y0 - 50, LEFT, C_SUBTEXT, C_PANE);
+    text(g.font_small, "Edit, Paint, Draw, folders, discs and the standard file types look the same in every set.",
+         PANE_X, last.y0 - 90, LEFT, C_SUBTEXT, C_PANE);
+}
+
 static void draw(void)
 {
     rect(0, -g.win_h, SIDEBAR_W, 0, C_SIDEBAR);
@@ -1670,11 +1920,15 @@ static void draw(void)
         } else if (i == PAGE_WINDOWS) {
             rect(mx - 14, my - 12, mx + 14, my + 12, ink);
             rect(mx - 11, my - 9, mx + 11, my + 4, bg);
-        } else {
+        } else if (i == PAGE_WALLPAPER) {
             rect(mx - 14, my - 12, mx + 14, my + 12, ink);
             rect(mx - 11, my - 9, mx + 11, my + 9, bg);
             disc(mx + 4, my + 3, 4, ink);
             rect(mx - 9, my - 7, mx + 9, my - 3, ink);
+        } else {                        /* a folder */
+            rect(mx - 14, my - 10, mx + 14, my + 8, ink);
+            rect(mx - 14, my + 8, mx - 2, my + 12, ink);
+            rect(mx - 11, my - 7, mx + 11, my + 5, bg);
         }
         text(on ? g.font_bold : g.font_body, page_names[i], b.x0 + 70, my - 10, LEFT, ink, bg);
     }
@@ -1690,6 +1944,9 @@ static void draw(void)
         break;
     case PAGE_WALLPAPER:
         draw_wallpaper();
+        break;
+    case PAGE_ICONS:
+        draw_icons();
         break;
     }
 
@@ -1721,6 +1978,8 @@ static void apply_settings(void)
     for (int i = 0; i < NSETTINGS; i++)
         if (g.now.set[i] >= 0)
             report(cli("WimpThemeSet %s %s", settings[i].key, settings[i].values[g.now.set[i]]));
+    if (g.now.vectors[0])
+        report(cli("WimpThemeSet Theme.Vectors %s", g.now.vectors));
 }
 
 static void apply_backdrop(void)
@@ -1782,6 +2041,7 @@ static void choose_theme(const struct theme *t)
     snprintf(g.now.theme, sizeof g.now.theme, "%s", t->leaf);
     for (int i = 0; i < NSETTINGS; i++)
         g.now.set[i] = -1;
+    g.now.vectors[0] = 0;
     save_choices();
 }
 
@@ -1857,6 +2117,24 @@ static void click(const int *b)
                     return;
                 }
         break;
+    case PAGE_ICONS:
+        if (!current_theme()->painted)
+            return;
+        for (int i = 0; i < nsets; i++)
+            if (inside(set_row(i), x, y)) {
+                if (same(current_set(), sets[i].leaf))
+                    return;
+                os_error *e = cli("WimpThemeSet Theme.Vectors %s", sets[i].leaf);
+                if (e) {
+                    report(e);
+                    return;
+                }
+                snprintf(g.now.vectors, sizeof g.now.vectors, "%s", sets[i].leaf);
+                save_choices();
+                redraw_all();
+                return;
+            }
+        break;
     case PAGE_WALLPAPER:
         for (int i = 0; i < NSWATCHES; i++)
             if (inside(swatch(i), x, y)) {
@@ -1894,7 +2172,8 @@ static void click(const int *b)
                 return;
             }
         if (inside(composite_hit(), x, y)) {
-            composite_set(!g.now.composite);
+            if (g.host_backdrop || g.now.composite)     /* with no layer, it can only be turned off */
+                composite_set(!g.now.composite);
             return;
         }
         if (g.now.picture[0]) {
@@ -1969,13 +2248,16 @@ static void message(int *b)
         char was[32];
         snprintf(was, sizeof was, "%s", g.now.theme);
         read_current();
-        if (!same(was, g.now.theme))
+        if (!same(was, g.now.theme)) {
             for (int i = 0; i < NSETTINGS; i++)
                 g.now.set[i] = -1;
+            g.now.vectors[0] = 0;
+        }
         redraw_all();
         break;
     }
     case MSG_MODECHANGE:
+        make_samples();
         walls_retable();
         redraw_all();
         break;
@@ -2013,7 +2295,10 @@ int main(void)
     if (g.now.picture[0])
         load_picture(g.now.picture);
     scan_themes();
+    scan_sets();
     scan_walls();
+    char flag[8];
+    g.host_backdrop = read_var("BOX$HostBackdrop", flag, sizeof flag) > 0;
     fonts();
     menus_init();
     if ((e = create_window())) {

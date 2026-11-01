@@ -101,27 +101,27 @@ Documents:
 - [!Ledger](src/box/apps/ledger/) is a spreadsheet. It opens and saves Excel workbooks (`.xlsx`) and CSV files.
 - [!Folio](src/box/apps/folio/) is a PDF reader and editor. It adds notes, highlights and ink, and moves and turns pages.
 - [!Present](src/box/apps/present/) is a presentation program. It opens and saves PowerPoint files (`.pptx`) and shows them full screen.
-- !Publish lays out pages, with stories that run from frame to frame, and exports PDF, IDML and EPUB.
-- !Draft writes Markdown with diagrams in it, drawn as a page.
+- [!Publish](src/box/apps/publish/) lays out pages, with stories that run from frame to frame, and exports PDF, IDML and EPUB.
+- [!Draft](src/box/apps/draft/) writes Markdown with diagrams in it, drawn as a page.
 
 Pictures:
 
 - [!Trace](src/box/apps/trace/) is a drawing program. It opens and saves SVG, opens PostScript, EPS, DXF and Illustrator files, imports Draw and ArtWorks files, and exports Draw, ArtWorks, PDF and pictures.
 - [!Palette](src/box/apps/palette/) is a photo editor. It opens PNG, JPEG, TIFF, GIF and BMP pictures, saves PNG, and exports sprites and the other formats.
-- !Canvas is a painting program, with brushes that behave like paint.
-- !FloorPlan draws plans of houses and small offices.
+- [!Canvas](src/box/apps/canvas/) is a painting program, with brushes that behave like paint.
+- [!FloorPlan](src/box/apps/floorplan/) draws plans of houses and small offices.
 
 Sound, programs and work:
 
-- !Studio is a multitrack studio for WAV, AIFF and FLAC sounds.
-- !Code is the programmer's editor, with language servers, Build and Run, and a debugger.
-- !Workflows draws Tcl workflows: the steps a document goes through.
+- [!Studio](src/box/apps/studio/) is a multitrack studio for WAV, AIFF and FLAC sounds.
+- [!Code](src/box/apps/code/) is the programmer's editor, with language servers, Build and Run, and a debugger.
+- [!Workflows](src/box/apps/workflows/) draws Tcl workflows: the steps a document goes through.
 
-Games: !Micropolis, the city simulation; !Tower, a tower-building game; and !Antiquity, a 3D strategy game, still in development.
+Games: [!Micropolis](src/box/apps/micropolis/), the city simulation; [!Tower](src/box/apps/tower/), a tower-building game; and !Antiquity, a 3D strategy game, still in development.
 
 All of them are one program, the [shell](src/box/apps/shell/), with a configuration each; !Shell is the shell with an engine that does nothing.
 
-The Mojo source in [src/box/apps](src/box/apps/) is that of the shell and the first six applications as they were on 18 October; the source of the others is not published yet.
+The Mojo source of the shell and of every application but !Antiquity is in [src/box/apps](src/box/apps/). The engines are not published there; those of !Micropolis and !Tower are published with their simulations, in [box-micropolis](https://github.com/albanread/box-micropolis) and [box-tower](https://github.com/albanread/box-tower).
 
 [Apps for BOX](articles/10-Apps.md) describes how they are put together, why Mojo for the user interface and Rust underneath it, and how the two halves talk.
 

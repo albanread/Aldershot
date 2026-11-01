@@ -7,8 +7,17 @@
 It opens PowerPoint presentations (.pptx, type &A80) that are
 double-clicked or dropped on it.  It can edit the slides (text, shapes,
 tables and themes), save them, export them as PDF or as pictures, and show
-them on the whole screen.  DeckCraft holds and draws the slides; the
-tools, menus and commands are our own."""
+them on the whole screen.  A picture dropped on a slide is put on it.
+
+Its properties pane has parts for the slide (going to another, its
+layout, background, notes, whether it is hidden; new, copied, moved and
+deleted slides; what can be put in), the design (theme, colours, fonts,
+slide size, every slide's background), the show (each slide's
+transition and timing, starting the show), and, as they apply, the
+shape selected (size, turn, fill, line, frame, description), its text
+(font, size, style, colour, alignment, spacing, bullets, fit) and a
+table (style, heading row, bands, rows and columns).  DeckCraft holds
+and draws the slides; the tools, menus and commands are our own."""
 
 from rosapp import RosApp, AppConfig
 from riscos.desktop import Desktop, report_error
@@ -26,6 +35,11 @@ def main():
         cfg.save_leaf = String("Presentation")
         cfg.fit = True                      # a slide is shown whole when opened
         cfg.colours = True                  # the inspector's colour fills the selected shapes
+        cfg.props = True
+        # a picture dropped on a slide is put on it
+        cfg.places = True
+        for t in [0xB60, 0xC85, 0xFF0, 0x695, 0x69C]:
+            cfg.imports.append(t)
         # A button that starts the show from the first slide.  It does the same
         # as "Show from the start" in the Slide menu (menu 3, item 8) and F5.
         cfg.big_label = String("Show")

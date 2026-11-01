@@ -6,7 +6,15 @@
 
 It opens Word documents (.docx, type &A7E, and the older .doc, type &AE6)
 that are double-clicked or dropped on it, and saves them as .docx.  When
-it starts with no document, it shows WordCraft's sample document."""
+it starts with no document, it shows WordCraft's sample document.  A
+picture dropped on a document goes in at the caret.
+
+Its properties pane has three parts: Text (the characters' font, size,
+style and colours; the paragraph's style, alignment, spacing and
+indents; a table's rows and columns), Page (paper, margins, headers and
+footers, page numbers, what can be put in) and Find (find and replace,
+and the spelling check).  The inspector says what type is at the caret
+and where."""
 
 from rosapp import RosApp, AppConfig
 from riscos.desktop import Desktop, report_error
@@ -24,6 +32,13 @@ def main():
         cfg.save_type = 0xA7E
         cfg.save_leaf = String("Document")
         cfg.pastes_text = True
+        cfg.props = True
+        # the inspector tells the type at the caret, and where, in words
+        cfg.geometry = False
+        # a picture dropped on a document goes in at the caret
+        cfg.places = True
+        for t in [0xB60, 0xC85, 0xFF0, 0x695, 0x69C]:
+            cfg.imports.append(t)
         cfg.menu_names.append(String("Text"))
         cfg.menu_items.append(String("Bold,Italic,Underline,-Superscript,Subscript,"
                                      + "-Capitals,Small letters,Sentence case,-Plain text,"

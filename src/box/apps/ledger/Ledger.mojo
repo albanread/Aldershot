@@ -9,8 +9,12 @@ double-clicked or dropped on it, edits them and saves them.  The engine
 draws only the part of the sheet that is in view, so the shell fixes the
 picture to the window and tells the engine when the window scrolls.  The
 current cell's contents are shown in the formula bar under the toolbar.
-The menus and the look of the grid are our own; gridcraft holds the
-workbook, works out the formulas and reads and writes the files."""
+The properties pane has the cells' look (how numbers are shown, the
+type, fill, alignment, borders, merging), the sheet (sheets, frozen rows
+and columns, widths and heights), its data (sorting, filtering, filling,
+functions, charts, notes and links) and Find and Replace.  The menus and
+the look of the grid are our own; gridcraft holds the workbook, works
+out the formulas, lays out its charts and reads and writes the files."""
 
 from rosapp import RosApp, AppConfig
 from riscos.desktop import Desktop, report_error
@@ -39,6 +43,10 @@ def main():
         cfg.geometry = False
         cfg.view_toggles = False
         cfg.formula_bar = True
+        cfg.props = True
+        # text pasted from another program, or a text file dropped on the
+        # sheet, goes into the cells (tabs between them, a row a line)
+        cfg.pastes_text = True
         # The File menu's Export entries, which save a copy in another format.
         cfg.export_names.append(String("CSV"))
         cfg.export_types.append(0xDFE)

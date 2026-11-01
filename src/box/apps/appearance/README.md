@@ -1,7 +1,7 @@
 # Appearance
 
 Appearance sets the look of the BOX desktop in one window.
-It has three pages, listed down the left side.
+It has four pages, listed down the left side.
 
 **Themes.** Each theme is a card showing a small desktop in that theme's colours.
 A click on a card changes the desktop at once.
@@ -15,8 +15,16 @@ These are greyed out under a theme drawn from sprites.
 
 **Wallpaper.** Choose the desktop's colour, a wallpaper tile or a picture dragged to the window.
 The Composite switch lets the Mac window's own backdrop show through behind the desktop.
+It is greyed out, with a line saying why, in a window that has no backdrop layer of its own.
 
 ![The Wallpaper page](wallpaper.png)
+
+**Icons.** Choose the icon set the current theme draws with.
+Each set is shown with five of its icons.
+A click changes the icons at once.
+Edit, Paint, Draw, folders, discs and the standard file types look the same in every set.
+
+![The Icons page](icons.png)
 
 Each choice is saved as it is made in `<Choices$Write>.Appearance`.
 That file is run again when the desktop starts.

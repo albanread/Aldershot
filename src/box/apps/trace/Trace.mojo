@@ -5,7 +5,8 @@
 (rosapp.mojo) over an engine built on VectorCraft.
 
 It opens and saves SVG drawings (type &AAD), and also opens PostScript,
-EPS, DXF and Illustrator files.  Draw files dropped on it are imported.
+EPS, DXF and Illustrator files.  Draw and ArtWorks files dropped on it
+are imported.
 When it starts with no document, it shows VectorCraft's example poster.
 Its tools are VectorCraft's: selection, direct selection, the pen, the
 shapes and text."""
@@ -30,13 +31,17 @@ def main():
             cfg.imports.append(t)
         cfg.places = True
         cfg.imports.append(0xAFF)           # Draw files, when dropped on it
+        cfg.imports.append(0xD94)           # ArtWorks files, when dropped on it
         for t in ["rs_select", "rs_direct", "rs_pen", "rs_pencil", "rs_line", "rs_rect", "rs_rrect",
                   "rs_ellipse", "rs_polygon", "rs_star", "rs_text", "rs_eyedrop", "rs_pan", "rs_zoomtool"]:
             cfg.tools.append(String(t))
         cfg.start = String("sample")
         cfg.save_type = 0xAAD
         cfg.save_leaf = String("Drawing")
+        cfg.props = True
         cfg.fit = True                      # a drawing is shown whole when opened
+        cfg.zoom_keys = True                # Ctrl with + and - zooms, Ctrl-0 the page whole
+        cfg.menu_context = True             # MENU shades what the selection cannot have
         cfg.colours = True                  # the inspector's colour fills the selection
         cfg.menu_names.append(String("Arrange"))
         cfg.menu_items.append(String("To front,Forward,Backward,To back,-Group,Ungroup,-Copy beside,"
@@ -45,8 +50,13 @@ def main():
         cfg.menu_items.append(String("Left edges,Centres across,Right edges,Tops,Middles,Bottoms,"
                                      + "-Centre on the page,-Space across,Space down"))
         cfg.menu_names.append(String("Combine"))
-        cfg.menu_items.append(String("Join,Cut away the front,Overlap only,Not the overlap,"
-                                     + "-Outline the line,Simplify,-Swap fill and line,"
+        # the shapes together; then the paths' own points; then lines.  Join
+        # the ends is Ctrl-J (and closes a path alone)
+        cfg.menu_items.append(String("Add together,Cut away the front,Cut away the back,Overlap only,"
+                                     + "Not the overlap,Divide,Trim,Merge,Crop,"
+                                     + "-Join the ends,Average the points,Reverse the direction,"
+                                     + "Cut at the points,Add points,Offset...,"
+                                     + "-Outline the line,Simplify...,Clean up,-Swap fill and line,"
                                      + "-Hairline,Thin line,Medium line,Thick line"))
         cfg.menu_names.append(String("Style"))
         cfg.menu_items.append(String("Colour fills,Colour draws lines,-No fill,No line,-Solid line,Dashed line,"
@@ -57,7 +67,19 @@ def main():
         cfg.menu_items.append(String("None"))
         cfg.menu_names.append(String("Layers"))
         cfg.menu_items.append(String("None"))
+        # Image Trace: a picture made into paths.  The engine fills in the
+        # presets, then Expand, Release and the views.
+        cfg.menu_names.append(String("Image trace"))
+        cfg.menu_items.append(String("None"))
         # The File menu's Export entries, which save a copy in another format.
+        # first: a Draw file is what a drawing goes to on RISC OS
+        cfg.export_names.append(String("Draw file"))
+        cfg.export_types.append(0xAFF)
+        cfg.export_exts.append(String("aff"))
+        # ArtWorks: for OvationPro and the other programs that place it
+        cfg.export_names.append(String("ArtWorks"))
+        cfg.export_types.append(0xD94)
+        cfg.export_exts.append(String("aw"))
         cfg.export_names.append(String("PNG picture"))
         cfg.export_types.append(0xB60)
         cfg.export_exts.append(String("png"))
