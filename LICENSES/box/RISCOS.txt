@@ -8,13 +8,13 @@ Used by:  the modules and applications translated to C for the box (the
           fonts Corpus, Homerton, Trinity, Selwyn and Sidney, Draw,
           ColourTrans, BASIC (BASICVFP), the Toolbox and its modules,
           DrawFile, MessageTrans, Territory, the networking modules and the
-          rest); !Maestro and !CloseUp, and the Maestro tunes in
-          Documents.Music, from RISC OS 5.30's HardDisc4
+          rest); !Maestro, the Maestro tunes in Documents.Music and
+          !CloseUp's icons, from RISC OS 5.30's HardDisc4
 Licence:  Apache License 2.0; some components BSD-style
 
-!Maestro, !CloseUp and the Maestro tunes come from RISC OS Open's HardDisc4
-image, which states no licence of its own; RISC OS Open's sources for those
-applications are under the Apache License 2.0.
+!Maestro, the Maestro tunes and !CloseUp's icons come from RISC OS Open's
+HardDisc4 image, which states no licence of its own; RISC OS Open's sources
+for those applications are under the Apache License 2.0.
 
 ------------------------------------------------------------------------
 The Apache License 2.0, as RISC OS Open ships it (Kernel/LICENSE; most components carry the same file)

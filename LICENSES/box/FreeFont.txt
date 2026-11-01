@@ -32,7 +32,7 @@ FreeFont covers the following character ranges
 * Latin, Cyrillic, and Arabic, with supplements for many languages
 * Greek, Hebrew, Armenian, Georgian, Thaana, Syriac
 * Devanagari, Bengali, Gujarati, Gurmukhi, Sinhala, Tamil, Malayalam
-* Thai, Tai Le, Kayah Li, HanunÃ³o, Buginese
+* Thai, Tai Le, Kayah Li, Hanunóo, Buginese
 * Cherokee, Unified Canadian Aboriginal Syllabics
 * Ethiopian, Tifnagh, Vai, Osmanya, Coptic
 * Glagolitic, Gothic, Runic, Ugaritic, Old Persian, Phoenician, Old Italic

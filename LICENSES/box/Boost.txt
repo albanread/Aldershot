@@ -1,10 +1,12 @@
-Boost (headers: icl, variant)
-=============================
+Boost (dynarmic: the icl and variant headers; !Boost: headers and libraries)
+============================================================================
 
-Version:  1.89.0
+Version:  1.89.0 (dynarmic), 1.92.0 (!Boost)
 From:     https://www.boost.org/
 Used by:  the ARM container in /init, which runs ARM code (runtime/armrun)
-          (dynarmic is built with them)
+          (dynarmic is built with them); !Boost, Boost's headers and
+          compiled libraries for *CC --linux's C++ programs
+          (deps/build-boost-box.sh, tools/boost-share.sh)
 Licence:  Boost Software License 1.0
 
 ------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 gridcraft (ArtCraft)
 ====================
 
-Version:  e6b6b34970
+Version:  23829d8c67
 From:     https://github.com/storytold/gridcraft
 Used by:  !Ledger's engine: spreadsheets (.xlsx, CSV), their calculation and
           their number formats
@@ -9,7 +9,8 @@ Licence:  MIT or Apache License 2.0
 
 BOX's engine for the application (ports/rosapps) is its own code, under
 BOX's licence; the library it calls is this package, under the licences
-below. The crates either of them is built from are in the file RustCrates.
+below. BOX builds it from a copy of its own, taken at the version above. The
+crates either of them is built from are in the file RustCrates.
 
 ------------------------------------------------------------------------
 LICENSE-MIT

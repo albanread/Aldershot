@@ -7,10 +7,10 @@ Used by:  /init (LanManFS: *LMConnect's SMB2 and SMB3 client)
 Licence:  GNU LGPL 2.1 or later
 
 libsmb2 is linked statically into /init, unchanged. To use a changed
-libsmb2, rebuild /init from BOX's sources (src/box in
-https://github.com/albanread/Aldershot): gpl/libsmb2 builds the library from a
-source tree, and make links /init with it. BOX's own code is MIT, so all of
-the source /init is built from is available for that.
+libsmb2, rebuild /init from BOX's sources (rosgd in
+https://github.com/albanread/A7232ToolChain): deps/build-libsmb2.sh builds
+the library from a source tree, and make links /init with it. BOX's own code
+is MIT, so all of the source /init is built from is available for that.
 
 ------------------------------------------------------------------------
 COPYING

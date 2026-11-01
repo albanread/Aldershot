@@ -1,7 +1,7 @@
 VectorCraft (ArtCraft)
 ======================
 
-Version:  b12a52f724
+Version:  9e7929ee89
 From:     https://github.com/storytold/vectorcraft
 Used by:  !Trace's engine: drawings (SVG, PostScript and EPS), their tools
           and their renderer
@@ -9,7 +9,9 @@ Licence:  MIT or Apache License 2.0
 
 BOX's engine for the application (ports/rosapps) is its own code, under
 BOX's licence; the library it calls is this package, under the licences
-below. The crates either of them is built from are in the file RustCrates.
+below. BOX builds it from a copy of its own, taken at the version above and
+since changed. The crates either of them is built from are in the file
+RustCrates.
 
 ------------------------------------------------------------------------
 LICENSE-MIT

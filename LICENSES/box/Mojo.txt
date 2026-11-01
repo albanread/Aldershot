@@ -5,7 +5,7 @@ Version:  1.1
 From:     https://github.com/albanread/MojoRISCOS (fork of
           https://github.com/modular/modular)
 Used by:  *Mojo, BoxTools' Mojo compiler, and its standard library, under
-          /usr/lib/mojo
+          /usr/lib/mojo; mojo-lsp-server, !Code's Mojo language server
 Licence:  Apache License 2.0 with LLVM Exceptions
 
 BOX's Mojo compiler is one static program linked against musl, with
@@ -367,7 +367,7 @@ components are licensed to Licensee pursuant to the following terms and conditio
 
    COPYRIGHT AND PERMISSION NOTICE
 
-   Copyright Â© 1996 - 2022, Daniel Stenberg, <daniel@haxx.se>, and many
+   Copyright © 1996 - 2022, Daniel Stenberg, <daniel@haxx.se>, and many
    contributors, see the THANKS file.
 
    All rights reserved.

@@ -14,4 +14,5 @@ All of it is from the BOX sources at commit `2bd8aa9b8e`, from which the two Mac
 | [sparkfs](sparkfs/) | SparkFS | CDDL 1.0 and Apache 2.0 |
 | [wpe-edition](wpe-edition/) | Web browser programs | MIT; libraries: see [LICENSES/wpe](../LICENSES/wpe/) |
 | [qemu](qemu/) | QEMU | GNU GPL 2 |
+| [box-micropolis](https://github.com/albanread/box-micropolis) | Micropolis, the city simulation !Micropolis runs, with BOX's changes and its engine (on main since the releases; not yet in one) | GNU GPL 3, with Electronic Arts' additional terms |
 | [unmodified](unmodified/) | glibc, GCC runtime, FreeFont, Debian packages | GNU GPL / LGPL |

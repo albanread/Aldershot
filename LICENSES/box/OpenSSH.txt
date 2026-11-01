@@ -186,7 +186,7 @@ OpenSSH contains no GPL code.
 	Gert Doering
 	Jakob Schlyter
 	Jason Downs
-	Juha YrjÃ¶lÃ¤
+	Juha Yrjölä
 	Michael Stone
 	Networks Associates Technology, Inc.
 	Solar Designer
@@ -243,7 +243,7 @@ OpenSSH contains no GPL code.
 	Eric P. Allman
 	The Regents of the University of California
 	Constantin S. Svintsoff
-	Kungliga Tekniska HÃ¶gskolan
+	Kungliga Tekniska Högskolan
 
 	* Redistribution and use in source and binary forms, with or without
 	* modification, are permitted provided that the following conditions

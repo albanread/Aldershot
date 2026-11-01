@@ -4,10 +4,11 @@ OvationPro (David Pilling)
 Version:  2.78 (26-July-2022)
 From:     https://www.davidpilling.com/
 Used by:  Apps.!OvnPro, as RISC OS 5.30's image has it, unaltered (ARM code,
-          run by the ARM container)
+          run by the ARM container), and Documents.OvationPro, its guide,
+          manual, tutorial and examples, also as that image has them
 Licence:  Not stated in the application; distributed by RISC OS Open in RISC
           OS 5.30's image
 
 OvationPro carries no licence text of its own.  BOX ships it unaltered, as
 RISC OS Open distributes it in its RISC OS 5.30 disc image for the Raspberry
-Pi.
+Pi, and its documents with it.

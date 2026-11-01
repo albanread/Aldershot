@@ -3,7 +3,10 @@ Linux
 
 Version:  6.18.54
 From:     https://www.kernel.org/
-Used by:  the kernel BOX runs on (both machines, and the PC image)
+Used by:  the kernel BOX runs on (both machines, and the PC image); the few
+          of its user-space headers (linux/futex.h, linux/version.h and
+          those they include) that !Boost carries, which Boost's own headers
+          include
 Licence:  GNU GPL 2, with the Linux syscall note
 
 ------------------------------------------------------------------------

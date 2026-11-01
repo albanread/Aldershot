@@ -1,7 +1,7 @@
 PDFCraft (ArtCraft)
 ===================
 
-Version:  afa8e1843c
+Version:  ec0a965074
 From:     https://github.com/storytold/pdfcraft
 Used by:  !Folio's engine: PDF documents, their editing and their page
           renderer (hayro, vendored in it, is under the same licences)
@@ -9,7 +9,9 @@ Licence:  MIT or Apache License 2.0
 
 BOX's engine for the application (ports/rosapps) is its own code, under
 BOX's licence; the library it calls is this package, under the licences
-below. The crates either of them is built from are in the file RustCrates.
+below. BOX builds it from a copy of its own, taken at the version above and
+since changed. The crates either of them is built from are in the file
+RustCrates.
 
 ------------------------------------------------------------------------
 LICENSE-MIT

@@ -4,7 +4,10 @@ LLVM (clang, lld, compiler-rt, libc++, libc++abi, libunwind)
 Version:  22.1.2
 From:     https://llvm.org/
 Used by:  both boxes' clang and ld.lld (*CC, *RosBas), compiler-rt's
-          builtins; libc++, libc++abi and libunwind in /init (by zig)
+          builtins; libc++, libc++abi and libunwind in /init (by zig), and
+          in the ROM for *CC --linux's C++ programs (/usr/include/c++/v1,
+          /usr/lib/c++; deps/build-libcxx-box.sh); clangd, !Code's C
+          language server
 Licence:  Apache License 2.0 with LLVM Exceptions
 
 ------------------------------------------------------------------------
